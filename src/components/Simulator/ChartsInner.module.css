@@ -1,0 +1,15 @@
+.charts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding: var(--s-4);
+}
+
+.chart {}
+
+.chartLabel {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--fg-2);
+  margin-bottom: var(--s-2);
+}

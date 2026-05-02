@@ -1,0 +1,59 @@
+.panel {
+  padding: var(--s-4);
+}
+
+.title {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  color: var(--fg-2);
+  margin-bottom: var(--s-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.row {
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.formulaHead {
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.var {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.expr {
+  font-size: var(--fs-caption);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.result {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  color: var(--success);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

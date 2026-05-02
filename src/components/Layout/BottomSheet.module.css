@@ -1,0 +1,39 @@
+.sheet {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1;
+  min-width: 72px;
+  padding: 12px 8px;
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  color: var(--fg-3);
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur-base), border-color var(--dur-base);
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.tab:hover { color: var(--fg-1); }
+
+.tab.active {
+  color: var(--ten-red);
+  border-bottom-color: var(--ten-red);
+}
+
+.content {
+  max-height: 280px;
+  overflow-y: auto;
+}

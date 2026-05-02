@@ -1,0 +1,51 @@
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvasWrap {
+  flex: 1;
+  min-height: 200px;
+}
+
+.controls {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.paramRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.paramBlock {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--s-3);
+}
+
+.hint {
+  color: var(--warn);
+  font-size: var(--fs-body-sm);
+  text-align: center;
+}
+
+.actionRow {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.overlayToggles {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+}

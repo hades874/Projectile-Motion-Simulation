@@ -1,0 +1,60 @@
+{
+  "appTitle": "প্রক্ষেপ গতি সিমুলেটর",
+  "controls": {
+    "v0": "প্রাথমিক বেগ",
+    "v0Unit": "m/s",
+    "theta": "উৎক্ষেপণ কোণ",
+    "thetaUnit": "°",
+    "h0": "প্রাথমিক উচ্চতা",
+    "h0Unit": "m"
+  },
+  "buttons": {
+    "launch": "উৎক্ষেপণ",
+    "pause": "বিরতি",
+    "resume": "চালু",
+    "reset": "রিসেট",
+    "speed": "গতি"
+  },
+  "readouts": {
+    "range": "পাল্লা (R)",
+    "height": "সর্বোচ্চ উচ্চতা (H)",
+    "time": "উড্ডয়নকাল (T)",
+    "impactSpeed": "আঘাতের বেগ",
+    "impactAngle": "আঘাতের কোণ",
+    "rangeUnit": "m",
+    "heightUnit": "m",
+    "timeUnit": "s",
+    "speedUnit": "m/s",
+    "angleUnit": "°"
+  },
+  "tabs": {
+    "vectors": "ভেক্টর",
+    "formulas": "সূত্র",
+    "graphs": "গ্রাফ",
+    "comparison": "তুলনা"
+  },
+  "formulas": {
+    "range": "R = v₀ cos θ · T",
+    "height": "H = h₀ + (v₀ sin θ)² / 2g",
+    "time": "T = [v₀ sin θ + √((v₀ sin θ)² + 2gh₀)] / g",
+    "title": "সূত্র"
+  },
+  "overlays": {
+    "vectors": "বেগ ভেক্টর দেখাও",
+    "dots": "সময়ের বিন্দু দেখাও",
+    "axes": "অক্ষ দেখাও"
+  },
+  "comparison": {
+    "title": "তুলনামূলক উৎক্ষেপণ",
+    "add": "দ্বিতীয় প্রক্ষেপ যোগ করো",
+    "remove": "সরিয়ে দাও",
+    "v0": "প্রাথমিক বেগ ২",
+    "theta": "কোণ ২",
+    "h0": "উচ্চতা ২"
+  },
+  "errors": {
+    "noVelocity": "গতি বাড়ান।",
+    "flat": "এই কোণে কোনো প্রক্ষেপ নেই — কোণ বাড়ান।"
+  },
+  "numeralToggle": "সংখ্যা"
+}

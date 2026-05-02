@@ -1,0 +1,64 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s-4);
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.logoText {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  color: var(--ten-red);
+  letter-spacing: 0.05em;
+}
+
+.title {
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  color: var(--fg-2);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.numBtn {
+  padding: 6px 10px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--fg-2);
+  background: var(--gray-50);
+  min-height: 36px;
+  transition: background var(--dur-base);
+}
+.numBtn:hover { background: var(--gray-100); }
+
+.modeBtn {
+  padding: 6px 12px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--fg-1);
+  background: var(--gray-50);
+  min-height: 36px;
+  transition: background var(--dur-base);
+}
+.modeBtn:hover { background: var(--gray-100); }

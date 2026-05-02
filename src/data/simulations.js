@@ -1,0 +1,28 @@
+export const SIMULATIONS = [
+  {
+    id: 'projectile-motion',
+    titleBn: 'প্রক্ষেপ গতি',
+    titleEn: 'Projectile Motion',
+    descBn: 'প্রাথমিক বেগ, কোণ এবং উচ্চতা পরিবর্তন করে দেখো — বায়ু প্রতিরোধসহ বা ছাড়া। বিভিন্ন বস্তু ছুঁড়ে পাল্লা, উচ্চতা এবং সময় মাপো।',
+    topics: ['প্রক্ষেপ গতি', 'পাল্লা', 'উচ্চতা', 'বেগ', 'মাধ্যাকর্ষণ'],
+    curriculum: 'SSC অধ্যায় ২ / HSC অধ্যায় ৩',
+    urlBn: 'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_bn.html',
+    urlEn: 'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_en.html',
+    color: '#E8F5E9',
+    accentColor: '#1CAB55',
+    tabs: ['পরিচিতি', 'ভেক্টর', 'বায়ু প্রতিরোধ', 'ল্যাব'],
+  },
+  {
+    id: 'forces-and-motion',
+    titleBn: 'বল ও গতি',
+    titleEn: 'Forces and Motion: Basics',
+    descBn: 'বল প্রয়োগ করো এবং দেখো ঘর্ষণ, ভর ও বেগ কীভাবে গতিকে প্রভাবিত করে। টানাটানি খেলায় বল ও ত্বরণের সম্পর্ক বোঝো।',
+    topics: ['বল', 'ত্বরণ', 'ঘর্ষণ', 'ভর', 'নিউটনের সূত্র'],
+    curriculum: 'SSC অধ্যায় ৩ / HSC অধ্যায় ২',
+    urlBn: 'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_bn.html',
+    urlEn: 'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_en.html',
+    color: '#E3F2FD',
+    accentColor: '#274FE3',
+    tabs: ['নেট বল', 'গতি', 'ঘর্ষণ', 'টানাটানি'],
+  },
+]

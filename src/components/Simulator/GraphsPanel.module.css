@@ -1,0 +1,11 @@
+.panel {
+  min-height: 120px;
+}
+
+.loading {
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--fg-3);
+  font-family: var(--font-bangla);
+  font-size: var(--fs-body-sm);
+}

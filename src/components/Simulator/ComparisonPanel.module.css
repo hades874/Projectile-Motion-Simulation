@@ -1,0 +1,12 @@
+.panel {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
