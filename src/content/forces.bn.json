@@ -1,0 +1,60 @@
+{
+  "title": "বল ও গতির মূল বিষয়",
+  "tabs": {
+    "netforce": "নেট বল",
+    "motion":   "গতি",
+    "friction": "ঘর্ষণ",
+    "tug":      "টানা-হেঁচড়া"
+  },
+  "netforce": {
+    "leftForce":  "বাম দিকের বল",
+    "rightForce": "ডান দিকের বল",
+    "readouts": {
+      "netForce":    "নেট বল",
+      "accel":       "ত্বরণ",
+      "velocity":    "বেগ",
+      "position":    "সরণ"
+    },
+    "hint": "মানুষ যোগ করো বা সরাও — ট্রলি নড়বে!"
+  },
+  "motion": {
+    "appliedForce":  "প্রযুক্ত বল (N)",
+    "frictionLabel": "ঘর্ষণ",
+    "frictionOn":    "চালু",
+    "frictionOff":   "বন্ধ",
+    "objects": {
+      "skate":  "স্কেটবোর্ড",
+      "box":    "বাক্স",
+      "fridge": "ফ্রিজ",
+      "car":    "গাড়ি"
+    },
+    "readouts": {
+      "velocity":    "বেগ",
+      "accel":       "ত্বরণ",
+      "appliedF":    "প্রযুক্ত বল",
+      "frictionF":   "ঘর্ষণ বল"
+    }
+  },
+  "friction": {
+    "appliedForce": "প্রযুক্ত বল (N)",
+    "surfaces": {
+      "ice":      "বরফ",
+      "wood":     "কাঠ",
+      "concrete": "কংক্রিট"
+    },
+    "graphTitle": "F বনাম Ff গ্রাফ",
+    "hint": "প্রযুক্ত বল বাড়াও — কখন বস্তু নড়তে শুরু করে?"
+  },
+  "tug": {
+    "leftTeam":  "লাল দল",
+    "rightTeam": "নীল দল",
+    "winLeft":   "লাল দল জিতেছে!",
+    "winRight":  "নীল দল জিতেছে!",
+    "hint":      "দলে মানুষ যোগ করো — কোন দল রশি টেনে নেবে?"
+  },
+  "actions": {
+    "start": "শুরু করুন",
+    "pause": "বিরতি",
+    "reset": "রিসেট"
+  }
+}

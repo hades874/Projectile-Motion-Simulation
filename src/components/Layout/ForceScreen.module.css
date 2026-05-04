@@ -1,0 +1,100 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Header */
+.header {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s-4);
+  gap: var(--s-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out);
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+.backBtn:hover { background: var(--bg-muted); }
+
+.logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ten-red);
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ten-ink);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tab bar */
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabBar::-webkit-scrollbar { display: none; }
+
+.tabBtn {
+  flex: 1;
+  min-width: 72px;
+  padding: var(--s-3) var(--s-2);
+  font-family: var(--font-bangla);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  color: var(--fg-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur-base) var(--ease-out), border-color var(--dur-base);
+  touch-action: manipulation;
+  min-height: 44px;
+}
+.tabBtn:hover { color: var(--fg-1); }
+
+.tabActive {
+  color: var(--success);
+  border-bottom-color: var(--success);
+  font-weight: 700;
+}
+
+/* Main content area (hosts tab components) */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}

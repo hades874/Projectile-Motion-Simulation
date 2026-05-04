@@ -58,8 +58,8 @@ function reducer(state, action) {
   }
 }
 
-export function useSimulator() {
-  const [state, dispatch] = useReducer(reducer, 'junior', makeInitialState)
+export function useSimulator(initialMode = 'senior') {
+  const [state, dispatch] = useReducer(reducer, initialMode, makeInitialState)
 
   const setParam = useCallback((key, value) => dispatch({ type: 'SET_PARAM', key, value }), [])
   const setMode = useCallback((mode) => dispatch({ type: 'SET_MODE', mode }), [])
