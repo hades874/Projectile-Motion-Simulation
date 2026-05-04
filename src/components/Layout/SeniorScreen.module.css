@@ -40,76 +40,74 @@
   font-weight: 800;
   color: var(--ten-red);
   letter-spacing: 0.06em;
-  flex-shrink: 0;
 }
 
 .title {
-  font-size: var(--fs-body);
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--ten-ink);
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .headerSpacer { flex: 1; }
 
 .numeralBtn {
-  padding: var(--s-1) var(--s-3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-muted);
-  font-size: var(--fs-caption);
+  font-size: 14px;
   font-weight: 700;
-  color: var(--fg-2);
+  padding: 4px 10px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: background var(--dur-base);
-  min-height: 32px;
-  touch-action: manipulation;
+  color: var(--fg-2);
 }
-.numeralBtn:hover { background: var(--gray-200); }
 
-/* Main area: canvas | controls */
+/* Main Area */
 .mainArea {
   flex: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
-  min-height: 0;
+}
+
+@media (min-width: 768px) {
+  .mainArea {
+    flex-direction: row;
+  }
 }
 
 .canvasWrap {
   flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  min-height: 280px;
+  background: #fff;
+  position: relative;
+  box-shadow: inset 0 -2px 10px rgba(0,0,0,0.02);
 }
 
-/* Controls panel (right side on desktop) */
+/* Controls Panel */
 .controlsPanel {
-  width: 260px;
-  flex-shrink: 0;
-  border-left: 1px solid var(--border);
-  background: var(--bg);
+  padding: var(--s-4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
-  gap: var(--s-3);
-  padding: var(--s-4);
+  gap: var(--s-4);
+  max-height: 45%;
   overflow-y: auto;
 }
 
-@media (max-width: 639px) {
-  .mainArea { flex-direction: column; }
-  .canvasWrap { flex: none; height: 44dvh; min-height: 180px; }
+@media (min-width: 768px) {
   .controlsPanel {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--border);
-    flex: 1;
-    overflow-y: auto;
+    width: 320px;
+    max-height: none;
+    border-top: none;
+    border-left: 1px solid var(--glass-border);
   }
 }
 
-/* Param rows */
+/* Params Section */
 .paramsSection {
   display: flex;
   flex-direction: column;
@@ -119,75 +117,82 @@
 .paramRow {
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
+  gap: 6px;
 }
 
 .paramHeader {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
+  align-items: center;
 }
 
 .paramLabel {
-  font-size: var(--fs-body-sm);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--fg-2);
-  font-weight: 500;
-  cursor: help;
 }
 
 .paramValue {
-  font-size: var(--fs-body-sm);
+  font-size: 15px;
   font-weight: 700;
   color: var(--ten-ink);
-  font-variant-numeric: tabular-nums;
-  min-width: 52px;
-  text-align: right;
+  background: var(--gray-100);
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
+/* Tactile Range Slider */
 .rangeSlider {
+  -webkit-appearance: none;
   width: 100%;
-  accent-color: var(--success);
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  outline: none;
+}
+
+.rangeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border: 2px solid var(--success);
+  border-radius: 50%;
   cursor: pointer;
-  height: 4px;
-  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.1s;
 }
 
-/* Degenerate hint */
-.hint {
-  font-size: var(--fs-body-sm);
-  color: var(--warn);
-  text-align: center;
-  padding: 0 var(--s-2);
-  margin: 0;
+.rangeSlider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
 }
 
-/* Results 2×2 grid */
+/* Results Grid */
 .resultsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-2);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-3);
 }
 
 .resultCard {
+  background: var(--ten-white);
+  padding: var(--s-3);
+  border-radius: 16px;
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: var(--s-2) var(--s-3);
-  background: var(--bg);
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  align-items: flex-start;
+  gap: 2px;
+  box-shadow: var(--sh-card);
 }
 
 .resultLabel {
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.8;
 }
 
 .resultValue {
-  font-size: var(--fs-body);
-  font-weight: 700;
-  color: var(--ten-ink);
   font-variant-numeric: tabular-nums;
 }
 

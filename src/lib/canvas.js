@@ -78,9 +78,14 @@ export function drawTrajectory(ctx, points, scale, offsetX, offsetY, color = '#1
   if (!points || points.length < 2) return
   ctx.save()
   ctx.strokeStyle = color
-  ctx.lineWidth = 2.5
+  ctx.lineWidth = 3
   if (dashed) ctx.setLineDash([6, 4])
   ctx.lineJoin = 'round'
+  
+  // Bloom effect
+  ctx.shadowBlur = 8
+  ctx.shadowColor = color
+
   ctx.beginPath()
   points.forEach((p, i) => {
     const { sx, sy } = worldToScreen(p.x, p.y, scale, offsetX, offsetY)
@@ -94,13 +99,27 @@ export function drawTrajectory(ctx, points, scale, offsetX, offsetY, color = '#1
 export function drawBall(ctx, x, y, scale, offsetX, offsetY, color = '#1CAB55') {
   const { sx, sy } = worldToScreen(x, y, scale, offsetX, offsetY)
   ctx.save()
+  
+  // Ball outer glow
+  ctx.shadowBlur = 12
+  ctx.shadowColor = color
+
   ctx.beginPath()
-  ctx.arc(sx, sy, 7, 0, Math.PI * 2)
+  ctx.arc(sx, sy, 8, 0, Math.PI * 2)
   ctx.fillStyle = color
   ctx.fill()
+  
+  ctx.shadowBlur = 0
   ctx.strokeStyle = '#fff'
-  ctx.lineWidth = 1.5
+  ctx.lineWidth = 2
   ctx.stroke()
+  
+  // Inner highlight
+  ctx.beginPath()
+  ctx.arc(sx - 2, sy - 2, 2, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.fill()
+  
   ctx.restore()
 }
 

@@ -1,5 +1,22 @@
 import { OBJECTS, SURFACES, FORCE_PER_PERSON, frictionForce } from './forcesPhysics.js'
 
+// Preload object sprites
+const IMG = {}
+const SPRITES = {
+  skate:    '/assets/images/skate-board.png',
+  box:      '/assets/images/box.png',
+  fridge:   '/assets/images/fridge.png',
+  car:      '/assets/images/car.png',
+  ice:      '/assets/images/ice.png',
+  wood:     '/assets/images/log.png',
+  concrete: '/assets/images/concrete.png',
+}
+Object.entries(SPRITES).forEach(([key, src]) => {
+  const img = new Image()
+  img.src = src
+  IMG[key] = img
+})
+
 // World → screen X. World range: [-8, 8] m → [5%, 95%] of canvas width.
 function wx(worldX, w) {
   return w / 2 + (worldX / 8) * (w * 0.44)
@@ -28,26 +45,34 @@ function drawSurface(ctx, w, h) {
 // Proportional horizontal force arrow starting at (x, y)
 function drawForceArrow(ctx, x, y, F, maxF, color, label) {
   if (Math.abs(F) < 0.5) return
-  const maxLen = 70
+  const maxLen = 80
   const len = (Math.min(Math.abs(F), maxF) / maxF) * maxLen
   const dir = Math.sign(F)
   const ex = x + dir * len
   ctx.save()
+  
+  // Glow effect
+  ctx.shadowBlur = 6
+  ctx.shadowColor = color
+
   ctx.strokeStyle = color
   ctx.fillStyle = color
-  ctx.lineWidth = 2.5
+  ctx.lineWidth = 3
   ctx.lineCap = 'round'
   ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, y); ctx.stroke()
-  const hs = 9
+  
+  const hs = 10
   ctx.beginPath()
   ctx.moveTo(ex, y)
-  ctx.lineTo(ex - dir * hs, y - 5)
-  ctx.lineTo(ex - dir * hs, y + 5)
+  ctx.lineTo(ex - dir * hs, y - 6)
+  ctx.lineTo(ex - dir * hs, y + 6)
   ctx.closePath(); ctx.fill()
-  ctx.font = 'bold 11px Inter, sans-serif'
+  
+  ctx.shadowBlur = 0
+  ctx.font = 'bold 12px Inter, sans-serif'
   ctx.textAlign = dir > 0 ? 'left' : 'right'
   ctx.textBaseline = 'bottom'
-  ctx.fillText(label, ex + dir * 5, y - 3)
+  ctx.fillText(label, ex + dir * 5, y - 4)
   ctx.restore()
 }
 
@@ -66,6 +91,17 @@ function drawBox(ctx, cx, cy, size, label) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
   ctx.fillText(label, cx, cy - size / 2)
   ctx.restore()
+}
+
+function drawSprite(ctx, key, cx, groundY, height) {
+  const img = IMG[key]
+  if (!img?.complete || !img.naturalWidth) {
+    drawBox(ctx, cx, groundY, height, '')
+    return
+  }
+  const aspect = img.naturalWidth / img.naturalHeight
+  const w = height * aspect
+  ctx.drawImage(img, cx - w / 2, groundY - height, w, height)
 }
 
 function drawCart(ctx, cx, cy) {
@@ -92,26 +128,51 @@ function drawCart(ctx, cx, cy) {
 function drawPerson(ctx, cx, cy, active, direction) {
   const color = active
     ? (direction === 'left' ? '#E8001D' : '#274FE3')
-    : '#D1D5DB'
-  const headR = 8, bodyH = 20, legH = 16, armLen = 12
+    : '#9CA3AF'
+  const headR = 7, bodyH = 22, legH = 18, armLen = 14
   const dir = direction === 'left' ? -1 : 1
 
   ctx.save()
   ctx.strokeStyle = color; ctx.fillStyle = color
-  ctx.lineWidth = 2; ctx.lineCap = 'round'
+  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'
 
-  // Head
-  ctx.beginPath(); ctx.arc(cx, cy - bodyH - headR * 1.4, headR, 0, Math.PI * 2); ctx.fill()
-  // Body
-  ctx.beginPath(); ctx.moveTo(cx, cy - bodyH); ctx.lineTo(cx, cy); ctx.stroke()
-  // Push arm (toward center direction)
-  ctx.beginPath(); ctx.moveTo(cx, cy - bodyH * 0.55); ctx.lineTo(cx + dir * armLen, cy - bodyH * 0.2); ctx.stroke()
+  // Head with subtle glow if active
+  if (active) {
+    ctx.shadowBlur = 4
+    ctx.shadowColor = color
+  }
+  ctx.beginPath(); ctx.arc(cx, cy - bodyH - headR * 1.5, headR, 0, Math.PI * 2); ctx.fill()
+  
+  ctx.shadowBlur = 0
+  // Body (slightly curved for pushing feel)
+  ctx.beginPath()
+  ctx.moveTo(cx, cy - bodyH)
+  ctx.quadraticCurveTo(cx - dir * 2, cy - bodyH / 2, cx, cy)
+  ctx.stroke()
+
+  // Push arm (extended)
+  ctx.beginPath()
+  ctx.moveTo(cx, cy - bodyH * 0.7)
+  ctx.lineTo(cx + dir * armLen, cy - bodyH * 0.5)
+  ctx.stroke()
+
   // Back arm
-  ctx.beginPath(); ctx.moveTo(cx, cy - bodyH * 0.55); ctx.lineTo(cx - dir * armLen * 0.5, cy - bodyH * 0.8); ctx.stroke()
-  // Legs
-  ;[-8, 8].forEach(ox => {
-    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + ox, cy + legH); ctx.stroke()
-  })
+  ctx.beginPath()
+  ctx.moveTo(cx, cy - bodyH * 0.7)
+  ctx.lineTo(cx - dir * armLen * 0.4, cy - bodyH * 0.9)
+  ctx.stroke()
+
+  // Legs in pushing stance
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(cx - dir * 10, cy + legH)
+  ctx.stroke()
+  
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(cx + dir * 6, cy + legH)
+  ctx.stroke()
+
   ctx.restore()
 }
 
@@ -233,7 +294,7 @@ export function drawMotion(ctx, w, h, state) {
   ctx.clearRect(0, 0, w, h)
   ctx.fillStyle = '#F9FAFB'; ctx.fillRect(0, 0, w, h)
   drawSurface(ctx, w, h)
-  drawBox(ctx, boxSX, gy, boxSize, `${obj.mass}kg`)
+  drawSprite(ctx, selectedObject, boxSX, gy, boxSize)
 
   const arrowY = gy - boxSize - 10
   if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `F=${Fapplied.toFixed(0)}N`)
@@ -269,7 +330,7 @@ export function drawFriction(ctx, w, h, state) {
   ctx.fillText(`তল: ${surf.label}  (μₛ=${surf.mu_s})`, 12, h - 8)
   ctx.restore()
 
-  drawBox(ctx, boxSX, gy, 44, `${mass}kg`)
+  drawSprite(ctx, surface, boxSX, gy, 44)
 
   const arrowY = gy - 60
   if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `F=${Fapplied.toFixed(0)}N`)

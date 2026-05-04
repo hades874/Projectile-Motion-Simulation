@@ -30,14 +30,18 @@ export function ForceScreen() {
         </button>
         <span className={styles.logo}>10MS</span>
         <h1 className={`${styles.title} bn`}>{strings.title}</h1>
+        <div className={styles.headerSpacer} />
+        <button className={styles.numeralBtn} onClick={() => {}}>
+          {state.display?.numerals === 'bangla' ? '০৯' : '09'}
+        </button>
       </header>
 
       {/* Tab bar */}
-      <nav className={styles.tabBar} aria-label="সিমুলেশন ট্যাব">
+      <nav className={styles.tabs} aria-label="সিমুলেশন ট্যাব">
         {TABS.map(tab => (
           <button
             key={tab.id}
-            className={`${styles.tabBtn} ${active === tab.id ? styles.tabActive : ''}`}
+            className={`${styles.tab} ${active === tab.id ? styles.activeTab : ''}`}
             onClick={() => setTab(tab.id)}
           >
             <span className="bn">{tab.label}</span>
@@ -46,7 +50,7 @@ export function ForceScreen() {
       </nav>
 
       {/* Tab content */}
-      <div className={styles.content}>
+      <div className={styles.mainArea}>
         {active === 'netforce' && (
           <NetForceTab
             state={state.netforce}

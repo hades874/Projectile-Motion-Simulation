@@ -1,4 +1,4 @@
-/* Shared layout for all force tab components */
+/* Shared layout for all force tab components - Premium Design */
 
 .tabLayout {
   flex: 1;
@@ -6,28 +6,33 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  background: #fff;
 }
 
 .panel {
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  padding: var(--s-4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+  padding: var(--s-5) var(--s-4);
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  gap: var(--s-5);
   overflow-y: auto;
-  max-height: 45dvh;
+  max-height: 48dvh;
   flex-shrink: 0;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .tabLayout { flex-direction: row; }
   .panel {
-    width: 276px;
+    width: 320px;
     border-top: none;
-    border-left: 1px solid var(--border);
+    border-left: 1px solid var(--glass-border);
     max-height: none;
     flex-shrink: 0;
+    padding: var(--s-6) var(--s-5);
   }
 }
 
@@ -35,73 +40,75 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: var(--s-3);
 }
 
 .sectionLabel {
-  font-size: var(--fs-caption);
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--fg-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 2px;
 }
 
 /* Person toggle buttons */
 .pusherRow {
   display: flex;
-  gap: var(--s-2);
+  gap: var(--s-3);
   flex-wrap: wrap;
 }
 
 .personBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--r-sm);
-  border: 2px solid var(--border);
-  background: var(--bg-muted);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--ten-white);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color var(--dur-base) var(--ease-out),
-              background   var(--dur-base) var(--ease-out);
-  touch-action: manipulation;
+  transition: all var(--dur-base) var(--ease-out);
+  box-shadow: var(--sh-card);
 }
-.personBtn svg { display: block; }
+
+.personBtn:active { transform: scale(0.92); }
 
 .personBtn.personActive {
-  border-color: var(--success);
-  background: #ECFDF5;
+  background: var(--gray-50);
 }
 
-.personBtnLeft.personActive  { border-color: var(--ten-red);  background: #FFF1F2; }
-.personBtnRight.personActive { border-color: var(--info);     background: #EFF6FF; }
+.personBtnLeft.personActive  { border-color: var(--ten-red);  box-shadow: 0 0 12px rgba(232,0,29,0.12); }
+.personBtnRight.personActive { border-color: var(--info);     box-shadow: 0 0 12px rgba(39,79,227,0.12); }
 
 /* Readout cards */
 .readouts {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--s-2);
+  gap: var(--s-3);
 }
 
 .readoutCard {
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: var(--s-2) var(--s-3);
-  background: var(--bg);
+  border-radius: 16px;
+  padding: var(--s-3);
+  background: var(--ten-white);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-shadow: var(--sh-card);
 }
 
 .readoutLabel {
-  font-size: var(--fs-caption);
+  font-size: 11px;
+  font-weight: 700;
   color: var(--fg-3);
 }
 
 .readoutValue {
-  font-size: var(--fs-body);
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   color: var(--ten-ink);
   font-variant-numeric: tabular-nums;
 }
@@ -109,34 +116,35 @@
 /* Action buttons */
 .actions {
   display: flex;
-  gap: var(--s-2);
-  flex-wrap: wrap;
+  gap: var(--s-3);
 }
+
+.actions > button { flex: 1; }
 
 /* Object preset buttons */
 .objectRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--s-2);
-  flex-wrap: wrap;
 }
 
 .objectBtn {
-  padding: var(--s-1) var(--s-3);
-  border-radius: var(--r-pill);
+  padding: 8px 4px;
+  border-radius: 10px;
   border: 1.5px solid var(--border);
-  background: var(--bg-muted);
-  font-size: var(--fs-body-sm);
-  font-family: var(--font-bangla);
+  background: var(--ten-white);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color var(--dur-base), background var(--dur-base);
-  touch-action: manipulation;
-  min-height: 32px;
+  transition: all var(--dur-base);
+  text-align: center;
 }
+
 .objectBtn.selected {
   border-color: var(--warn);
   background: #FFF7ED;
   color: var(--warn-deep);
-  font-weight: 600;
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.1);
 }
 
 /* Surface selector */
@@ -147,35 +155,36 @@
 
 .surfaceBtn {
   flex: 1;
-  padding: var(--s-2) var(--s-2);
-  border-radius: var(--r-sm);
+  padding: 10px 4px;
+  border-radius: 10px;
   border: 1.5px solid var(--border);
-  background: var(--bg-muted);
-  font-size: var(--fs-body-sm);
-  font-family: var(--font-bangla);
+  background: var(--ten-white);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   text-align: center;
-  transition: border-color var(--dur-base), background var(--dur-base);
-  touch-action: manipulation;
-  min-height: 36px;
+  transition: all var(--dur-base);
 }
+
 .surfaceBtn.selected {
   border-color: var(--info);
   background: #EFF6FF;
   color: var(--info);
-  font-weight: 600;
+  box-shadow: 0 0 10px rgba(39, 79, 227, 0.1);
 }
 
-/* Toggle friction */
+/* Toggle friction row */
 .frictionRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
+  padding: 4px 0;
 }
 
 .frictionLabel {
-  font-size: var(--fs-body-sm);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--fg-1);
 }
 
@@ -183,42 +192,62 @@
 .paramRow {
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
+  gap: 8px;
 }
 
 .paramHeader {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
 }
 
 .paramName {
-  font-size: var(--fs-body-sm);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--fg-2);
-  font-weight: 500;
 }
 
 .paramValue {
-  font-size: var(--fs-body-sm);
+  font-size: 15px;
   font-weight: 700;
   color: var(--ten-ink);
-  font-variant-numeric: tabular-nums;
-  min-width: 52px;
-  text-align: right;
+  background: var(--gray-100);
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
+/* Tactile Slider for Forces */
 .rangeInput {
+  -webkit-appearance: none;
   width: 100%;
-  accent-color: var(--info);
-  height: 4px;
-  border-radius: 2px;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  outline: none;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border: 2px solid var(--info);
+  border-radius: 50%;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.1s;
+}
+
+.rangeInput::-webkit-slider-thumb:active {
+  transform: scale(1.15);
 }
 
 /* Hint text */
 .hint {
-  font-size: var(--fs-caption);
+  font-size: 12px;
   color: var(--fg-3);
-  text-align: center;
-  padding: 0 var(--s-2);
+  text-align: left;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
 }
