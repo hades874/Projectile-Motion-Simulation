@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**SIM-P1** — Physics Simulation Hub for 10 Minute School's TenTen platform. A Bangla-first, mobile-first React app featuring a **custom canvas-based projectile motion simulator** (the core feature) plus a secondary PhET Interactive Simulations browser. Spec: `md/projectile_motion_simulator_prd.md`. Design system: `md/design.md`.
+**SIM-P1** — Physics Simulation Hub for 10 Minute School's TenTen platform. A Bangla-first, mobile-first React app with two fully custom HTML5 Canvas simulations: **Forces and Motion** (Junior) and **Projectile Motion** (Senior). Spec: `md/projectile_motion_simulator_prd.md`. Design system: `md/design.md`.
 
 Curriculum alignment: SSC Chapter 2 + HSC Chapter 3 (Bangladeshi board-exam format). The simulator teaches range symmetry (30°/60° pairs yield same R), and presents problems in the board-exam style: "v₀=20, θ=30° দেওয়া আছে → R, H, T নির্ণয় কর".
 
@@ -112,9 +112,9 @@ Nine exported pure functions:
 ### Localization
 
 All Bangla UI strings live in `src/content/`:
-- `junior.bn.json` — 3-page explainer, buttons, readouts, error messages
-- `senior.bn.json` — tabs, controls, overlay labels, speed options
-- `glossary.bn.json` — term definitions (v₀, θ, h₀, R, H, T, g, vₓ, vᵧ)
+- `forces.bn.json` — tab names, labels, actions, object/surface names for Forces sim
+- `senior.bn.json` — tabs, controls, overlay labels, speed options for Projectile sim
+- `glossary.bn.json` — physics term definitions (v₀, θ, h₀, R, H, T, g, vₓ, vᵧ)
 
 No English fallback — Bangla-only by design. Numeral conversion in `src/lib/bangla.js`: `toBn(n)`, `toEn(n)`, `formatNum(value, 'bangla'|'western', decimals)`. All readouts honor `display.numerals`.
 
@@ -161,7 +161,7 @@ Import `src/styles/tokens.css` in every component. Key rules from `md/design.md`
 - All touch targets: minimum **44×44 px**
 - No hover-only interactions
 - Performance budget: initial JS bundle ≤ 200 KB gzipped (currently ~57 KB)
-- Canvas fills `100dvh` minus header + controls + attribution (~80px total)
+- Canvas fills `100dvh` minus header + controls (~80px total)
 
 ## Common extension patterns
 

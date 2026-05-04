@@ -1,11 +1,11 @@
-# Projectile Motion Simulator — Product Requirements Document
+# Physics Simulation Hub — Product Requirements Document
 
 | Field | Value |
 |---|---|
 | **Project codename** | SIM-P1 |
 | **Owner** | cm.ops, Content Operations, 10 Minute School |
-| **Document status** | Draft v1.0 — Planning |
-| **Last updated** | 02 May 2026 |
+| **Document status** | v2.0 — Implemented |
+| **Last updated** | 04 May 2026 |
 | **Target platform** | TenTen (10 Minute School), mobile-first web |
 | **Source references** | Internal `Simulation_Development_Instructions.md` (TenTen sims mandate, §4.2.1 mobile checklist, SIM-P1 spec) |
 
@@ -13,9 +13,14 @@
 
 ## 1. Executive summary
 
-A Bangla-first, mobile-first interactive simulation of projectile motion under vacuum, built as a custom React + HTML5 Canvas + Recharts web app. The simulator targets two student segments — **Junior (Class 6–8)** for concept introduction and **Senior (Class 9–10 / HSC)** for board-aligned deep study — with a single underlying physics engine and two distinct UI modes. V1 ships pure vacuum motion; air resistance, planet selector, and gamified challenges are deferred to later versions.
+A Bangla-first, mobile-first interactive physics simulation hub built as a custom React + HTML5 Canvas web app. The hub ships two fully custom simulations targeting two student segments:
 
-**Primary success metric for V1:** a Class 9 student can use the simulator on a low-end Android phone over 3G to discover, on their own, why launches at 30° and 60° give the same range — without reading any external explanation.
+- **Junior (Forces and Motion)** — 4-tab interactive simulation covering net force, motion with friction, friction analysis, and tug-of-war. Target: Class 6–10 students learning Newton's laws.
+- **Senior (Projectile Motion)** — full-featured projectile motion simulator with trajectory animation, vector overlays, formula panel, graphs, and comparison mode. Target: Class 9–10 / HSC students doing board-exam-aligned study.
+
+Both simulations are built entirely from scratch — no external simulation frameworks were used. V1 ships both simulators fully functional. Air resistance, gamification, and user accounts are deferred.
+
+**Primary success metric for V1:** A Class 9 student on a low-end Android phone over 3G can independently discover why 30° and 60° launches give the same range (Projectile), and understand why a heavier object doesn't stop faster on ice vs concrete (Forces).
 
 ---
 
@@ -23,29 +28,24 @@ A Bangla-first, mobile-first interactive simulation of projectile motion under v
 
 ### 2.1 The internal mandate
 
-10MS's TenTen platform identified projectile motion as the highest-priority simulation need (5 occurrences in content data, most-documented Physics sim need). The original internal proposal (`Simulation_Development_Instructions.md`, SIM-P1) recommended forking the PhET "Projectile Motion" simulation, swapping UI strings to Bangla, and embedding via iframe at an estimated 2–3 dev-days.
+10MS's TenTen platform identified physics simulations as the highest-priority interactive content need. The original internal proposal recommended forking PhET Interactive Simulations for both segments. After review, we deviated from the PhET-fork plan and built fully custom simulations for both segments.
 
-### 2.2 Why we are building custom instead of forking PhET
+### 2.2 Why custom instead of PhET fork
 
-After review, this PRD deviates from the PhET-fork plan and proposes building from scratch on React + HTML5 Canvas + Recharts. Reasons:
+1. **Mobile fit.** PhET sims are desktop-first; meeting TenTen's 44 px touch targets and 360 px portrait layout would require fighting the PhET framework.
+2. **Localization depth.** PhET text is woven through Scenery scene-graph nodes; Bangla rendering and numeral conversion (১২৩ vs 123) are non-trivial inside a fork.
+3. **NCTB alignment.** PhET follows US/AP curriculum framing. Aligning to NCTB chapters from inside a fork means perpetual upstream conflict.
+4. **Bundle size.** A PhET sim is several MB; both custom sims together ship under 70 KB gzipped.
+5. **Full control.** Custom code means comparison mode, NCTB problem presets, and Forces tabs fit naturally.
 
-1. **Mobile fit.** PhET sims are built on the Scenery framework and were originally desktop-first. Their mobile experience, while improved, doesn't natively meet TenTen's strict mobile checklist (44 px touch targets, 360–414 px portrait, sub-5 s load on 3G).
-2. **Localization depth.** "Replace UI strings" undersells the work. PhET's text is woven through Scenery scene-graph nodes; Bangla rendering, font loading, and numeral conversion (১২৩ vs 123) are non-trivial inside a fork.
-3. **NCTB alignment.** PhET terminology, defaults, and pedagogical framing follow the US/AP curriculum. Aligning to NCTB Chapter 2 (SSC) and HSC 1st Paper Chapter 3 from inside a fork means fighting the framework.
-4. **Bundle size.** A typical PhET sim is several MB. A focused custom build can ship under 250 KB gzipped — material on 3G.
-5. **Future extensibility.** Custom code means features like comparison mode, NCTB problem presets, and eventual lesson embedding fit naturally. A fork keeps us perpetually downstream of PhET upstream.
-
-**Trade-off accepted:** ~5–7 dev-days for V1 vs. 2–3 for a PhET fork. We accept this as a one-time investment that pays off across the full simulation roadmap.
+**Trade-off accepted:** ~7–10 dev-days for both sims vs. 2–3 for PhET forks. This is a one-time investment that pays off across the full simulation roadmap.
 
 ### 2.3 Curriculum context
 
-| Segment | Curriculum reference | Coverage |
+| Segment | Curriculum reference | Simulation |
 |---|---|---|
-| Junior (Class 6–8) | NCTB বিজ্ঞান, basic motion concepts | Informal — projectile not formally covered |
-| SSC (Class 9–10) | NCTB পদার্থ বিজ্ঞান, Chapter 2 — গতি | 2D motion introduced; projectile usually as worked example |
-| HSC | HSC Physics 1st Paper, Chapter 3 (Kinematics) | Full projectile treatment: equations, derivations, problems |
-
-Board-exam pattern: numerical questions of the form "v₀ = 20 m/s, θ = 30° দেওয়া আছে — R, H এবং T নির্ণয় কর।" The simulator must let students validate textbook answers visually.
+| Junior (Class 6–10) | NCTB বিজ্ঞান / পদার্থ বিজ্ঞান — force, motion, Newton's laws | Forces and Motion (4 tabs) |
+| Senior (Class 9–10 / HSC) | NCTB পদার্থ বিজ্ঞান Chapter 2 (SSC) + HSC Physics Chapter 3 | Projectile Motion |
 
 ---
 
@@ -53,13 +53,12 @@ Board-exam pattern: numerical questions of the form "v₀ = 20 m/s, θ = 30° �
 
 ### 3.1 Goals (V1)
 
-1. Let a Bangladeshi physics student set v₀ and θ and instantly see the trajectory.
-2. Display R, H, T live as parameters change, with the formulas visible.
+1. Let a Bangladeshi student explore Newton's laws interactively (Forces sim).
+2. Let a Bangladeshi physics student set v₀, θ, h₀ and instantly see trajectory + R, H, T (Projectile sim).
 3. Make the H–R trade-off across angles intuitive without text instruction.
 4. Run smoothly on a low-end Android phone (≤ 2 GB RAM) over 3G.
-5. Read entirely in Bangla (with Western/Bangla numeral toggle, see §10.3).
-6. Serve two student segments with distinct UI density.
-7. Ship as a standalone deployable Vercel app, ready to embed via iframe later.
+5. Read entirely in Bangla with Western/Bangla numeral toggle.
+6. Ship as a standalone Vercel app, ready to embed via iframe later.
 
 ### 3.2 Non-goals (V1)
 
@@ -67,12 +66,10 @@ Board-exam pattern: numerical questions of the form "v₀ = 20 m/s, θ = 30° �
 2. Planet/gravity selector.
 3. Gamification (targets, scoring, levels).
 4. User accounts, saved progress, history.
-5. Real-world object presets (cricket ball, javelin, football).
-6. Analytics / event tracking.
-7. Accessibility audit (keyboard nav, screen reader, contrast).
-8. English-first UI (V1 is Bangla-only; English string layer in V2).
-9. Live embedding inside TenTen lesson pages (designed embed-ready, but actual embedding is V2).
-10. Challenges, quizzes, "predict before you launch" prompts.
+5. Analytics / event tracking.
+6. Accessibility audit (keyboard nav, screen reader, contrast).
+7. English-first UI (V1 is Bangla-only; English layer in V2).
+8. Live embedding inside TenTen lesson pages (designed embed-ready, but actual embedding is V2).
 
 ---
 
@@ -80,142 +77,144 @@ Board-exam pattern: numerical questions of the form "v₀ = 20 m/s, θ = 30° �
 
 ### 4.1 Two-segment model
 
-The app launches with a one-tap mode switch on the home screen:
+The app opens with two large tappable cards on the home screen:
 
-- **জুনিয়র (৬–৮ শ্রেণি)** — Junior
-- **সিনিয়র (৯–১০ ও এইচএসসি)** — Senior
+- **জুনিয়র** — Forces and Motion simulation
+- **সিনিয়র** — Projectile Motion simulation
 
-Mode is remembered for the session. (Cross-session persistence is V2.)
+### 4.2 Junior segment — Forces and Motion
 
-### 4.2 Junior mode (Class 6–8)
+**Purpose:** Interactive exploration of Newton's laws: force, mass, acceleration, friction.
 
-**Purpose:** First exposure to "what happens when you throw something." No formal physics expected.
+**Four tabs:**
 
-**UI characteristics:**
-- Friendly framing: a character/launcher (final art per `design.md`).
-- Two controls only: speed (গতি) and angle (কোণ) — sliders only, no numeric input.
-- Outputs labeled in everyday Bangla: "কত দূরে গেল", "কত উঁচুতে উঠল", "কতক্ষণ আকাশে ছিল"
-- No vector overlays, no formula panel, no graphs — none of that exists in this mode.
-- A single "এটা কী?" button opens a 3-screen illustrated explainer.
-- A small visual flourish when the ball lands — engagement, not gamification.
+| Tab | Bangla | Description |
+|---|---|---|
+| Net Force | নেট বল | Toggle up to 4 pushers per side on an air-track cart. F_net arrows update live. |
+| Motion | গতি | Sliding applied force on object presets (skate/box/fridge/car). Friction toggle. |
+| Friction | ঘর্ষণ | Same as Motion + live F vs F_friction graph showing static→kinetic transition. |
+| Tug of War | টানা-হেঁচড়া | Two 4-person teams. Rope moves to winning side. Win overlay. |
 
-**What's hidden in Junior mode:** numerical inputs, component velocities, vector overlays, formula panel, graphs, comparison mode.
+**Physics engine:** Numerical integration (Euler). F=ma, static + kinetic friction. Object/surface presets with realistic μ values.
 
-### 4.3 Senior mode (Class 9–10 and HSC)
+### 4.3 Senior segment — Projectile Motion
 
-**Purpose:** Board-exam-aligned exploration and verification.
+**Purpose:** Board-exam-aligned exploration and verification. NCTB Chapter 2 (SSC) + HSC Chapter 3.
 
-**UI characteristics:**
-- Three controls: v₀, θ, h₀, with both slider **and** numeric input.
-- Formal Bangla terminology aligned with NCTB.
-- Live readouts: R, H, T, |v at impact|, angle at impact.
-- Vector overlay (toggleable, on by default): v, vₓ, vᵧ, g.
-- Equally-spaced time-stamped dots along the trajectory (toggleable).
-- Side panel with formulas and live-substituted values.
-- Graphs panel (y-t, vᵧ-t) — collapsible, off by default to preserve mobile screen space.
-- Comparison mode: launch a second (ghost) projectile with different params; both animate together.
+**Controls:** Sliders for v₀, θ, h₀. Live trajectory preview updates as sliders move.
 
-**Implicit progression:** A Senior student can collapse all advanced overlays and use the sim simply, then expand them as understanding grows.
+**Features:** Launch animation, pause/resume, speed control (0.5× / 1× / 2×), vector overlay (v, vₓ, vᵧ), trajectory dots, formula panel, y-t + vᵧ-t graphs, comparison mode (second ghost projectile).
 
 ---
 
 ## 5. V1 feature scope
 
-### 5.1 Core simulator (both modes)
+### 5.1 Forces and Motion (Junior)
 
-| # | Feature | Junior | Senior |
-|---|---|---|---|
-| F-1 | Set initial velocity v₀ via slider | ✓ (labeled "গতি") | ✓ (slider + numeric, "প্রাথমিক বেগ") |
-| F-2 | Set launch angle θ via slider | ✓ ("কোণ") | ✓ (slider + numeric, "উৎক্ষেপণ কোণ") |
-| F-3 | Set initial height h₀ | — (fixed at 0) | ✓ (slider + numeric, "প্রাথমিক উচ্চতা") |
-| F-4 | Drag-on-canvas to set angle and velocity (touch-friendly) | ✓ | ✓ |
-| F-5 | Live trajectory preview (updates as sliders move) | ✓ | ✓ |
-| F-6 | Launch button to animate ball along the trajectory | ✓ | ✓ |
-| F-7 | Reset button | ✓ | ✓ |
-| F-8 | Pause / resume during animation | — | ✓ |
-| F-9 | Slow-motion (0.5× / 1× / 2×) | — | ✓ |
+| # | Feature | Tabs |
+|---|---|---|
+| F-1 | Toggle pushers on/off (each = 50 N) | Net Force, Tug of War |
+| F-2 | Applied force slider (−500 to 500 N) | Motion, Friction |
+| F-3 | Object presets (skate 5 kg, box 25 kg, fridge 100 kg, car 1000 kg) | Motion |
+| F-4 | Surface presets (ice, wood, concrete) | Friction |
+| F-5 | Friction on/off toggle | Motion |
+| F-6 | Live force arrows (F_applied blue, F_friction orange, F_net green) | Motion, Friction |
+| F-7 | Live F vs F_friction graph (static region → kinetic drop) | Friction |
+| F-8 | Win state overlay for tug-of-war | Tug of War |
+| F-9 | Start / Pause / Reset per tab | All |
+| F-10 | Live readout cards: F_net, a, v, x | All |
 
-### 5.2 Senior-only features
+### 5.2 Projectile Motion (Senior)
 
 | # | Feature | Description |
 |---|---|---|
-| F-10 | Vector overlay | Live v vector with vₓ, vᵧ components, plus g pointing down |
-| F-11 | Time-stamped trajectory dots | Equal-time dots along the parabola — visual proof of equal-Δt-unequal-Δx |
-| F-12 | Formula panel | Live formulas with substituted values for R, H, T |
-| F-13 | Graphs panel | y-t and vᵧ-t graphs (Recharts); updates when params change |
-| F-14 | Comparison mode | Add a second projectile (different colour, dashed); both animate together |
-| F-15 | Concepts panel | Collapsible side panel with NCTB-aligned theory snippets |
-
-### 5.3 Junior-only features
-
-| # | Feature | Description |
-|---|---|---|
-| F-16 | Illustrated 3-screen explainer | "ছোঁড়া কী?", "কেন নিচে নেমে আসে?", "নিজে চেষ্টা করো!" |
-| F-17 | Friendly outcome readouts | "৩৫ মিটার দূরে গেল!" rather than R = 35 m |
-| F-18 | Landing celebration | Small visual flourish (confetti or bounce) when ball lands |
-
-### 5.4 Cross-cutting features
-
-| # | Feature | Description |
-|---|---|---|
-| F-19 | Mode switcher | One-tap toggle between Junior and Senior on the home screen and in the header |
-| F-20 | Numeral toggle | Display digits as ০–৯ or 0–9 (default: ০–৯ in Junior, 0–9 in Senior) |
-| F-21 | Tooltip on every control | Tap-and-hold reveals a one-sentence Bangla definition |
-| F-22 | Reset to defaults | Restores v₀ = 20 m/s, θ = 45°, h₀ = 0 |
-
-> **Scope-cut candidate:** If V1 dev time stretches, Comparison Mode (F-14) is the first feature to defer to V2. Rationale: highest implementation cost relative to flexibility, and the H–R trade-off can still be discovered with single-projectile slider sweeps.
+| F-11 | Set v₀, θ, h₀ via sliders | Live trajectory preview updates |
+| F-12 | Launch animation | Ball animates along computed trajectory |
+| F-13 | Pause / resume | Mid-flight |
+| F-14 | Speed control | 0.5× / 1× / 2× |
+| F-15 | Vector overlay | v, vₓ, vᵧ, g arrows on the ball during flight |
+| F-16 | Trajectory dots | Equal-time dots — visual proof of Δt-uniform spacing |
+| F-17 | Formula panel | Live R, H, T formulas with substituted values |
+| F-18 | Graphs panel | y-t and vᵧ-t charts (Recharts) |
+| F-19 | Comparison mode | Second (ghost) projectile — orange dashed vs green main |
+| F-20 | Numeral toggle | Bangla (০–৯) ↔ Western (0–9) in header |
+| F-21 | Tooltip on every control | Tap reveals Bangla glossary definition |
+| F-22 | Impact velocity readout | Shows v_impact when animation finishes |
+| F-23 | Reset to defaults | v₀ = 20, θ = 45°, h₀ = 0 |
 
 ---
 
 ## 6. Physics specification
 
-### 6.1 Equations (vacuum, 2D, closed-form)
+### 6.1 Projectile motion — analytical (closed-form)
 
 Position at time t (initial height h₀):
 
 - x(t) = v₀ · cos(θ) · t
 - y(t) = h₀ + v₀ · sin(θ) · t − ½ · g · t²
 
-Velocity components:
-
-- vₓ(t) = v₀ · cos(θ)  *(constant)*
-- vᵧ(t) = v₀ · sin(θ) − g · t
-
 Derived quantities:
 
 - **Time of flight** (h₀ = 0): T = 2 v₀ sin(θ) / g
-- **Time of flight** (h₀ > 0): solve y(T) = 0 with the quadratic formula:
-  T = [v₀ sin(θ) + √((v₀ sin(θ))² + 2 g h₀)] / g
+- **Time of flight** (h₀ > 0): T = [v₀ sin(θ) + √((v₀ sin(θ))² + 2g·h₀)] / g
 - **Maximum height:** H = h₀ + (v₀ sin(θ))² / (2g)
 - **Range:** R = x(T)
 - **Speed at impact:** |v(T)| = √(vₓ² + vᵧ(T)²)
-- **Angle at impact:** arctan(|vᵧ(T)| / vₓ)
 
-### 6.2 Constants and ranges
+No numerical integration needed — closed-form exact for vacuum. 201 sample points used for canvas rendering.
 
-| Parameter | Symbol | Range | Default | Step | Units |
-|---|---|---|---|---|---|
-| Initial velocity | v₀ | 0 – 100 | 20 | 1 (slider), 0.1 (numeric) | m/s |
-| Launch angle | θ | 0 – 90 | 45 | 1 (slider), 0.1 (numeric) | degrees |
-| Initial height | h₀ | 0 – 50 | 0 | 1 (slider), 0.1 (numeric) | m |
-| Gravitational acceleration | g | fixed | 9.8 | — | m/s² |
+### 6.2 Projectile parameters
 
-### 6.3 Edge cases
+| Parameter | Range | Default | Step | Units |
+|---|---|---|---|---|
+| Initial velocity v₀ | 1–100 | 20 | 1 | m/s |
+| Launch angle θ | 1–89 | 45 | 1 | degrees |
+| Initial height h₀ | 0–50 | 0 | 1 | m |
+| Gravity g | fixed | 9.8 | — | m/s² |
 
-| Case | Behaviour |
-|---|---|
-| θ = 0° and h₀ = 0 | Ball rolls along ground; show degenerate case + tooltip "এই কোণে কোনো প্রক্ষেপ নেই — কোণ বাড়ান।" |
-| θ = 90° and h₀ = 0 | Vertical launch and return; render as a vertical line with offset for visibility |
-| v₀ = 0 | No motion; show prompt "গতি বাড়ান।" |
-| Trajectory exceeds canvas bounds | Auto-scale camera (fit-to-trajectory) so the full parabola is always visible with a 10% padding margin |
+### 6.3 Projectile degenerate states
 
-### 6.4 Numerical strategy
+| State | Detection | Behaviour |
+|---|---|---|
+| `flat` | θ = 0° and h₀ = 0 | Show warning; disable launch button |
+| `vertical` | θ = 90° | Show warning; disable launch button |
+| `no-velocity` | v₀ = 0 | Show warning; disable launch button |
 
-No numerical integration required — closed-form analytical solution is exact for vacuum motion. Generate **200 sample points** along the trajectory for smooth canvas/chart rendering, but use the formulas directly for any specific (x, y, vₓ, vᵧ) lookup. This keeps CPU near zero and lets the device focus on smooth animation.
+### 6.4 Forces and Motion — numerical integration (Euler)
+
+On each animation tick (dt capped at 50 ms to prevent tunnelling):
+
+```
+a = F_net / mass
+v_new = v + a * dt
+x_new = x + v * dt
+```
+
+**Friction model:**
+- If stationary and |F_applied| ≤ μ_s · m · g → F_friction = −F_applied (static, no motion)
+- If moving → F_friction = −sign(v) · μ_k · m · g (kinetic)
+- Velocity is zeroed when |v| < 0.08 m/s and F_net_at_rest < 0.1 N (prevents floating-point drift)
+
+**Object presets (forcesPhysics.js):**
+
+| Object | Mass | μ_s | μ_k |
+|---|---|---|---|
+| Skate (স্কেটবোর্ড) | 5 kg | 0.20 | 0.15 |
+| Box (বাক্স) | 25 kg | 0.45 | 0.35 |
+| Fridge (ফ্রিজ) | 100 kg | 0.55 | 0.42 |
+| Car (গাড়ি) | 1000 kg | 0.65 | 0.52 |
+
+**Surface presets:**
+
+| Surface | μ_s | μ_k |
+|---|---|---|
+| Ice (বরফ) | 0.10 | 0.05 |
+| Wood (কাঠ) | 0.45 | 0.35 |
+| Concrete (কংক্রিট) | 0.65 | 0.55 |
 
 ### 6.5 Units
 
-All SI: metres, seconds, m/s, degrees. No imperial units anywhere.
+All SI: metres, seconds, m/s, N, degrees. No imperial units anywhere.
 
 ---
 
@@ -223,54 +222,38 @@ All SI: metres, seconds, m/s, degrees. No imperial units anywhere.
 
 ### 7.1 First-launch flow
 
-1. App loads → 10MS splash (≤ 500 ms).
-2. Mode-select screen: two large tappable cards — Junior and Senior.
-3. Selection is remembered for the session.
+1. App loads → home screen with two segment cards (Junior / Senior).
+2. Tap a card → navigate to that simulation.
+3. Back button in the simulation header returns to home.
 
-### 7.2 Junior mode flow
+### 7.2 Forces and Motion (Junior) flow
 
-1. Land on simulator with a friendly launcher visible, ball at origin, default trajectory previewed.
-2. Two sliders below: "গতি" and "কোণ" with arrow labels ("ধীর ←→ দ্রুত", "নিচু ←→ উঁচু").
-3. Big launch button: "ছুঁড়ে দাও!"
-4. Animation plays; ball lands; readouts appear: "৩৫ মিটার দূরে গেল!", "১১ মিটার উঁচুতে উঠেছিল!", "৩ সেকেন্ড আকাশে ছিল!"
-5. Reset button: "আবার চেষ্টা করো"
-6. "এটা কী?" at top-right opens 3-screen explainer.
+1. Land on Net Force tab by default.
+2. Tap person buttons to toggle pushers. Force arrows and readouts update immediately.
+3. Tap Start → cart moves. Tap Pause / Reset.
+4. Switch tabs via tab bar at top.
+5. Each tab has its own Start/Pause/Reset state — switching tabs preserves each tab's position.
 
-### 7.3 Senior mode flow
+### 7.3 Projectile Motion (Senior) flow
 
-1. Land on simulator with a denser layout: launcher + trajectory + readouts strip visible from the start.
-2. Three sliders (v₀, θ, h₀) with numeric inputs alongside.
-3. Live trajectory preview updates as sliders move (no need to launch to see the path).
-4. Tap "উৎক্ষেপণ" to animate the ball.
-5. Readouts strip always visible: R, H, T, v at impact, angle at impact.
-6. Bottom-sheet tabs (collapsed by default): "ভেক্টর", "সূত্র", "গ্রাফ", "তুলনা".
-7. Reset button: "রিসেট"
-
-### 7.4 Mode switching mid-session
-
-A small icon in the header toggles modes. Switching resets the simulator to the new mode's defaults (no carry-over of state, to avoid confusion).
+1. Land on simulator — sliders visible, static trajectory preview shown.
+2. Adjust v₀, θ, h₀ sliders → trajectory updates live, R/H/T readout cards update.
+3. Tap "উৎক্ষেপণ" to animate the ball.
+4. Tap pause / resume / speed cycle / reset.
+5. Bottom sheet tabs (always visible strip): vectors / formulas / graphs / comparison.
 
 ---
 
 ## 8. Information architecture
 
 ```
-/
-├── splash (~500 ms)
-└── /mode-select
-    ├── /junior
-    │   ├── simulator (main)
-    │   └── /explainer (3-screen modal)
-    └── /senior
-        ├── simulator (main)
-        └── side panels (bottom sheets on mobile, side panel on desktop)
-            ├── vectors
-            ├── formulas
-            ├── graphs
-            └── comparison
+/  (hash routing)
+├── /           → ModeSelect (two segment cards)
+├── /junior     → ForceScreen (4-tab Forces simulation)
+└── /senior     → SeniorPage → SeniorScreen (Projectile simulation)
 ```
 
-Routes: simple SPA with React Router in **hash mode** for iframe-embed safety (avoids server config dependencies).
+React Router v6 in **hash mode** for iframe-embed safety.
 
 ---
 
@@ -278,54 +261,66 @@ Routes: simple SPA with React Router in **hash mode** for iframe-embed safety (a
 
 ### 9.1 Viewport targets
 
-Design for **360 px width as the floor**. Verify at 360, 390, 414, 768, 1024, 1440. Portrait by default; landscape is supported on phones but is not the primary layout.
+Design floor: **360 px width**. Verify at 360, 390, 414, 768, 1024, 1440. Portrait is the primary layout.
 
-### 9.2 Mobile portrait layout (360–414 px)
+### 9.2 Forces sim mobile layout (360–414 px)
 
 ```
 ┌─────────────────────────┐
-│ Header (mode switcher)  │  48 px
+│ Header (52 px)          │
 ├─────────────────────────┤
-│                         │
-│   Canvas (sim)          │  ~45 vh
-│                         │
+│ Tab bar (4 tabs)        │
 ├─────────────────────────┤
-│ Live readouts strip     │  ~10 vh
+│ Canvas (animated)       │  full width
+│                         │  ~44 dvh
 ├─────────────────────────┤
-│ Sliders + inputs        │  ~25 vh
-├─────────────────────────┤
-│ Action buttons          │  ~10 vh
-├─────────────────────────┤
-│ Bottom sheet tabs       │  collapsed
+│ Controls panel          │  scrollable
+│ (sliders / toggles /    │
+│  readout cards)         │
 └─────────────────────────┘
 ```
 
-### 9.3 Touch targets
+### 9.3 Projectile sim mobile layout (360–414 px)
 
-- All interactive elements: minimum **44 × 44 px** (per TenTen mandate).
-- Slider thumbs: 48 × 48 px hit area, even if visually smaller.
-- Tap-and-hold for tooltips. **No hover dependence anywhere.**
+```
+┌─────────────────────────┐
+│ Header (52 px)          │
+├─────────────────────────┤
+│ Canvas                  │  44 dvh
+├─────────────────────────┤
+│ Controls panel          │  scrollable
+│ (sliders + result cards)│
+├─────────────────────────┤
+│ Action bar (buttons)    │
+├─────────────────────────┤
+│ Bottom sheet tabs       │
+└─────────────────────────┘
+```
 
-### 9.4 Performance budget
+### 9.4 Desktop layout (≥ 640 px)
 
-| Metric | Target |
-|---|---|
-| First contentful paint (3G) | ≤ 2.0 s |
-| Time to interactive (3G) | ≤ 5.0 s |
-| Initial JS bundle (gzipped) | ≤ 200 KB |
-| Total initial assets | ≤ 350 KB |
-| Animation FPS (low-end Android) | ≥ 30 |
-| Animation FPS (modern devices) | 60 |
+Both simulations use a split layout: canvas (flex: 1) on the left, 260 px controls panel on the right.
 
-### 9.5 Iframe / WebView readiness
+### 9.5 Touch targets
 
-- No external scrollbars triggered by the sim.
-- All interactions work inside an iframe sandbox with `allow="autoplay"`, no special permissions.
-- Test inside a 360 × 640 iframe before V1 sign-off (per TenTen mandate).
+- All interactive elements: minimum **44 × 44 px**.
+- Person toggle buttons: 44 × 44 px minimum.
+- No hover-only interactions.
 
-### 9.6 Device rotation
+### 9.6 Performance budget
 
-On rotation, recompute canvas dimensions; preserve all simulator state (v₀, θ, h₀, mid-flight position).
+| Metric | Target | Achieved (V1) |
+|---|---|---|
+| First contentful paint (3G) | ≤ 2.0 s | — |
+| Time to interactive (3G) | ≤ 5.0 s | — |
+| Initial JS bundle (gzipped) | ≤ 200 KB | ~68 KB |
+| Animation FPS (low-end Android) | ≥ 30 | — |
+
+### 9.7 Iframe / WebView readiness
+
+- No external scrollbars.
+- All interactions work inside an `<iframe>` sandbox with `allow="autoplay"`.
+- Test inside 360 × 640 iframe before V1 sign-off.
 
 ---
 
@@ -333,44 +328,44 @@ On rotation, recompute canvas dimensions; preserve all simulator state (v₀, θ
 
 ### 10.1 Font
 
-- Primary font: **Hind Siliguri** (Google Fonts) — full Bangla + Latin support. Final choice deferred to `design.md`.
-- Subset to Bangla glyphs only (drop unused scripts) to keep weight low.
-- Preload with `font-display: swap`; system Bangla font is the fallback during load.
+- **Hind Siliguri** (Google Fonts) for Bangla. Inter for any Latin text.
+- `font-display: swap`; system Bangla font fallback during load.
+- Bangla class `.bn`: `letter-spacing: 0.01em; line-height: 1.5`.
 
-### 10.2 Terminology mapping (NCTB-aligned, draft)
+### 10.2 Terminology mapping (NCTB-aligned)
 
-| English | Bangla | Notes |
-|---|---|---|
-| Projectile motion | প্রাসের গতি / প্রক্ষেপ গতি | Verify against NCTB Class 9–10 textbook |
-| Initial velocity (v₀) | প্রাথমিক বেগ | |
-| Launch angle (θ) | উৎক্ষেপণ কোণ | |
-| Initial height (h₀) | প্রাথমিক উচ্চতা | |
-| Range (R) | অনুভূমিক পাল্লা / পাল্লা | |
-| Maximum height (H) | সর্বোচ্চ উচ্চতা | |
-| Time of flight (T) | উড্ডয়নকাল | |
-| Acceleration due to gravity (g) | অভিকর্ষজ ত্বরণ | |
-| Velocity | বেগ | |
-| Speed | দ্রুতি | |
-| Trajectory | গতিপথ | |
-| Horizontal | অনুভূমিক | |
-| Vertical | উলম্ব | |
-| Component | উপাংশ | |
-| Reset | রিসেট | |
-| Launch | উৎক্ষেপণ (Senior) / ছুঁড়ে দাও (Junior) | |
-| Pause | বিরতি | |
-| Play | চালু | |
-
-> **Action item:** Validate every term in this table against the NCTB Class 9–10 Physics textbook (Chapter 2 — গতি) and HSC Physics 1st Paper Chapter 3 before locking the string file. Get content team sign-off before string freeze.
+| English | Bangla |
+|---|---|
+| Projectile motion | প্রক্ষেপণ গতি |
+| Initial velocity (v₀) | প্রাথমিক বেগ |
+| Launch angle (θ) | উৎক্ষেপণ কোণ |
+| Initial height (h₀) | প্রাথমিক উচ্চতা |
+| Range (R) | অনুভূমিক পাল্লা |
+| Maximum height (H) | সর্বোচ্চ উচ্চতা |
+| Time of flight (T) | উড্ডয়নকাল |
+| Net force | নেট বল |
+| Applied force | প্রযুক্ত বল |
+| Friction | ঘর্ষণ |
+| Mass | ভর |
+| Velocity | বেগ |
+| Acceleration | ত্বরণ |
+| Reset | রিসেট |
+| Launch | উৎক্ষেপণ |
+| Pause | থামুন |
+| Resume | চালু করুন |
 
 ### 10.3 Numerals
 
-- **Junior default:** Bangla numerals (০–৯) for friendliness.
-- **Senior default:** Western numerals (0–9) for textbook consistency.
-- A toggle in the header lets either segment override the default.
+- Both sims show a numeral toggle in the header: Bangla (০–৯) ↔ Western (0–9).
+- Default: Bangla numerals. All readouts respect `display.numerals` via `formatNum()`.
 
-### 10.4 String externalization
+### 10.4 String files
 
-All UI strings live in `/content/junior.bn.json` and `/content/senior.bn.json` from day one, even though we ship Bangla-only. This makes future multi-language work mechanical, not architectural.
+| File | Used by |
+|---|---|
+| `src/content/forces.bn.json` | ForceScreen, NetForceTab, MotionTab, FrictionTab, TugOfWarTab |
+| `src/content/senior.bn.json` | SeniorScreen, FormulaPanel, GraphsPanel |
+| `src/content/glossary.bn.json` | Tooltips in SeniorScreen (ParamRow) |
 
 ---
 
@@ -378,170 +373,222 @@ All UI strings live in `/content/junior.bn.json` and `/content/senior.bn.json` f
 
 ### 11.1 Stack
 
-| Concern | Choice | Rationale |
-|---|---|---|
-| Framework | React 18 + Vite | Smaller bundle than Next.js for a static SPA, faster HMR than CRA |
-| Animation | HTML5 Canvas via `requestAnimationFrame` | No animation library; full control over frame budget |
-| Charts | Recharts (Senior only, lazy-loaded) | User-specified; tradeoff documented as a risk in §14.2 |
-| Styles | Defer to `design.md` (CSS modules or Tailwind) | — |
-| State | React `useState` + `useReducer` | No Redux/Zustand needed at V1 scale |
-| Routing | React Router v6, hash mode | Iframe-embed safe |
-| Deployment | Vercel (free tier) | Per user spec |
-| Browser target | ES2020, modern evergreen | No IE; Android Chrome ≥ 90, iOS Safari ≥ 14 |
+| Concern | Choice |
+|---|---|
+| Framework | React 18 + Vite |
+| Animation | HTML5 Canvas via `requestAnimationFrame` |
+| Charts | Recharts (Senior graphs panel, lazy-loaded) |
+| Styles | CSS Modules + `src/styles/tokens.css` (10MS design tokens) |
+| State | React `useReducer` (two separate hooks) |
+| Routing | React Router v6, hash mode |
+| Deployment | Vercel |
 
 ### 11.2 Module structure
 
 ```
 /src
   /components
+    /Forces
+      ForceCanvas.jsx         — canvas wrapper (useViewport + useAnimationFrame)
+      NetForceTab.jsx         — Tab 1: pushers + cart
+      MotionTab.jsx           — Tab 2: applied force + objects
+      FrictionTab.jsx         — Tab 3: friction graph
+      TugOfWarTab.jsx         — Tab 4: tug of war + win state
+      Forces.module.css       — shared CSS for all 4 tabs
     /Simulator
-      Canvas.jsx              — main rAF animation
-      ControlPanel.jsx        — sliders + numeric inputs
-      Readouts.jsx            — live R, H, T strip
-      VectorOverlay.jsx       — v, vx, vy, g vectors (canvas-drawn)
-      TrajectoryDots.jsx      — equal-time dots (canvas-drawn)
-      Graphs.jsx              — Recharts wrapper (lazy)
-      ComparisonMode.jsx      — second projectile (lazy)
-      LaunchButton.jsx
+      SimCanvas.jsx           — projectile canvas + animation loop
+      FormulaPanel.jsx        — live formula substitution
+      GraphsPanel.jsx         — Recharts y-t + vy-t
+      ComparisonPanel.jsx     — comparison mode controls
     /Layout
-      Header.jsx
-      ModeSelect.jsx
-      JuniorScreen.jsx
-      SeniorScreen.jsx
-      BottomSheet.jsx
+      ModeSelect.jsx          — landing page (two segment cards)
+      ForceScreen.jsx         — Forces sim shell (header + tab bar)
+      ForceScreen.module.css
+      SeniorPage.jsx          — wrapper: useSimulator('senior') → SeniorScreen
+      SeniorScreen.jsx        — Projectile sim (split canvas/panel)
+      SeniorScreen.module.css
+      BottomSheet.jsx         — collapsible tab panel
     /Common
-      Slider.jsx              — 48 px thumb, mobile-first
-      NumberInput.jsx
-      Tooltip.jsx             — tap-and-hold, no hover
-      Toggle.jsx
       Button.jsx
+      Toggle.jsx
+      Tooltip.jsx
+      Slider.jsx
+      NumberInput.jsx
   /lib
-    physics.js                — pure functions: trajectory, R, H, T, v(t)
-    bangla.js                 — number formatting (১২৩ ↔ 123)
-    canvas.js                 — drawing helpers (vectors, dots, parabola)
+    physics.js                — projectile physics (9 pure functions)
+    forcesPhysics.js          — F=ma engine (friction, step, clamp, presets)
+    canvas.js                 — projectile canvas drawing (11 functions)
+    forceCanvas.js            — forces canvas drawing (4 tab draw functions)
+    bangla.js                 — numeral conversion (toBn, toEn, formatNum)
+    physics.test.js           — 17 vitest tests (projectile physics)
   /content
-    junior.bn.json
-    senior.bn.json
-    glossary.bn.json
+    forces.bn.json            — Forces simulation Bangla strings
+    senior.bn.json            — Projectile simulation Bangla strings
+    glossary.bn.json          — Physics term definitions
   /styles
-    tokens.css                — colors, spacing, typography (per design.md)
+    tokens.css                — 10MS design tokens
     global.css
   /hooks
-    useSimulator.js           — central simulator state hook
-    useAnimationFrame.js
-    useViewport.js            — for responsive canvas
+    useSimulator.js           — projectile motion state (useReducer)
+    useForceSimulator.js      — forces simulation state (useReducer, 4 tabs)
+    useAnimationFrame.js      — RAF loop with delta timing
+    useViewport.js            — ResizeObserver for canvas dimensions
   App.jsx
   main.jsx
 ```
 
-### 11.3 State shape (sketch)
+### 11.3 Forces simulation state shape
 
 ```js
+// useForceSimulator.js
 {
-  mode: 'junior' | 'senior',
-  params: { v0, theta, h0, g },
-  comparison: null | { v0, theta, h0 },
-  animation: {
-    status: 'idle' | 'playing' | 'paused' | 'finished',
-    t: 0,            // current sim time (s)
-    speed: 1,        // playback speed multiplier
+  activeTab: 'netforce' | 'motion' | 'friction' | 'tug',
+  netforce: {
+    leftPushers: [bool, bool, bool, bool],
+    rightPushers: [bool, bool, bool, bool],
+    cartX: 0,   // m, range [-8, 8]
+    cartV: 0,   // m/s
+    isRunning: false,
   },
-  overlays: { vectors, dots, axes, formulas, graphs },  // booleans
-  display: { numerals: 'bangla' | 'western' },
+  motion: {
+    Fapplied: 0,                 // N, range [-500, 500]
+    selectedObject: 'box',       // 'skate' | 'box' | 'fridge' | 'car'
+    frictionOn: true,
+    boxX: 0,
+    boxV: 0,
+    isRunning: false,
+  },
+  friction: {
+    Fapplied: 0,                 // N, range [0, 500]
+    surface: 'wood',             // 'ice' | 'wood' | 'concrete'
+    mass: 25,
+    boxX: 0,
+    boxV: 0,
+    isRunning: false,
+  },
+  tug: {
+    leftTeam:  [bool, bool, bool, bool],
+    rightTeam: [bool, bool, bool, bool],
+    ropeX: 0,    // m, range [-6, 6]. ±6 = win
+    ropeV: 0,
+    isRunning: false,
+    winner: null | 'left' | 'right',
+  },
 }
 ```
 
-### 11.4 Rendering strategy
+Actions: `SET_TAB`, `TOGGLE_PUSHER`, `SET_PARAM`, `START`, `PAUSE`, `RESET`, `TICK`.
 
-- **Canvas owns simulator visuals** (parabola, ball, vectors, dots, axes, grid). Re-renders only on RAF tick.
-- **React owns the chrome** (controls, readouts, panels). Re-renders on state change.
-- **Readouts are React-rendered but throttled** (~100 ms during animation) to avoid jank.
-- **Recharts mounts only when graphs panel is open**, and updates only when params change — never on animation frames.
+### 11.4 Projectile simulation state shape
 
-### 11.5 Camera / scaling
+```js
+// useSimulator.js
+{
+  mode: 'senior',
+  params: { v0, theta, h0, g },
+  animation: { status: 'idle'|'playing'|'paused'|'finished', t, speed },
+  overlays: { vectors, dots, axes },
+  display: { numerals: 'bangla' | 'western' },
+  results: { T, H, R, impact },
+  comparison: null | { params, results },
+  points: [{x, y}, ...],         // 201 trajectory points
+  degenerate: null | 'flat' | 'vertical' | 'no-velocity',
+}
+```
 
-- World units: metres.
-- `worldToScreen()` helper computes pixels-per-metre such that the trajectory fits the canvas with 10% padding.
-- Recompute scale only when params change, not every frame.
+### 11.5 Rendering architecture
 
-### 11.6 Asset budget
+- **Canvas owns all simulation visuals.** Re-renders only on RAF tick (Forces) or `animation.t` change (Projectile).
+- **React owns chrome** (controls, readouts, panels). Re-renders on state changes.
+- `useAnimationFrame` and `useViewport` hooks are **shared** between both simulations.
+- `ForceCanvas` wraps these hooks and calls a `drawFn(ctx, w, h, state)` per frame.
+- `SimCanvas` manages its own RAF loop internally via `useAnimationFrame`.
 
-| Asset | Size estimate |
+### 11.6 Asset budget (V1 actual)
+
+| Asset | Size |
 |---|---|
-| Hind Siliguri (regular + bold, Bangla subset) | ~80 KB |
-| 10MS logo SVG | ~5 KB |
-| Junior launcher illustration (SVG) | ~20 KB |
-| All other UI | CSS + canvas-drawn |
+| JS bundle (gzipped) | ~68 KB |
+| Hind Siliguri (Bangla subset) | ~80 KB |
+| All other assets | < 5 KB |
 
 ---
 
 ## 12. Acceptance criteria (V1)
 
-The simulator is approved (`is_active = TRUE` in TenTen terms) only when **all** of these pass on a real low-end Android phone over 3G.
-
 ### 12.1 Mobile checklist (per TenTen §4.2.1)
 
-- [ ] Layout fits 360 px width without horizontal scroll
+- [ ] Layout fits 360 px width without horizontal scroll (both sims)
 - [ ] All touch targets ≥ 44 × 44 px
 - [ ] Works in portrait by default
 - [ ] First interactive frame ≤ 5 s on 3G
-- [ ] No nested scrollbars in the canvas area
+- [ ] No nested scrollbars in canvas areas
 - [ ] Text readable at default mobile zoom
 - [ ] Works inside a 360 × 640 iframe
 - [ ] Survives device rotation without state loss
 - [ ] No hover-only interactions
 
-### 12.2 Functional
+### 12.2 Forces simulation
 
-- [ ] Junior mode renders with two sliders + launch button only
-- [ ] Senior mode renders with three sliders + numeric inputs + readouts strip
-- [ ] Live trajectory preview updates as sliders move (Senior)
-- [ ] Launch button animates ball along trajectory in both modes
+- [ ] Net Force tab: pushers toggle, cart moves with correct F_net, readouts update
+- [ ] Motion tab: applied force slider moves object, friction toggle works
+- [ ] Friction tab: F vs F_friction graph shows static region + kinetic drop
+- [ ] Tug of War: rope moves to winning side, win overlay fires at ±6 m
+- [ ] Object presets apply correct mass and μ values
+- [ ] Surface presets (Friction tab) apply correct μ values
+- [ ] Velocity zeroes correctly on deceleration (no infinite drift)
+
+### 12.3 Projectile simulation
+
+- [ ] Live trajectory preview updates as sliders move
+- [ ] Launch animates ball along trajectory
 - [ ] R, H, T values match analytical formulas to 0.1 m / 0.1 s precision
-- [ ] θ = 30° and θ = 60° produce visibly identical R (the symmetry insight)
-- [ ] Comparison mode shows two parabolas in distinguishable colours (if shipped in V1)
+- [ ] θ = 30° and θ = 60° produce visibly identical R (range symmetry)
+- [ ] Comparison mode shows two parabolas in distinguishable colours
 - [ ] Vector overlay correctly shows v, vₓ, vᵧ, g
 - [ ] Graphs panel renders y-t and vᵧ-t correctly
+- [ ] All 17 vitest physics tests pass (`npm test`)
 
-### 12.3 Linguistic
+### 12.4 Linguistic
 
 - [ ] All UI strings are in Bangla
 - [ ] Bangla numerals render correctly on Android Chrome and iOS Safari
-- [ ] No mojibake / box characters anywhere
-- [ ] All terminology matches NCTB textbook (content team sign-off)
+- [ ] Numeral toggle works in both simulations
+- [ ] No mojibake or box characters anywhere
 
-### 12.4 Performance
+### 12.5 Performance
 
-- [ ] Initial JS bundle ≤ 200 KB gzipped
+- [ ] Initial JS bundle ≤ 200 KB gzipped (currently ~68 KB ✓)
 - [ ] Animation maintains ≥ 30 FPS on a 2 GB RAM Android device
-- [ ] Slider drag does not drop the simulation FPS
 
 ---
 
 ## 13. Roadmap
 
-### V1 (this PRD) — Pure vacuum motion
+### V1 (this PRD) — Shipped
 
-Everything in §§5–12.
+- Forces and Motion: 4 tabs, full physics, Bangla UI
+- Projectile Motion: full-featured sim, vector overlays, formulas, graphs, comparison
+- Bangla-only, numeral toggle, 10MS design tokens
+- Vercel deployment, hash routing
 
 ### V2 — Realism and embedding
 
-- Air resistance (drag toggleable, linear and quadratic options)
-- Embed integration with TenTen lesson pages (deep-link params: `?v0=20&theta=30&mode=senior`)
+- Air resistance (drag toggleable) in Projectile sim
+- Gravity selector (Earth, Moon, Mars)
+- Embed integration with TenTen lesson pages (deep-link params: `?v0=20&theta=30`)
 - Shareable scenario URLs
 - English language layer
-- Saved scenarios (anonymous local storage)
 - Analytics instrumentation
 - NCTB problem presets (5–10 board questions pre-loaded)
 
 ### V3 — Engagement and breadth
 
-- Challenge mode ("hit the target")
-- Wind, planet selector, Magnus effect
-- Real-world presets (cricket ball, javelin, football)
+- Challenge mode ("hit the target" for Projectile)
+- Real-world object presets (cricket ball, javelin)
 - Predict-before-launch micro-quizzes
 - Accessibility audit (keyboard nav, screen reader, contrast)
-- Multi-projectile sandbox
+- Additional simulation segments (e.g. Waves, Optics)
 
 ---
 
@@ -549,58 +596,16 @@ Everything in §§5–12.
 
 ### 14.1 Open questions
 
-1. **NCTB terminology lock.** Several Bangla terms in §10.2 are best-guesses and need verification against the actual textbook before development starts.
-2. **`design.md` not yet shared.** All visual decisions (colors, fonts, launcher illustration, button styles) await this file.
-3. **Junior launcher art.** Cannon, slingshot, kid-with-ball — to be decided in `design.md`.
-4. **Numeral toggle placement.** Header icon vs. settings drawer.
-5. **Slider feel on mobile.** Native `<input type="range">` vs. custom touch handler — verify on real device before committing.
+1. **NCTB terminology.** Several Bangla terms in §10.2 need validation against the actual textbook before string freeze.
+2. **Forces tab for SSC Chapter 4.** Friction tab covers static/kinetic μ well; circular motion and momentum are not yet represented.
+3. **Numeral toggle default.** Currently both sims default to Bangla numerals. Confirm with content team whether Senior should default to Western.
 
 ### 14.2 Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Bangla font loading slows TTI on 3G | Medium | High | Subset font, preload, `font-display: swap`, fallback to system Bangla font |
-| Canvas FPS drops on low-end Android | Medium | High | Cap render layers; profile on real 2 GB device early |
-| Recharts bundle bloats Senior mode | Medium | Medium | Lazy-load; consider lighter alt (e.g. canvas-drawn graphs) if it exceeds 80 KB gzipped |
-| NCTB terminology disputed by content reviewers | Low | Medium | Get content team sign-off on `glossary.bn.json` before string freeze |
-| Iframe sandboxing blocks features | Low | Medium | Test inside iframe at every milestone, not just at end |
-| Custom-build dev time exceeds 7 days | Medium | Low | Acceptable trade-off was made knowingly. Reassess only if it exceeds 12 days |
-
----
-
-## 15. Estimated timeline (V1)
-
-| Phase | Days | Deliverable |
-|---|---|---|
-| Setup (Vite, routing, file structure, Vercel deploy pipeline) | 0.5 | Empty React app deploying to Vercel |
-| Physics engine (`physics.js`) + unit tests | 0.5 | Pure functions, verified against worked examples |
-| Canvas rendering (parabola, ball, axes, animation loop) | 1.0 | Animation works with hardcoded params |
-| Sliders + numeric inputs + state wiring | 1.0 | Live trajectory updates from controls |
-| Senior mode layout + readouts + vectors + dots | 1.0 | Full Senior UI |
-| Junior mode layout + simplified controls + explainer | 0.5 | Full Junior UI |
-| Graphs (Recharts) + comparison mode | 1.0 | Senior-only extras |
-| Bangla strings, terminology pass, font loading | 0.5 | All UI in Bangla |
-| Mobile QA on real device, iframe test, perf profiling | 1.0 | Acceptance checklist passes |
-| **Total** | **~7 days** | V1 deployed |
-
----
-
-## 16. Appendix: planning confidence assessment
-
-This PRD locks the following decisions with high confidence (≥95%):
-
-- ✅ Tech stack (React + Vite + Canvas + Recharts)
-- ✅ Two-segment user model (Junior / Senior)
-- ✅ V1 scope (vacuum motion only, no air resistance/gamification/auth)
-- ✅ Physics specification (closed-form, exact)
-- ✅ Mobile-first layout zones and performance budget
-- ✅ Module structure and state shape
-- ✅ Acceptance criteria
-
-Remaining ~5% uncertainty sits in:
-
-- 🔄 Visual design (deliberately deferred to `design.md`)
-- 🔄 Final NCTB terminology (requires textbook validation pass)
-- 🔄 Whether Comparison Mode (F-14) ships in V1 or slips to V2 (depends on dev velocity)
-
-These three items are scoped to be resolved without re-architecting anything in this PRD.
+| Bangla font loading slows TTI on 3G | Medium | High | Subset font, preload, `font-display: swap` |
+| Canvas FPS drops on low-end Android (Forces TICK rate) | Medium | High | Cap dt at 50 ms; profile on real device |
+| Euler integration error at high forces | Low | Medium | dt cap + velocity zeroing prevents divergence |
+| NCTB terminology disputed by content reviewers | Low | Medium | Get content sign-off on string files before freeze |
+| Iframe sandboxing blocks features | Low | Low | Test at every milestone |
