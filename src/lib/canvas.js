@@ -303,34 +303,78 @@ export function drawTrajectoryDots(ctx, points, T, scale, offsetX, offsetY, colo
 
 export function drawVectors(ctx, x, y, vx, vy, scale, offsetX, offsetY) {
   const { sx, sy } = worldToScreen(x, y, scale, offsetX, offsetY)
-  const speed = Math.max(Math.sqrt(vx * vx + vy * vy), 0.01)
-  const vs = Math.min(scale * 2, 75) / speed
-  drawArrow(ctx, sx, sy, sx + vx * vs, sy - vy * vs, '#274FE3', 'v',  2.5)
-  drawArrow(ctx, sx, sy, sx + vx * vs, sy,           '#EA580C', 'vₓ', 2)
-  drawArrow(ctx, sx, sy, sx,           sy - vy * vs, '#1CAB55', 'vᵧ', 2)
-  drawArrow(ctx, sx, sy, sx,           sy + 38,       '#E8001D', 'g',  2)
+  const speed = Math.max(Math.sqrt(vx * vx + vy * vy), 0.1)
+  
+  // Use a fixed pixel target for arrow length so they are always visible
+  // regardless of the graph's world scale.
+  const targetPx = 100 
+  const vs = targetPx / speed
+  
+  // Main velocity: Solid and thick
+  drawArrow(ctx, sx, sy, sx + vx * vs, sy - vy * vs, '#2563EB', 'v',  6, false)
+  
+  // Components: Dashed and slightly thinner
+  drawArrow(ctx, sx, sy, sx + vx * vs, sy,           '#EA580C', 'vₓ', 4.5, true) 
+  drawArrow(ctx, sx, sy, sx,           sy - vy * vs, '#16A34A', 'vᵧ', 4.5, true)
+  
+  // Gravity: Solid (fixed length 90px)
+  drawArrow(ctx, sx, sy, sx,           sy + 90,       '#DC2626', 'g',  5, false)
 }
 
-function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 2) {
+function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false) {
   const dx = x2 - x1, dy = y2 - y1
   const len = Math.sqrt(dx * dx + dy * dy)
   if (len < 5) return
+  
   ctx.save()
-  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw
-  ctx.shadowBlur = 5; ctx.shadowColor = color + '88'
+  
+  // White outline for maximum contrast
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = lw + 2.5
+  if (dashed) ctx.setLineDash([5, 3])
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
-  ctx.shadowBlur = 0
-  const angle = Math.atan2(dy, dx), hs = 9
+  
+  // Main arrow shaft
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw
+  ctx.lineCap = 'round'
+  if (dashed) ctx.setLineDash([5, 3])
+  else ctx.setLineDash([])
+
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+  ctx.setLineDash([]) // Reset for arrowhead and tail
+
+  // Arrow Tail (starting dot)
+  ctx.beginPath(); ctx.arc(x1, y1, lw * 1.2, 0, Math.PI * 2); ctx.fill()
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke()
+  
+  // Balanced Arrowhead
+  const angle = Math.atan2(dy, dx)
+  const hs = 22 // High-visibility arrowhead size
+  
   ctx.beginPath()
   ctx.moveTo(x2, y2)
-  ctx.lineTo(x2 - hs * Math.cos(angle - 0.4), y2 - hs * Math.sin(angle - 0.4))
-  ctx.lineTo(x2 - hs * Math.cos(angle + 0.4), y2 - hs * Math.sin(angle + 0.4))
-  ctx.closePath(); ctx.fill()
+  ctx.lineTo(x2 - hs * Math.cos(angle - 0.45), y2 - hs * Math.sin(angle - 0.45))
+  ctx.lineTo(x2 - hs * Math.cos(angle + 0.45), y2 - hs * Math.sin(angle + 0.45))
+  ctx.closePath()
+  ctx.fill()
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke()
+
   if (label) {
-    ctx.font = 'bold 11px Inter, sans-serif'
-    ctx.shadowBlur = 3; ctx.shadowColor = '#fff'
-    ctx.fillText(label, x2 + 6, y2 - 4)
+    ctx.font = 'bold 20px Inter, sans-serif'
+    ctx.shadowBlur = 10; ctx.shadowColor = '#fff'
+    
+    // Explicit offsets for each label type to prevent overlap
+    let ox = 0, oy = 0
+    if (label === 'v')  { ox = 15;  oy = -20; }
+    if (label === 'vₓ') { ox = 18;  oy = 20;  }
+    if (label === 'vᵧ') { ox = -25; oy = -18; }
+    if (label === 'g')  { ox = 0;   oy = 26;  }
+    
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = color
+    ctx.fillText(label, x2 + ox, y2 + oy)
   }
+  
   ctx.restore()
 }
 

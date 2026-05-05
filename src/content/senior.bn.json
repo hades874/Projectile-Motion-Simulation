@@ -28,9 +28,8 @@
     "angleUnit": "°"
   },
   "tabs": {
-    "vectors": "ভেক্টর",
+    "vectors": "গ্রাফ সেটিংস",
     "formulas": "সূত্র",
-    "graphs": "গ্রাফ",
     "comparison": "তুলনা"
   },
   "formulas": {

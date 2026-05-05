@@ -6,7 +6,6 @@ import { Toggle }          from '../Common/Toggle.jsx'
 import { Tooltip }         from '../Common/Tooltip.jsx'
 import { Slider }          from '../Common/Slider.jsx'
 import { FormulaPanel }    from '../Simulator/FormulaPanel.jsx'
-import { GraphsPanel }     from '../Simulator/GraphsPanel.jsx'
 import { ComparisonPanel } from '../Simulator/ComparisonPanel.jsx'
 import { formatNum }       from '../../lib/bangla.js'
 import glossary  from '../../content/glossary.bn.json'
@@ -16,17 +15,13 @@ import styles    from './SeniorScreen.module.css'
 const SPEED_OPTIONS = [0.5, 1, 2]
 
 const PROJECTILE_OPTIONS = [
-  { id: 'ball',       color: '#1CAB55' },
   { id: 'cannonball', color: '#374151' },
-  { id: 'stone',      color: '#92400e' },
-  { id: 'football',   color: '#F97316' },
 ]
 
 const TAB_ICONS = {
   controls:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 3v2M8 13v2M3 8h2M13 8h2"/><circle cx="16" cy="16" r="3"/><path d="M16 11v2M16 21v-2M11 16h2M21 16h-2"/></svg>,
   vectors:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M15 8l4 4-4 4"/></svg>,
   formulas:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>,
-  graphs:     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
   comparison: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>,
 }
 
@@ -65,7 +60,6 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
     { id: 'controls',   label: 'কন্ট্রোল' },
     { id: 'vectors',    label: s.tabs.vectors },
     { id: 'formulas',   label: s.tabs.formulas },
-    { id: 'graphs',     label: s.tabs.graphs },
     { id: 'comparison', label: s.tabs.comparison },
   ]
 
@@ -183,19 +177,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                   </Tooltip>
                 </div>
 
-                <div className={`${styles.sectionTitle} bn`}>{s.projectileSection}</div>
-                <div className={styles.projectileSelector}>
-                  {PROJECTILE_OPTIONS.map(({ id, color }) => (
-                    <button
-                      key={id}
-                      className={`${styles.projectileBtn} ${params.projectileType === id ? styles.activeProjBtn : ''}`}
-                      onClick={() => setParam('projectileType', id)}
-                    >
-                      <span className={styles.projDot} style={{ background: color }} />
-                      <span className={`bn`}>{s.projectiles[id]}</span>
-                    </button>
-                  ))}
-                </div>
+
 
                 {degenerate && (
                   <div className={styles.hintBox}>
@@ -237,12 +219,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
               </div>
             )}
 
-            {/* Graphs */}
-            {activeTab === 'graphs' && (
-              <div className={styles.tabPanel}>
-                <GraphsPanel points={state.points} results={results} />
-              </div>
-            )}
+
 
             {/* Comparison */}
             {activeTab === 'comparison' && (

@@ -3,7 +3,7 @@ import { computeResults, trajectoryPoints, isDegenerate } from '../lib/physics.j
 
 const DEFAULTS = {
   junior:  { v0: 20, theta: 45, h0: 0, projectileType: 'ball' },
-  senior:  { v0: 20, theta: 45, h0: 0, projectileType: 'ball' },
+  senior:  { v0: 20, theta: 45, h0: 0, projectileType: 'cannonball' },
 }
 
 function makeInitialState(mode = 'senior') {
