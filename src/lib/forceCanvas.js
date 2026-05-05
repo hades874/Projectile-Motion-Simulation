@@ -86,28 +86,43 @@ function drawSurface(ctx, w, h) {
   const gy = groundY(h)
   ctx.save()
   
-  // Surface fill with subtle gradient
+  // Fix 1: Surface fill with earthy tones
   const grad = ctx.createLinearGradient(0, gy, 0, h)
-  grad.addColorStop(0, '#F3F4F6')
-  grad.addColorStop(1, '#E5E7EB')
+  grad.addColorStop(0, '#d4a574') // Sandy tan near horizon
+  grad.addColorStop(1, '#b5845a') // Warm earthy brown at base
   ctx.fillStyle = grad
   ctx.fillRect(0, gy, w, h - gy)
   
-  // Top line
-  ctx.strokeStyle = '#9CA3AF'
+  // Fix 3: Platform Strip / Stage
+  // A thin horizontal band sitting on top of the ground
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+  ctx.fillRect(0, gy, w, 12)
+  
+  // Fix 1: Clear Horizon Line (Darker contrasting stroke)
+  ctx.strokeStyle = '#059669'
   ctx.lineWidth = 2
   ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke()
   
-  // Texture patterns
-  ctx.strokeStyle = '#D1D5DB'
+  // Decorative edge for the platform
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)'
   ctx.lineWidth = 1
-  for (let x = 0; x < w; x += 24) {
-    ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x - 8, gy + 8); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(0, gy + 12); ctx.lineTo(w, gy + 12); ctx.stroke()
+  
+  // Fix 1: Bottom shading (darker strip at the very bottom)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
+  ctx.fillRect(0, h - 10, w, 10)
+  
+  // Fix 3: Subtle platform texture (dots or small lines)
+  ctx.fillStyle = 'rgba(0,0,0,0.03)'
+  for (let x = 20; x < w; x += 60) {
+    ctx.beginPath(); ctx.arc(x, gy + 6, 1, 0, Math.PI * 2); ctx.fill()
   }
+  
   ctx.restore()
 }
 
 // Proportional horizontal force arrow starting at (x, y)
+
 function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0) {
   if (Math.abs(F) < 0.5) return
   const dir = Math.sign(F)
@@ -187,7 +202,7 @@ function drawBox(ctx, cx, cy, size, label) {
   const hs = size / 2
   ctx.save()
   
-  // Shadow
+  // Original Shadow (Restored)
   ctx.fillStyle = 'rgba(0,0,0,0.12)'
   ctx.fillRect(cx - hs + 4, cy - size + 4, size, size)
   
@@ -218,10 +233,12 @@ function drawSprite(ctx, key, cx, groundY, height) {
   const w = height * aspect
   
   ctx.save()
-  // Subtle shadow for sprites
-  ctx.shadowBlur = 10
-  ctx.shadowColor = 'rgba(0,0,0,0.1)'
-  ctx.shadowOffsetY = 4
+  
+  // Fix 4: Contrast backdrop
+  ctx.beginPath()
+  ctx.ellipse(cx, groundY - height / 2, w * 0.6, height * 0.6, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
+  ctx.fill()
   
   ctx.drawImage(img, cx - w / 2, groundY - height, w, height)
   ctx.restore()
@@ -262,9 +279,15 @@ function drawCart(ctx, cx, cy) {
   const cw = 72, ch = 30, wr = 11
   ctx.save()
   
-  // Shadow
+  // Original Shadow (Restored)
   ctx.fillStyle = 'rgba(0,0,0,0.1)'
   ctx.fillRect(cx - cw / 2 + 4, cy - ch + 4, cw, ch)
+  
+  // Fix 4: Contrast backdrop
+  ctx.beginPath()
+  ctx.ellipse(cx, cy - ch / 2, cw * 0.6, ch * 0.8, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
+  ctx.fill()
   
   // Cart Body
   ctx.fillStyle = '#1CAB55'
@@ -297,6 +320,17 @@ function drawPerson(ctx, cx, cy, active, direction, color, isRunning, isPulling 
     ox = (Math.random() - 0.5) * 1.5
     oy = Math.sin(Date.now() * 0.02) * 1.2
   }
+
+  // Fix 4: Contrast backdrop for active figures
+  if (active) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.ellipse(cx, cy - bodyH * 0.8, headR * 3, bodyH * 1.5, 0, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+    ctx.fill()
+    ctx.restore()
+  }
+
 
   ctx.save()
   ctx.translate(ox, oy)
