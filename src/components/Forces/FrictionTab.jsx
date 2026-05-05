@@ -2,6 +2,7 @@ import { ForceCanvas } from './ForceCanvas.jsx'
 import { drawFriction } from '../../lib/forceCanvas.js'
 import { SURFACES, frictionForce, GRAVITY } from '../../lib/forcesPhysics.js'
 import { Button } from '../Common/Button.jsx'
+import { GuideCard } from '../Common/GuideCard.jsx'
 import strings from '../../content/forces.bn.json'
 import styles from './Forces.module.css'
 
@@ -18,6 +19,7 @@ export function FrictionTab({ state, setParam, start, pause, reset, tick }) {
       <ForceCanvas drawFn={drawFriction} state={state} onTick={tick} />
 
       <div className={styles.panel}>
+        <GuideCard title={strings.guideTitle} items={s.guides} />
         {/* Applied force slider */}
         <div className={styles.paramRow}>
           <div className={styles.paramHeader}>
@@ -54,7 +56,7 @@ export function FrictionTab({ state, setParam, start, pause, reset, tick }) {
           <ReadoutCard label="প্রযুক্ত বল"       value={`${Fapplied.toFixed(0)} N`} />
           <ReadoutCard label="ঘর্ষণ বল"          value={`${Math.abs(Ff).toFixed(0)} N`} />
           <ReadoutCard label="সর্বোচ্চ স্থিতি ঘর্ষণ" value={`${Fs_max} N`} />
-          <ReadoutCard label="বেগ"               value={`${boxV.toFixed(1)} m/s`} />
+          <ReadoutCard label="বেগ"               value={`${boxV.toFixed(1)} মি/সে`} />
         </div>
 
         {/* Actions */}

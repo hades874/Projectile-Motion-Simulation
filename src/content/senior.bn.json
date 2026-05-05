@@ -2,11 +2,11 @@
   "appTitle": "প্রক্ষেপ গতি সিমুলেটর",
   "controls": {
     "v0": "প্রাথমিক বেগ",
-    "v0Unit": "m/s",
+    "v0Unit": "মি/সে",
     "theta": "উৎক্ষেপণ কোণ",
     "thetaUnit": "°",
     "h0": "প্রাথমিক উচ্চতা",
-    "h0Unit": "m"
+    "h0Unit": "মি"
   },
   "buttons": {
     "launch": "উৎক্ষেপণ",
@@ -21,10 +21,10 @@
     "time": "উড্ডয়নকাল (T)",
     "impactSpeed": "আঘাতের বেগ",
     "impactAngle": "আঘাতের কোণ",
-    "rangeUnit": "m",
-    "heightUnit": "m",
-    "timeUnit": "s",
-    "speedUnit": "m/s",
+    "rangeUnit": "মি",
+    "heightUnit": "মি",
+    "timeUnit": "সে",
+    "speedUnit": "মি/সে",
     "angleUnit": "°"
   },
   "tabs": {
@@ -56,5 +56,12 @@
     "noVelocity": "গতি বাড়ান।",
     "flat": "এই কোণে কোনো প্রক্ষেপ নেই — কোণ বাড়ান।"
   },
-  "numeralToggle": "সংখ্যা"
+  "numeralToggle": "সংখ্যা",
+  "projectileSection": "প্রক্ষেপণ বস্তু",
+  "projectiles": {
+    "ball":       "বল",
+    "cannonball": "কামানের গোলা",
+    "stone":      "পাথর",
+    "football":   "ফুটবল"
+  }
 }

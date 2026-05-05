@@ -70,9 +70,9 @@ export function NetForceTab({ state, togglePusher, start, pause, reset, tick }) 
             value={`${Fnet > 0 ? '+' : ''}${Fnet} N`}
             color={Fnet === 0 ? '#6B7280' : Fnet > 0 ? '#274FE3' : '#E8001D'}
           />
-          <ReadoutCard label={s.readouts.accel}    value={`${a} m/s²`} />
-          <ReadoutCard label={s.readouts.velocity} value={`${cartV.toFixed(1)} m/s`} />
-          <ReadoutCard label={s.readouts.position} value={`${cartX.toFixed(1)} m`} />
+          <ReadoutCard label={s.readouts.accel}    value={`${a} মি/সে²`} />
+          <ReadoutCard label={s.readouts.velocity} value={`${cartV.toFixed(1)} মি/সে`} />
+          <ReadoutCard label={s.readouts.position} value={`${cartX.toFixed(1)} মি`} />
         </div>
 
         {/* Actions */}

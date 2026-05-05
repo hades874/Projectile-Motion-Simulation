@@ -15,8 +15,12 @@ export function ForceCanvas({ drawFn, state, onTick }) {
   }, [drawFn, state, width, height])
 
   useAnimationFrame((delta) => {
-    if (state.isRunning) onTick(delta)
-  }, state.isRunning)
+    if (state.isRunning) {
+      onTick(delta)
+    } else {
+      draw()
+    }
+  }, true)
 
   useEffect(() => { draw() }, [draw])
 

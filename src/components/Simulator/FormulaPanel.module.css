@@ -1,15 +1,4 @@
-.panel {
-  padding: var(--s-4);
-}
-
-.title {
-  font-size: var(--fs-body-sm);
-  font-weight: 700;
-  color: var(--fg-2);
-  margin-bottom: var(--s-3);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+.panel { }
 
 .list {
   display: flex;
@@ -18,42 +7,78 @@
 }
 
 .row {
-  background: var(--gray-50);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: var(--s-3) var(--s-4);
+  background: var(--f-bg, #F9FAFB);
+  border: 1px solid var(--f-border, #E5E7EB);
+  border-radius: 14px;
+  padding: 12px 14px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--s-3);
+  flex-direction: column;
+  gap: 6px;
+  border-left: 3px solid var(--f-color, #1CAB55);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.row:hover { transform: translateX(2px); }
+
+.rowHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.formulaHead {
+.symbolBadge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  letter-spacing: 0.04em;
+}
+
+.rowLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-2);
+}
+
+.genericFormula {
+  font-size: 12px;
+  color: var(--fg-3);
+  font-style: italic;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.substitutedRow {
   display: flex;
-  gap: var(--s-2);
-  align-items: baseline;
+  gap: 6px;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
-.var {
-  font-size: var(--fs-body-sm);
+.equalsSign {
+  font-size: 12px;
   font-weight: 700;
-  color: var(--fg-1);
-  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
   white-space: nowrap;
+  padding-top: 1px;
 }
 
 .expr {
-  font-size: var(--fs-caption);
+  font-size: 11px;
   color: var(--fg-2);
   font-variant-numeric: tabular-nums;
   word-break: break-all;
+  flex: 1;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .result {
-  font-size: var(--fs-body-sm);
-  font-weight: 700;
-  color: var(--success);
-  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }

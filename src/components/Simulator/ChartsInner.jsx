@@ -14,7 +14,7 @@ export default function ChartsInner({ points, results }) {
         <ResponsiveContainer width="100%" height={140}>
           <LineChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="t" tick={{ fontSize: 10 }} label={{ value: 't (s)', position: 'insideBottomRight', fontSize: 10 }} />
+            <XAxis dataKey="t" tick={{ fontSize: 10 }} label={{ value: 't (সে)', position: 'insideBottomRight', fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip contentStyle={{ fontSize: 12 }} />
             <Line type="monotone" dataKey="y" stroke="#1CAB55" strokeWidth={2} dot={false} />

@@ -2,6 +2,7 @@ import { ForceCanvas } from './ForceCanvas.jsx'
 import { drawTug } from '../../lib/forceCanvas.js'
 import { FORCE_PER_PERSON, ROPE_MASS } from '../../lib/forcesPhysics.js'
 import { Button } from '../Common/Button.jsx'
+import { GuideCard } from '../Common/GuideCard.jsx'
 import strings from '../../content/forces.bn.json'
 import styles from './Forces.module.css'
 
@@ -21,12 +22,14 @@ export function TugOfWarTab({ state, togglePusher, start, pause, reset, tick }) 
   const lCount = leftTeam.filter(Boolean).length
   const rCount = rightTeam.filter(Boolean).length
   const Fnet   = (rCount - lCount) * FORCE_PER_PERSON
+  const a      = (Fnet / ROPE_MASS).toFixed(1)
 
   return (
     <div className={styles.tabLayout}>
       <ForceCanvas drawFn={drawTug} state={state} onTick={tick} />
 
       <div className={styles.panel}>
+        <GuideCard title={strings.guideTitle} items={s.guides} />
         {winner && (
           <div style={{
             background: '#ECFDF5', border: '1px solid var(--success)',
@@ -75,13 +78,13 @@ export function TugOfWarTab({ state, togglePusher, start, pause, reset, tick }) 
         {/* Readouts */}
         <div className={styles.readouts}>
           <ReadoutCard
-            label="নেট বল"
+            label={strings.netforce.readouts.netForce}
             value={`${Fnet >= 0 ? '+' : ''}${Fnet} N`}
             color={Fnet === 0 ? '#6B7280' : Fnet > 0 ? '#274FE3' : '#E8001D'}
           />
-          <ReadoutCard label="রশির সরণ" value={`${ropeX.toFixed(1)} m`} />
-          <ReadoutCard label="লাল দল"   value={`${lCount * FORCE_PER_PERSON} N`} />
-          <ReadoutCard label="নীল দল"   value={`${rCount * FORCE_PER_PERSON} N`} />
+          <ReadoutCard label={strings.netforce.readouts.accel}    value={`${a} মি/সে²`} />
+          <ReadoutCard label={strings.netforce.readouts.velocity} value={`${ropeV.toFixed(1)} মি/সে`} />
+          <ReadoutCard label={strings.netforce.readouts.position} value={`${ropeX.toFixed(1)} মি`} />
         </div>
 
         {/* Actions */}

@@ -1,13 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SimCanvas }       from '../Simulator/SimCanvas.jsx'
 import { Button }          from '../Common/Button.jsx'
 import { Toggle }          from '../Common/Toggle.jsx'
 import { Tooltip }         from '../Common/Tooltip.jsx'
+import { Slider }          from '../Common/Slider.jsx'
 import { FormulaPanel }    from '../Simulator/FormulaPanel.jsx'
 import { GraphsPanel }     from '../Simulator/GraphsPanel.jsx'
 import { ComparisonPanel } from '../Simulator/ComparisonPanel.jsx'
-import { BottomSheet }     from './BottomSheet.jsx'
 import { formatNum }       from '../../lib/bangla.js'
 import glossary  from '../../content/glossary.bn.json'
 import strings   from '../../content/senior.bn.json'
@@ -15,17 +15,42 @@ import styles    from './SeniorScreen.module.css'
 
 const SPEED_OPTIONS = [0.5, 1, 2]
 
-export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, toggleNumerals, setComparison, reset }) {
+const PROJECTILE_OPTIONS = [
+  { id: 'ball',       color: '#1CAB55' },
+  { id: 'cannonball', color: '#374151' },
+  { id: 'stone',      color: '#92400e' },
+  { id: 'football',   color: '#F97316' },
+]
+
+const TAB_ICONS = {
+  controls:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 3v2M8 13v2M3 8h2M13 8h2"/><circle cx="16" cy="16" r="3"/><path d="M16 11v2M16 21v-2M11 16h2M21 16h-2"/></svg>,
+  vectors:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M15 8l4 4-4 4"/></svg>,
+  formulas:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>,
+  graphs:     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  comparison: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>,
+}
+
+const RESULT_META = {
+  R:     { color: '#1CAB55', bg: '#F0FBF4', border: '#bbf7d0', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
+  H:     { color: '#274FE3', bg: '#EEF2FF', border: '#c7d2fe', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg> },
+  T:     { color: '#EA580C', bg: '#FFF7ED', border: '#fed7aa', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  v_imp: { color: '#9333EA', bg: '#FAF5FF', border: '#e9d5ff', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> },
+}
+
+export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, setComparison, reset }) {
   const navigate = useNavigate()
   const s = strings
-  const { params, animation, results, overlays, comparison, degenerate, display } = state
+  const { params, animation, results, overlays, comparison, degenerate } = state
+
   const isPlaying  = animation.status === 'playing'
   const isPaused   = animation.status === 'paused'
   const isIdle     = animation.status === 'idle'
   const isFinished = animation.status === 'finished'
   const showImpact = isFinished || isPlaying
 
-  const fmt = (v, d = 1) => formatNum(v ?? 0, display.numerals, d)
+  const [activeTab, setActiveTab] = useState('controls')
+
+  const fmt = useCallback((v, d = 1) => formatNum(v ?? 0, d, 'bangla'), [])
 
   const handleAnimTick = useCallback((t, status) => setAnimation({ t, status }), [setAnimation])
   const handleLaunch   = () => { if (!degenerate) setAnimation({ status: 'playing', t: 0, speed: animation.speed }) }
@@ -36,163 +61,227 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, tog
     setAnimation({ speed: next })
   }
 
-  const tabs = [
+  const sidebarTabs = [
+    { id: 'controls',   label: 'কন্ট্রোল' },
     { id: 'vectors',    label: s.tabs.vectors },
     { id: 'formulas',   label: s.tabs.formulas },
     { id: 'graphs',     label: s.tabs.graphs },
     { id: 'comparison', label: s.tabs.comparison },
   ]
 
-  const tabContents = {
-    vectors: (
-      <div className={styles.overlayToggles}>
-        <Toggle checked={overlays.vectors} onChange={() => toggleOverlay('vectors')} label={s.overlays.vectors} />
-        <Toggle checked={overlays.dots}    onChange={() => toggleOverlay('dots')}    label={s.overlays.dots} />
-        <Toggle checked={overlays.axes}    onChange={() => toggleOverlay('axes')}    label={s.overlays.axes} />
-      </div>
-    ),
-    formulas:   <FormulaPanel params={params} results={results} strings={s.formulas} numerals={display.numerals} />,
-    graphs:     <GraphsPanel points={state.points} results={results} />,
-    comparison: <ComparisonPanel comparison={comparison} onSet={setComparison} />,
-  }
-
   return (
     <div className={styles.screen}>
-      {/* Header */}
+      {/* ── Header ── */}
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate('/')} aria-label="পেছনে">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </button>
-        <span className={styles.logo}>10MS</span>
-        <h1 className={`${styles.title} bn`}>{s.appTitle}</h1>
-        <div className={styles.headerSpacer} />
-        <button className={styles.numeralBtn} onClick={toggleNumerals} title="সংখ্যা পদ্ধতি বদলাও">
-          {display.numerals === 'bangla' ? '০৯' : '09'}
-        </button>
-      </header>
 
-      {/* Main: canvas + controls panel */}
-      <div className={styles.mainArea}>
-        {/* Canvas */}
-        <div className={styles.canvasWrap}>
-          <SimCanvas state={state} onAnimTick={handleAnimTick} />
+        <div className={styles.headerBrand}>
+          <span className={styles.logo}>10MS</span>
+          <div className={styles.headerDivider} />
+          <h1 className={`${styles.title} bn`}>{s.appTitle}</h1>
         </div>
 
-        {/* Right panel: params + results */}
-        <div className={styles.controlsPanel}>
-          {/* Parameters */}
-          <div className={styles.paramsSection}>
-            <ParamRow
-              label={s.controls.v0}
-              glossaryText={glossary.v0}
-              value={params.v0} min={1} max={100} step={1}
-              unit="m/s"
-              numerals={display.numerals}
-              onChange={v => setParam('v0', v)}
-            />
-            <ParamRow
-              label={s.controls.theta}
-              glossaryText={glossary.theta}
-              value={params.theta} min={1} max={89} step={1}
-              unit="°"
-              numerals={display.numerals}
-              onChange={v => setParam('theta', v)}
-            />
-            <ParamRow
-              label={s.controls.h0}
-              glossaryText={glossary.h0}
-              value={params.h0} min={0} max={50} step={1}
-              unit="m"
-              numerals={display.numerals}
-              onChange={v => setParam('h0', v)}
-            />
+        <div className={styles.headerSpacer} />
+
+        <div className={styles.headerActions}>
+          <button className={styles.resetBtn} onClick={reset} aria-label={s.buttons.reset}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span className="bn">{s.buttons.reset}</span>
+          </button>
+        </div>
+      </header>
+
+      <div className={styles.mainArea}>
+        {/* ── Canvas ── */}
+        <div className={styles.canvasContainer}>
+          <div className={styles.canvasWrap}>
+            <SimCanvas state={state} onAnimTick={handleAnimTick} />
           </div>
 
-          {/* Degenerate hint */}
-          {degenerate && (
-            <p className={`${styles.hint} bn`}>
-              {degenerate === 'no-velocity' ? s.errors.noVelocity : s.errors.flat}
-            </p>
-          )}
+          {/* Floating action bar */}
+          <div className={styles.actionBar}>
+            {(isIdle || isFinished) && (
+              <button
+                className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled : ''}`}
+                onClick={handleLaunch}
+                disabled={!!degenerate}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 11.4 12.6 15M15 9l-6 6M5 3h4l2 2-5 5-2-2V3z"/><path d="M9 11.4A9.97 9.97 0 0 0 21 3c-4.97 0-8.73 3.26-9.6 7.4M5 14.6A9.97 9.97 0 0 0 3 21c2.57 0 4.97-.92 6.82-2.44"/>
+                </svg>
+                <span className="bn">{s.buttons.launch}</span>
+              </button>
+            )}
 
-          {/* Result cards */}
-          <div className={styles.resultsGrid}>
-            <ResultCard label="R" value={fmt(results.R)} unit={s.readouts.rangeUnit}    color="var(--success)" />
-            <ResultCard label="H" value={fmt(results.H)} unit={s.readouts.heightUnit}   color="var(--info)" />
-            <ResultCard label="T" value={fmt(results.T, 2)} unit={s.readouts.timeUnit}  color="var(--warn)" />
-            {showImpact && results.impact && (
-              <ResultCard
-                label="v_imp"
-                value={fmt(results.impact.speed, 1)}
-                unit={s.readouts.speedUnit}
-                color="#9333EA"
-              />
+            {isPlaying && (
+              <button className={`${styles.actionBtn} ${styles.pauseBtn}`} onClick={handlePause}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+                </svg>
+                <span className="bn">{s.buttons.pause}</span>
+              </button>
+            )}
+
+            {isPaused && (
+              <button className={`${styles.actionBtn} ${styles.resumeBtn}`} onClick={handleResume}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <span className="bn">{s.buttons.resume}</span>
+              </button>
+            )}
+
+            {(isPlaying || isPaused) && (
+              <button className={`${styles.actionBtn} ${styles.speedBtn}`} onClick={cycleSpeed}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                <span>{animation.speed}×</span>
+              </button>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Action bar */}
-      <div className={styles.actionBar}>
-        {(isIdle || isFinished) && (
-          <Button variant="primary" onClick={handleLaunch} disabled={!!degenerate}>
-            <span className="bn">{s.buttons.launch}</span>
-          </Button>
-        )}
-        {isPlaying && (
-          <Button variant="secondary" onClick={handlePause}>
-            <span className="bn">{s.buttons.pause}</span>
-          </Button>
-        )}
-        {isPaused && (
-          <Button variant="primary" onClick={handleResume}>
-            <span className="bn">{s.buttons.resume}</span>
-          </Button>
-        )}
-        {(isPlaying || isPaused) && (
-          <Button variant="ghost" onClick={cycleSpeed}>
-            <span className="bn">{animation.speed}×</span>
-          </Button>
-        )}
-        <Button variant="ghost" onClick={reset}>
-          <span className="bn">{s.buttons.reset}</span>
-        </Button>
-      </div>
+        {/* ── Sidebar ── */}
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarTabs}>
+            {sidebarTabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ''} bn`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className={styles.tabIcon}>{TAB_ICONS[tab.id]}</span>
+                <span className={styles.tabLabel}>{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
-      {/* Bottom sheet */}
-      <BottomSheet tabs={tabs}>{tabContents}</BottomSheet>
+          <div className={styles.sidebarContent}>
+
+            {/* Controls */}
+            {activeTab === 'controls' && (
+              <div className={styles.tabPanel}>
+                <div className={`${styles.sectionTitle} bn`}>প্যারামিটার</div>
+
+                <div className={styles.paramsSection}>
+                  <Tooltip text={glossary.v0}>
+                    <Slider label={s.controls.v0} value={params.v0} min={1} max={100} step={1} unit={` ${s.controls.v0Unit}`} onChange={v => setParam('v0', v)} />
+                  </Tooltip>
+                  <Tooltip text={glossary.theta}>
+                    <Slider label={s.controls.theta} value={params.theta} min={1} max={89} step={1} unit={s.controls.thetaUnit} onChange={v => setParam('theta', v)} />
+                  </Tooltip>
+                  <Tooltip text={glossary.h0}>
+                    <Slider label={s.controls.h0} value={params.h0} min={0} max={50} step={1} unit={` ${s.controls.h0Unit}`} onChange={v => setParam('h0', v)} />
+                  </Tooltip>
+                </div>
+
+                <div className={`${styles.sectionTitle} bn`}>{s.projectileSection}</div>
+                <div className={styles.projectileSelector}>
+                  {PROJECTILE_OPTIONS.map(({ id, color }) => (
+                    <button
+                      key={id}
+                      className={`${styles.projectileBtn} ${params.projectileType === id ? styles.activeProjBtn : ''}`}
+                      onClick={() => setParam('projectileType', id)}
+                    >
+                      <span className={styles.projDot} style={{ background: color }} />
+                      <span className={`bn`}>{s.projectiles[id]}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {degenerate && (
+                  <div className={styles.hintBox}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
+                    <p className={`${styles.hint} bn`}>
+                      {degenerate === 'no-velocity' ? s.errors.noVelocity : s.errors.flat}
+                    </p>
+                  </div>
+                )}
+
+                <div className={`${styles.sectionTitle} bn`}>ফলাফল</div>
+                <div className={styles.resultsGrid}>
+                  <ResultCard label="R"    sublabel={s.readouts.range}  value={fmt(results.R)}     unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
+                  <ResultCard label="H"    sublabel={s.readouts.height} value={fmt(results.H)}     unit={s.readouts.heightUnit} meta={RESULT_META.H} />
+                  <ResultCard label="T"    sublabel={s.readouts.time}   value={fmt(results.T, 2)}  unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
+                  {showImpact && results.impact && (
+                    <ResultCard label="v" sublabel={s.readouts.impactSpeed} value={fmt(results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Vectors */}
+            {activeTab === 'vectors' && (
+              <div className={styles.tabPanel}>
+                <div className={`${styles.sectionTitle} bn`}>ভিজ্যুয়াল অপশন</div>
+                <div className={styles.overlayToggles}>
+                  <OverlayRow color="#274FE3" label={s.overlays.vectors}  checked={overlays.vectors} onChange={() => toggleOverlay('vectors')} />
+                  <OverlayRow color="#1CAB55" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} />
+                  <OverlayRow color="#6B7280" label={s.overlays.axes}     checked={overlays.axes}    onChange={() => toggleOverlay('axes')} />
+                </div>
+              </div>
+            )}
+
+            {/* Formulas */}
+            {activeTab === 'formulas' && (
+              <div className={styles.tabPanel}>
+                <FormulaPanel params={params} results={results} strings={s.formulas} />
+              </div>
+            )}
+
+            {/* Graphs */}
+            {activeTab === 'graphs' && (
+              <div className={styles.tabPanel}>
+                <GraphsPanel points={state.points} results={results} />
+              </div>
+            )}
+
+            {/* Comparison */}
+            {activeTab === 'comparison' && (
+              <div className={styles.tabPanel}>
+                <ComparisonPanel comparison={comparison} onSet={setComparison} />
+              </div>
+            )}
+
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }
 
-function ParamRow({ label, glossaryText, value, min, max, step, unit, numerals, onChange }) {
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function ResultCard({ label, sublabel, value, unit, meta }) {
   return (
-    <div className={styles.paramRow}>
-      <div className={styles.paramHeader}>
-        <Tooltip text={glossaryText}>
-          <span className={`${styles.paramLabel} bn`}>{label}</span>
-        </Tooltip>
-        <span className={styles.paramValue}>{value}{unit}</span>
+    <div className={styles.resultCard} style={{ '--card-color': meta.color, '--card-bg': meta.bg, '--card-border': meta.border }}>
+      <div className={styles.resultCardTop}>
+        <span className={styles.resultIcon} style={{ color: meta.color }}>{meta.icon}</span>
+        <span className={styles.resultLabel} style={{ color: meta.color }}>{label}</span>
       </div>
-      <input
-        type="range"
-        className={styles.rangeSlider}
-        min={min} max={max} step={step}
-        value={value}
-        onChange={e => onChange(Number(e.target.value))}
-      />
+      <div className={styles.resultValueWrap}>
+        <span className={`${styles.resultValue} bn`}>{value}</span>
+        <span className={styles.resultUnit}>{unit}</span>
+      </div>
+      <span className={`${styles.resultSublabel} bn`}>{sublabel}</span>
     </div>
   )
 }
 
-function ResultCard({ label, value, unit, color }) {
+function OverlayRow({ color, label, checked, onChange }) {
   return (
-    <div className={styles.resultCard}>
-      <span className={styles.resultLabel} style={{ color }}>{label}</span>
-      <span className={`${styles.resultValue} bn`}>{value}</span>
-      <span className={styles.resultUnit}>{unit}</span>
+    <div className={styles.overlayRow}>
+      <div className={styles.overlayDot} style={{ background: color }} />
+      <span className={`${styles.overlayLabel} bn`}>{label}</span>
+      <Toggle checked={checked} onChange={onChange} />
     </div>
   )
 }

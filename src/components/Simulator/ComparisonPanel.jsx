@@ -25,9 +25,9 @@ export function ComparisonPanel({ comparison, onSet }) {
       ) : (
         <>
           <div className={styles.controls}>
-            <Slider label={s.v0}  value={params.v0}    min={0}  max={100} step={1} onChange={v => set('v0', v)}    unit=" m/s" />
+            <Slider label={s.v0}  value={params.v0}    min={0}  max={100} step={1} onChange={v => set('v0', v)}    unit=" মি/সে" />
             <Slider label={s.theta} value={params.theta} min={0}  max={90}  step={1} onChange={v => set('theta', v)} unit="°" />
-            <Slider label={s.h0}  value={params.h0}    min={0}  max={50}  step={1} onChange={v => set('h0', v)}    unit=" m" />
+            <Slider label={s.h0}  value={params.h0}    min={0}  max={50}  step={1} onChange={v => set('h0', v)}    unit=" মি" />
           </div>
           <Button variant="ghost" fullWidth onClick={() => onSet(null)}>
             <span className="bn">{s.remove}</span>

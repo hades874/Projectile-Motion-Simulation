@@ -2,9 +2,9 @@ import { useMemo } from 'react'
 import { formatNum } from '../../lib/bangla.js'
 import styles from './Readouts.module.css'
 
-export function Readouts({ results, impact, strings, numerals }) {
+export function Readouts({ results, impact, strings }) {
   const { T, H, R } = results
-  const fmt = (v, d = 1) => formatNum(v, numerals, d)
+  const fmt = (v, d = 1) => formatNum(v, d)
 
   const items = useMemo(() => [
     { label: strings.range,  value: fmt(R), unit: strings.rangeUnit },
@@ -14,7 +14,7 @@ export function Readouts({ results, impact, strings, numerals }) {
       { label: strings.impactSpeed, value: fmt(impact.speed), unit: strings.speedUnit },
       { label: strings.impactAngle, value: fmt(impact.angleDeg), unit: strings.angleUnit },
     ] : []),
-  ], [R, H, T, impact, strings, numerals])
+  ], [R, H, T, impact, strings])
 
   return (
     <div className={styles.strip}>

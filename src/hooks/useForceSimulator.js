@@ -6,12 +6,7 @@ import {
 
 function makeInitial() {
   return {
-    activeTab: 'netforce',
-    netforce: {
-      leftPushers:  [false, false, false, false],
-      rightPushers: [false, false, false, false],
-      cartX: 0, cartV: 0, isRunning: false,
-    },
+    activeTab: 'tug',
     motion: {
       Fapplied: 0, selectedObject: 'box', frictionOn: true,
       boxX: 0, boxV: 0, isRunning: false,
@@ -21,8 +16,8 @@ function makeInitial() {
       boxX: 0, boxV: 0, isRunning: false,
     },
     tug: {
-      leftTeam:  [false, false, false, false],
-      rightTeam: [false, false, false, false],
+      leftTeam:  [false, false, false],
+      rightTeam: [false, false, false],
       ropeX: 0, ropeV: 0, isRunning: false, winner: null,
     },
   }
@@ -58,22 +53,12 @@ function reducer(state, action) {
 
     case 'RESET': {
       const base = state[tab]
-      if (tab === 'netforce') return { ...state, netforce: { ...base, cartX: 0, cartV: 0, isRunning: false } }
-      if (tab === 'tug')      return { ...state, tug:      { ...base, ropeX: 0, ropeV: 0, isRunning: false, winner: null } }
+      if (tab === 'tug') return { ...state, tug: { ...base, ropeX: 0, ropeV: 0, isRunning: false, winner: null } }
       return { ...state, [tab]: { ...base, boxX: 0, boxV: 0, isRunning: false } }
     }
 
     case 'TICK': {
       const dt = Math.min(action.dt, 0.05)
-
-      if (tab === 'netforce') {
-        const { leftPushers, rightPushers, cartX, cartV } = state.netforce
-        const Fnet = netForceFromPushers(leftPushers, rightPushers)
-        const a    = accel(Fnet, CART_MASS)
-        const moved = step(cartX, cartV, a, dt)
-        const clamped = clamp(moved.x, moved.v)
-        return { ...state, netforce: { ...state.netforce, cartX: clamped.x, cartV: clamped.v } }
-      }
 
       if (tab === 'motion') {
         const { Fapplied, selectedObject, frictionOn, boxX, boxV } = state.motion

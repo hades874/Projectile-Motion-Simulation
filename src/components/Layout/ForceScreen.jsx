@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useForceSimulator } from '../../hooks/useForceSimulator.js'
-import { NetForceTab }  from '../Forces/NetForceTab.jsx'
 import { MotionTab }    from '../Forces/MotionTab.jsx'
 import { FrictionTab }  from '../Forces/FrictionTab.jsx'
 import { TugOfWarTab }  from '../Forces/TugOfWarTab.jsx'
@@ -8,10 +7,9 @@ import strings from '../../content/forces.bn.json'
 import styles from './ForceScreen.module.css'
 
 const TABS = [
-  { id: 'netforce', label: strings.tabs.netforce },
+  { id: 'tug',      label: strings.tabs.tug },
   { id: 'motion',   label: strings.tabs.motion },
   { id: 'friction', label: strings.tabs.friction },
-  { id: 'tug',      label: strings.tabs.tug },
 ]
 
 export function ForceScreen() {
@@ -31,9 +29,7 @@ export function ForceScreen() {
         <span className={styles.logo}>10MS</span>
         <h1 className={`${styles.title} bn`}>{strings.title}</h1>
         <div className={styles.headerSpacer} />
-        <button className={styles.numeralBtn} onClick={() => {}}>
-          {state.display?.numerals === 'bangla' ? '০৯' : '09'}
-        </button>
+
       </header>
 
       {/* Tab bar */}
@@ -51,9 +47,9 @@ export function ForceScreen() {
 
       {/* Tab content */}
       <div className={styles.mainArea}>
-        {active === 'netforce' && (
-          <NetForceTab
-            state={state.netforce}
+        {active === 'tug' && (
+          <TugOfWarTab
+            state={state.tug}
             togglePusher={togglePusher}
             start={start} pause={pause} reset={reset} tick={tick}
           />
@@ -69,13 +65,6 @@ export function ForceScreen() {
           <FrictionTab
             state={state.friction}
             setParam={setParam}
-            start={start} pause={pause} reset={reset} tick={tick}
-          />
-        )}
-        {active === 'tug' && (
-          <TugOfWarTab
-            state={state.tug}
-            togglePusher={togglePusher}
             start={start} pause={pause} reset={reset} tick={tick}
           />
         )}

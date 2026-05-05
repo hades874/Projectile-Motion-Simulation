@@ -3,6 +3,7 @@ import { drawMotion } from '../../lib/forceCanvas.js'
 import { OBJECTS, frictionForce, netMotionForce, accel } from '../../lib/forcesPhysics.js'
 import { Button } from '../Common/Button.jsx'
 import { Toggle } from '../Common/Toggle.jsx'
+import { GuideCard } from '../Common/GuideCard.jsx'
 import strings from '../../content/forces.bn.json'
 import styles from './Forces.module.css'
 
@@ -19,6 +20,7 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
       <ForceCanvas drawFn={drawMotion} state={state} onTick={tick} />
 
       <div className={styles.panel}>
+        <GuideCard title={strings.guideTitle} items={s.guides} />
         {/* Applied force slider */}
         <div className={styles.paramRow}>
           <div className={styles.paramHeader}>
@@ -62,8 +64,8 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
 
         {/* Readouts */}
         <div className={styles.readouts}>
-          <ReadoutCard label={s.readouts.velocity}  value={`${boxV.toFixed(1)} m/s`} />
-          <ReadoutCard label={s.readouts.accel}      value={`${a.toFixed(2)} m/s²`} />
+          <ReadoutCard label={s.readouts.velocity}  value={`${boxV.toFixed(1)} মি/সে`} />
+          <ReadoutCard label={s.readouts.accel}      value={`${a.toFixed(2)} মি/সে²`} />
           <ReadoutCard label={s.readouts.appliedF}   value={`${Fapplied.toFixed(0)} N`} />
           <ReadoutCard label={s.readouts.frictionF}  value={`${Math.abs(Ff).toFixed(0)} N`} />
         </div>
