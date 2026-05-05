@@ -11,13 +11,9 @@ function makeInitial() {
       Fapplied: 0, selectedObject: 'box', frictionOn: true,
       boxX: 0, boxV: 0, isRunning: false,
     },
-    friction: {
-      Fapplied: 0, surface: 'wood', mass: 50,
-      boxX: 0, boxV: 0, isRunning: false,
-    },
     tug: {
-      leftTeam:  [false, false, false],
-      rightTeam: [false, false, false],
+      leftTeam:  [false, false, false, false],
+      rightTeam: [false, false, false, false],
       ropeX: 0, ropeV: 0, isRunning: false, winner: null,
     },
   }

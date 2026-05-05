@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Slider } from '../Common/Slider.jsx'
 import { Button } from '../Common/Button.jsx'
 import strings from '../../content/senior.bn.json'
@@ -8,6 +8,14 @@ const DEFAULTS = { v0: 30, theta: 60, h0: 0 }
 
 export function ComparisonPanel({ comparison, onSet }) {
   const [params, setParams] = useState(comparison?.params || DEFAULTS)
+
+  useEffect(() => {
+    if (comparison) {
+      setParams(comparison.params)
+    } else {
+      setParams(DEFAULTS)
+    }
+  }, [comparison])
 
   const s = strings.comparison
   const set = (k, v) => {

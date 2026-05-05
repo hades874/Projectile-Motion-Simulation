@@ -7,9 +7,8 @@ import strings from '../../content/forces.bn.json'
 import styles from './ForceScreen.module.css'
 
 const TABS = [
-  { id: 'tug',      label: strings.tabs.tug },
-  { id: 'motion',   label: strings.tabs.motion },
-  { id: 'friction', label: strings.tabs.friction },
+  { id: 'tug',    label: strings.tabs.tug },
+  { id: 'motion', label: strings.tabs.motion },
 ]
 
 export function ForceScreen() {
@@ -19,6 +18,13 @@ export function ForceScreen() {
 
   return (
     <div className={styles.screen}>
+      <div className={styles.backgroundDecorations} aria-hidden="true">
+        <div className={styles.hill} />
+        <div className={styles.grassTuft} style={{ left: '10%' }} />
+        <div className={styles.grassTuft} style={{ left: '30%' }} />
+        <div className={styles.grassTuft} style={{ left: '60%' }} />
+        <div className={styles.grassTuft} style={{ left: '85%' }} />
+      </div>
       {/* Header */}
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate('/')} aria-label="পেছনে">
@@ -57,13 +63,6 @@ export function ForceScreen() {
         {active === 'motion' && (
           <MotionTab
             state={state.motion}
-            setParam={setParam}
-            start={start} pause={pause} reset={reset} tick={tick}
-          />
-        )}
-        {active === 'friction' && (
-          <FrictionTab
-            state={state.friction}
             setParam={setParam}
             start={start} pause={pause} reset={reset} tick={tick}
           />

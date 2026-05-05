@@ -17,7 +17,7 @@ const PROJECTILE_TYPES = {
   football:   { color: '#F97316', radius: 9 },
 }
 
-export function SimCanvas({ state, onAnimTick }) {
+export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
   const containerRef = useRef(null)
   const canvasRef    = useRef(null)
   const { width, height } = useViewport(containerRef)
@@ -37,23 +37,23 @@ export function SimCanvas({ state, onAnimTick }) {
 
     drawBackground(ctx, width, height)
 
-    const { scale, offsetX, offsetY } = computeScale(points, width, height, params.h0)
+    // Unified scale for both projectiles: grid expands to fit the largest one
+    const allPoints = comparison ? [...points, ...comparison.points] : points
+    const maxH0     = comparison ? Math.max(params.h0, comparison.params.h0) : params.h0
+    const { scale, offsetX, offsetY } = computeScale(allPoints, width, height, maxH0)
 
     if (overlays.axes) {
       drawGrid(ctx, scale, offsetX, offsetY, width, height)
       drawAxes(ctx, scale, offsetX, offsetY, width, height)
     }
     drawGround(ctx, offsetY, width)
+    
+    // Main Canon
     drawLauncher(ctx, offsetX, offsetY, params.theta, params.h0, scale)
 
-    // Ghost comparison trajectory
+    // Comparison Canon
     if (comparison) {
-      drawTrajectory(ctx, comparison.points, scale, offsetX, offsetY, '#EA580C', true, 0.7)
-      if (isIdle || isFinished) {
-        const cp = comparison.params
-        const pos = position(cp.v0, cp.theta, cp.h0, comparison.results.T)
-        drawBall(ctx, pos.x, pos.y, scale, offsetX, offsetY, '#EA580C')
-      }
+      drawLauncher(ctx, offsetX, offsetY, comparison.params.theta, comparison.params.h0, scale, true)
     }
 
     // Main trajectory drawing
@@ -69,7 +69,12 @@ export function SimCanvas({ state, onAnimTick }) {
       }
     }
 
-    if (overlays.dots && results.T > 0) {
+    // Ghost comparison trajectory
+    if (comparison) {
+      drawTrajectory(ctx, comparison.points, scale, offsetX, offsetY, '#EA580C', true, 0.7)
+    }
+
+    if (overlays.dots && (isPlaying || isPaused || isFinished)) {
       const dotT = isPlaying || isPaused ? Math.min(animation.t, results.T) : results.T
       drawTrajectoryDots(ctx, points, results.T, scale, offsetX, offsetY, ballColor, dotT)
     }
@@ -91,22 +96,34 @@ export function SimCanvas({ state, onAnimTick }) {
         drawImpactMarker(ctx, pos.x, pos.y, scale, offsetX, offsetY, ballColor)
       }
 
-      if (overlays.vectors && isPlaying) {
+      if (overlays.vectors && (isPlaying || isPaused)) {
         const vel = velocity(params.v0, params.theta, clampT)
         drawVectors(ctx, pos.x, pos.y, vel.vx, vel.vy, scale, offsetX, offsetY)
       }
 
-      if (comparison && isPlaying) {
+      if (comparison && (isPlaying || isPaused)) {
         const cClamp = Math.min(t, comparison.results.T)
         const cp     = comparison.params
         const cpos   = position(cp.v0, cp.theta, cp.h0, cClamp)
         drawBall(ctx, cpos.x, cpos.y, scale, offsetX, offsetY, '#EA580C')
+
+        if (overlays.vectors) {
+          const cvel = velocity(cp.v0, cp.theta, cClamp)
+          drawVectors(ctx, cpos.x, cpos.y, cvel.vx, cvel.vy, scale, offsetX, offsetY)
+        }
       }
     } else {
       drawBall(ctx, 0, params.h0, scale, offsetX, offsetY, ballColor, ballRadius)
+      
       if (overlays.vectors) {
         const vel = velocity(params.v0, params.theta, 0)
         drawVectors(ctx, 0, params.h0, vel.vx, vel.vy, scale, offsetX, offsetY)
+      }
+
+      if (comparison && overlays.vectors) {
+        const cp = comparison.params
+        const cvel = velocity(cp.v0, cp.theta, 0)
+        drawVectors(ctx, 0, cp.h0, cvel.vx, cvel.vy, scale, offsetX, offsetY)
       }
     }
   }, [width, height, points, params, results, animation, overlays, comparison, degenerate,

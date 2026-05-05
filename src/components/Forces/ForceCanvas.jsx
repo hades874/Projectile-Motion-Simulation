@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useViewport } from '../../hooks/useViewport.js'
 import { useAnimationFrame } from '../../hooks/useAnimationFrame.js'
 
-export function ForceCanvas({ drawFn, state, onTick }) {
+export function ForceCanvas({ drawFn, state, onTick, children }) {
   const containerRef = useRef(null)
   const canvasRef    = useRef(null)
   const { width, height } = useViewport(containerRef)
@@ -39,6 +39,7 @@ export function ForceCanvas({ drawFn, state, onTick }) {
         ref={canvasRef}
         style={{ display: 'block', width: '100%', height: '100%', touchAction: 'none' }}
       />
+      {children && typeof children === 'function' ? children({ width, height }) : children}
     </div>
   )
 }

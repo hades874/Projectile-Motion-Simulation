@@ -158,31 +158,44 @@ export function drawGround(ctx, offsetY, canvasW) {
 
 // ─── Launcher (cannon) ───────────────────────────────────────────────────────
 
-export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1) {
+export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1, isComparison = false) {
   const launchY = offsetY - h0 * scale
+
+  // Colors based on theme
+  const colors = isComparison ? {
+    barrel: ['#FB923C', '#EA580C', '#9A3412'],
+    wheel:  ['#7C2D12', '#C2410C', '#EA580C'],
+    arc:    'rgba(234, 88, 12, 0.35)',
+    label:  '#9A3412'
+  } : {
+    barrel: ['#6B7280', '#374151', '#111827'],
+    wheel:  ['#1F2937', '#4B5563', '#6B7280'],
+    arc:    'rgba(28, 171, 85, 0.38)',
+    label:  '#4B5563'
+  }
 
   // Platform column when elevated
   if (h0 > 0) {
     const platformH = offsetY - launchY
     ctx.save()
     const colGrad = ctx.createLinearGradient(offsetX - 8, 0, offsetX + 8, 0)
-    colGrad.addColorStop(0,   '#4B5563')
-    colGrad.addColorStop(0.5, '#6B7280')
-    colGrad.addColorStop(1,   '#374151')
+    colGrad.addColorStop(0,   isComparison ? '#9A3412' : '#4B5563')
+    colGrad.addColorStop(0.5, isComparison ? '#C2410C' : '#6B7280')
+    colGrad.addColorStop(1,   isComparison ? '#7C2D12' : '#374151')
     ctx.fillStyle = colGrad
     ctx.beginPath()
     ctx.roundRect(offsetX - 8, launchY + 6, 16, platformH - 6, [0, 0, 4, 4])
     ctx.fill()
     // Cap plate
     const capGrad = ctx.createLinearGradient(0, launchY - 4, 0, launchY + 8)
-    capGrad.addColorStop(0, '#9CA3AF')
-    capGrad.addColorStop(1, '#374151')
+    capGrad.addColorStop(0, isComparison ? '#FDBA74' : '#9CA3AF')
+    capGrad.addColorStop(1, isComparison ? '#9A3412' : '#374151')
     ctx.fillStyle = capGrad
     ctx.beginPath()
     ctx.roundRect(offsetX - 22, launchY - 4, 44, 10, 3)
     ctx.fill()
     // Height indicator tick
-    ctx.strokeStyle = 'rgba(39,79,227,0.35)'
+    ctx.strokeStyle = isComparison ? 'rgba(234, 88, 12, 0.4)' : 'rgba(39,79,227,0.35)'
     ctx.lineWidth = 1
     ctx.setLineDash([3, 4])
     ctx.beginPath()
@@ -198,7 +211,7 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1)
 
   // Angle arc
   const arcR = 36
-  ctx.strokeStyle = 'rgba(28,171,85,0.38)'
+  ctx.strokeStyle = colors.arc
   ctx.lineWidth = 1.5
   ctx.setLineDash([3, 4])
   ctx.beginPath()
@@ -208,31 +221,31 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1)
 
   // Angle label near the middle of the arc
   const midA = -thetaDeg * Math.PI / 360
-  ctx.fillStyle = '#4B5563'
+  ctx.fillStyle = colors.label
   ctx.font = 'bold 10px Inter, sans-serif'
   ctx.textAlign = 'left'
   ctx.fillText(thetaDeg + '°', (arcR + 6) * Math.cos(midA), (arcR + 6) * Math.sin(midA))
 
   // Wheel
-  ctx.fillStyle = '#1F2937'
+  ctx.fillStyle = colors.wheel[0]
   ctx.beginPath(); ctx.arc(3, 3, 13, 0, Math.PI * 2); ctx.fill()
-  ctx.strokeStyle = '#4B5563'; ctx.lineWidth = 2.5; ctx.stroke()
-  ctx.fillStyle = '#6B7280'
+  ctx.strokeStyle = colors.wheel[1]; ctx.lineWidth = 2.5; ctx.stroke()
+  ctx.fillStyle = colors.wheel[2]
   ctx.beginPath(); ctx.arc(3, 3, 4.5, 0, Math.PI * 2); ctx.fill()
 
   // Barrel
   ctx.rotate(-thetaDeg * Math.PI / 180)
   const barGrad = ctx.createLinearGradient(0, -8, 0, 8)
-  barGrad.addColorStop(0, '#6B7280')
-  barGrad.addColorStop(0.45, '#374151')
-  barGrad.addColorStop(1,    '#111827')
+  barGrad.addColorStop(0,    colors.barrel[0])
+  barGrad.addColorStop(0.45, colors.barrel[1])
+  barGrad.addColorStop(1,    colors.barrel[2])
   ctx.fillStyle = barGrad
   ctx.beginPath(); ctx.roundRect(-2, -7, 42, 14, [3, 8, 8, 3]); ctx.fill()
 
   // Muzzle
-  ctx.fillStyle = '#111827'
+  ctx.fillStyle = colors.barrel[2]
   ctx.beginPath(); ctx.arc(40, 0, 8, 0, Math.PI * 2); ctx.fill()
-  ctx.fillStyle = '#374151'
+  ctx.fillStyle = colors.barrel[1]
   ctx.beginPath(); ctx.arc(40, 0, 4, 0, Math.PI * 2); ctx.fill()
 
   ctx.restore()

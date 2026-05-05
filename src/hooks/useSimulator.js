@@ -13,7 +13,7 @@ function makeInitialState(mode = 'senior') {
     params,
     comparison: null,
     animation: { status: 'idle', t: 0, speed: 1 },
-    overlays: { vectors: true, dots: true, axes: true, formulas: false, graphs: false },
+    overlays: { vectors: false, dots: false, axes: true, formulas: false, graphs: false },
     display: { numerals: 'bangla' },
     results: computeResults(params.v0, params.theta, params.h0),
     points: trajectoryPoints(params.v0, params.theta, params.h0),

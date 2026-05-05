@@ -6,7 +6,7 @@ export const TRACK_HALF = 8          // m
 export const WIN_DISTANCE = 6        // m — tug-of-war win threshold
 
 export const OBJECTS = {
-  skate:  { mass: 5,    mu_s: 0.20, mu_k: 0.15, label: 'স্কেটবোর্ড' },
+  ice:    { mass: 10,   mu_s: 0.10, mu_k: 0.05, label: 'বরফ' },
   box:    { mass: 25,   mu_s: 0.45, mu_k: 0.35, label: 'বাক্স' },
   fridge: { mass: 100,  mu_s: 0.55, mu_k: 0.42, label: 'ফ্রিজ' },
   car:    { mass: 1000, mu_s: 0.65, mu_k: 0.52, label: 'গাড়ি' },

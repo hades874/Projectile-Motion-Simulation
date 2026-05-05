@@ -21,21 +21,18 @@ Object.entries(SPRITES).forEach(([key, src]) => {
 let bgTime = 0
 
 // World → screen X. World range: [-8, 8] m → [5%, 95%] of canvas width.
-function wx(worldX, w) {
+export function wx(worldX, w) {
   return w / 2 + (worldX / 8) * (w * 0.44)
 }
 
-function groundY(h) {
+export function groundY(h) {
   return Math.floor(h * 0.68)
 }
 
 function drawBackground(ctx, w, h) {
   bgTime += 0.01
   
-  // Clean background
-  ctx.fillStyle = '#F9FAFB'
-  ctx.fillRect(0, 0, w, h)
-
+  // Clean background (removed solid fill to show CSS background)
   // Subtle Grid
   ctx.save()
   ctx.strokeStyle = 'rgba(209, 213, 219, 0.3)'
@@ -555,15 +552,11 @@ export function drawMotion(ctx, w, h, state) {
     shakeX = (Math.random() - 0.5) * 2
   }
 
-  // Draw person pushing
-  if (Math.abs(Fapplied) > 0.5) {
-    const dir = Math.sign(Fapplied)
-    const px = boxSX - dir * (boxSize / 2 + 15)
-    drawPerson(ctx, px + shakeX, gy, true, dir > 0 ? 'right' : 'left', '#274FE3', isRunning, false)
-  }
+  /* Person and Sprite are now handled by CSS in React component */
+  // if (Math.abs(Fapplied) > 0.5) { ... }
+  // drawSprite(ctx, selectedObject, boxSX + shakeX, gy, boxSize)
 
   drawParticles(ctx, boxSX, gy, boxV)
-  drawSprite(ctx, selectedObject, boxSX + shakeX, gy, boxSize)
 
   const arrowY = gy - boxSize - 20
   const boxOffset = boxSize / 2
@@ -648,12 +641,12 @@ export function drawTug(ctx, w, h, state) {
 
   // Left team (Red, pull left)
   leftTeam.forEach((active, i) => {
-    const px = wx(-7.5, w) + i * 40
+    const px = wx(-7.6, w) + i * 32
     drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning, true)
   })
   // Right team (Blue, pull right)
   rightTeam.forEach((active, i) => {
-    const px = wx(7.5, w) - i * 40
+    const px = wx(7.6, w) - i * 32
     drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, true)
   })
 
