@@ -6,8 +6,12 @@ const DEFAULTS = {
   senior:  { v0: 20, theta: 45, h0: 0, projectileType: 'cannonball' },
 }
 
-function makeInitialState(mode = 'senior') {
-  const params = { ...DEFAULTS[mode], g: 9.8 }
+function makeInitialState(modeOrConfig = 'senior') {
+  const config = typeof modeOrConfig === 'string'
+    ? { mode: modeOrConfig, overrides: {} }
+    : modeOrConfig
+  const { mode = 'senior', overrides = {} } = config
+  const params = { ...DEFAULTS[mode], ...overrides, g: 9.8 }
   return {
     mode,
     params,
@@ -66,8 +70,8 @@ function reducer(state, action) {
   }
 }
 
-export function useSimulator(initialMode = 'senior') {
-  const [state, dispatch] = useReducer(reducer, initialMode, makeInitialState)
+export function useSimulator(initialMode = 'senior', initialOverrides = {}) {
+  const [state, dispatch] = useReducer(reducer, { mode: initialMode, overrides: initialOverrides }, makeInitialState)
 
   const setParam       = useCallback((key, value) => dispatch({ type: 'SET_PARAM', key, value }), [])
   const setMode        = useCallback((mode) => dispatch({ type: 'SET_MODE', mode }), [])

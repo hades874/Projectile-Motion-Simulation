@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useForceSimulator } from '../../hooks/useForceSimulator.js'
-import { MotionTab }    from '../Forces/MotionTab.jsx'
-import { FrictionTab }  from '../Forces/FrictionTab.jsx'
-import { TugOfWarTab }  from '../Forces/TugOfWarTab.jsx'
+import { MotionTab }   from '../Forces/MotionTab.jsx'
+import { TugOfWarTab } from '../Forces/TugOfWarTab.jsx'
 import strings from '../../content/forces.bn.json'
 import styles from './ForceScreen.module.css'
 
@@ -71,3 +70,5 @@ export function ForceScreen() {
     </div>
   )
 }
+
+export default ForceScreen

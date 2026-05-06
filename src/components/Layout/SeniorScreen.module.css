@@ -176,11 +176,12 @@
 
 .actionBar {
   position: absolute;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--s-2);
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.88);
@@ -190,7 +191,7 @@
   border-radius: var(--r-pill);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
   z-index: 20;
-  white-space: nowrap;
+  flex-wrap: wrap;
 }
 
 .actionBtn {
@@ -256,6 +257,15 @@
   flex-direction: column;
   flex-shrink: 0;
   z-index: 5;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    height: 40%;
+  }
+  .sidebarTabs {
+    gap: var(--s-2);
+  }
 }
 
 @media (min-width: 1024px) {

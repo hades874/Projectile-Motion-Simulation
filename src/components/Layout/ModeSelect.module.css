@@ -133,6 +133,12 @@
   }
 }
 
+@media (max-height: 700px) {
+  .page {
+    padding-top: var(--s-6);
+  }
+}
+
 /* Card base (Glassmorphism) */
 .card {
   display: flex;

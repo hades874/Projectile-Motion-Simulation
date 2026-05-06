@@ -21,24 +21,6 @@ function CSSObject({ type }) {
   return <div className={styles[type]} />
 }
 
-function StickFigure({ direction, pushing }) {
-  const isLeft = direction === 'left'
-  return (
-    <div className={`${styles.stickFigure} ${pushing ? styles.pushing : ''}`} 
-         style={{ transform: `scaleX(${isLeft ? -1 : 1})` }}>
-      <div className={styles.head} />
-      <div className={styles.body}>
-        <div className={styles.neck} />
-        <div className={styles.torso} />
-        <div className={styles.arm + ' ' + styles.armLeft} />
-        <div className={styles.arm + ' ' + styles.armRight} />
-        <div className={styles.leg + ' ' + styles.legLeft} />
-        <div className={styles.leg + ' ' + styles.legRight} />
-      </div>
-    </div>
-  )
-}
-
 export function MotionTab({ state, setParam, start, pause, reset, tick }) {
   const { Fapplied, selectedObject, frictionOn, boxX, boxV, isRunning } = state
   const obj = OBJECTS[selectedObject]
@@ -56,16 +38,14 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
         {({ width, height }) => {
           const gy = groundY(height)
           const boxSX = wx(boxX, width)
-          const dir = Math.sign(Fapplied)
-          const pushing = isRunning || Math.abs(Fapplied) > 10
-          
+
           return (
             <>
               {/* Object */}
-              <div 
+              <div
                 className={styles.objectContainer}
-                style={{ 
-                  left: boxSX - (selectedObject === 'car' ? 60 : size / 2), 
+                style={{
+                  left: boxSX - (selectedObject === 'car' ? 60 : size / 2),
                   top: gy - objH - 2,
                   width: selectedObject === 'car' ? 120 : size,
                   height: objH
@@ -73,24 +53,6 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
               >
                 <CSSObject type={selectedObject} />
               </div>
-
-              {/* Stick Figure */}
-              {Math.abs(Fapplied) > 0.5 && (
-                <div style={{
-                  position: 'absolute',
-                  left: dir > 0 
-                    ? boxSX - (selectedObject === 'car' ? 60 : size / 2) - 10
-                    : boxSX + (selectedObject === 'car' ? 60 : size / 2) + 10,
-                  top: gy - 90,
-                  zIndex: 1,
-                  transition: 'left 0.1s linear'
-                }}>
-                  <StickFigure 
-                    direction={dir > 0 ? 'right' : 'left'} 
-                    pushing={pushing} 
-                  />
-                </div>
-              )}
             </>
           )
         }}
