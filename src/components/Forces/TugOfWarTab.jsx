@@ -29,6 +29,13 @@ export function TugOfWarTab({ state, togglePusher, start, pause, reset, tick }) 
       <ForceCanvas drawFn={drawTug} state={state} onTick={tick} />
 
       <div className={styles.panel}>
+        <div className={styles.instructionBox}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--info)', flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <p className={`${styles.instructionText} bn`}>{s.hint}</p>
+        </div>
+
         <GuideCard title={strings.guideTitle} items={s.guides} />
         {winner && (
           <div style={{
@@ -92,7 +99,7 @@ export function TugOfWarTab({ state, togglePusher, start, pause, reset, tick }) 
           {isRunning ? (
             <Button variant="secondary" onClick={pause}><span className="bn">{strings.actions.pause}</span></Button>
           ) : (
-            <Button variant="primary"   onClick={winner ? reset : start}>
+            <Button variant={winner ? "danger" : "primary"} onClick={winner ? reset : start}>
               <span className="bn">{winner ? strings.actions.reset : strings.actions.start}</span>
             </Button>
           )}
@@ -101,7 +108,7 @@ export function TugOfWarTab({ state, togglePusher, start, pause, reset, tick }) 
           )}
         </div>
 
-        <p className={`${styles.hint} bn`}>{s.hint}</p>
+
       </div>
     </div>
   )

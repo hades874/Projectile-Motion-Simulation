@@ -90,7 +90,7 @@ function reducer(state, action) {
         const a     = accel(Fnet, ROPE_MASS)
         const moved = step(ropeX, ropeV, a, dt)
         const winner = moved.x >= WIN_DISTANCE ? 'right' : moved.x <= -WIN_DISTANCE ? 'left' : null
-        return { ...state, tug: { ...state.tug, ropeX: moved.x, ropeV: moved.v, winner } }
+        return { ...state, tug: { ...state.tug, ropeX: moved.x, ropeV: moved.v, winner, isRunning: !winner } }
       }
 
       return state

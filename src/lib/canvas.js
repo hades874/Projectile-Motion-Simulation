@@ -161,46 +161,51 @@ export function drawGround(ctx, offsetY, canvasW) {
 export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1, isComparison = false) {
   const launchY = offsetY - h0 * scale
 
-  // Colors based on theme
+  // Colors based on the new "Toon Cannon" themes
   const colors = isComparison ? {
-    barrel: ['#FB923C', '#EA580C', '#9A3412'],
-    wheel:  ['#7C2D12', '#C2410C', '#EA580C'],
-    arc:    'rgba(234, 88, 12, 0.35)',
-    label:  '#9A3412'
+    // Rugged Orange
+    primary:   '#e67e22',
+    accent:    '#d35400',
+    wheelBg:   '#f39c12',
+    gold:      '#f1c40f',
+    label:     '#d35400',
+    arc:       'rgba(230, 126, 34, 0.35)'
   } : {
-    barrel: ['#6B7280', '#374151', '#111827'],
-    wheel:  ['#1F2937', '#4B5563', '#6B7280'],
-    arc:    'rgba(28, 171, 85, 0.38)',
-    label:  '#4B5563'
+    // Moderne Grey
+    primary:   '#7f8c8d',
+    accent:    '#2c3e50',
+    wheelBg:   '#95a5a6',
+    gold:      '#f1c40f',
+    label:     '#2c3e50',
+    arc:       'rgba(127, 140, 141, 0.38)'
   }
 
   // Platform column when elevated
   if (h0 > 0) {
     const platformH = offsetY - launchY
     ctx.save()
-    const colGrad = ctx.createLinearGradient(offsetX - 8, 0, offsetX + 8, 0)
-    colGrad.addColorStop(0,   isComparison ? '#9A3412' : '#4B5563')
-    colGrad.addColorStop(0.5, isComparison ? '#C2410C' : '#6B7280')
-    colGrad.addColorStop(1,   isComparison ? '#7C2D12' : '#374151')
+    const colGrad = ctx.createLinearGradient(offsetX - 10, 0, offsetX + 10, 0)
+    colGrad.addColorStop(0,   isComparison ? '#9A3412' : '#1F2937')
+    colGrad.addColorStop(0.5, colors.primary)
+    colGrad.addColorStop(1,   isComparison ? '#9A3412' : '#1F2937')
     ctx.fillStyle = colGrad
     ctx.beginPath()
-    ctx.roundRect(Math.round(offsetX - 8), Math.round(launchY + 6), 16, Math.round(platformH - 6), [0, 0, 4, 4])
+    ctx.roundRect(Math.round(offsetX - 10), Math.round(launchY + 8), 20, Math.round(platformH - 8), [0, 0, 4, 4])
     ctx.fill()
+    
     // Cap plate
-    const capGrad = ctx.createLinearGradient(0, launchY - 4, 0, launchY + 8)
-    capGrad.addColorStop(0, isComparison ? '#FDBA74' : '#9CA3AF')
-    capGrad.addColorStop(1, isComparison ? '#9A3412' : '#374151')
-    ctx.fillStyle = capGrad
+    ctx.fillStyle = colors.accent
     ctx.beginPath()
-    ctx.roundRect(Math.round(offsetX - 22), Math.round(launchY - 4), 44, 10, 3)
+    ctx.roundRect(Math.round(offsetX - 24), Math.round(launchY - 4), 48, 12, 4)
     ctx.fill()
+    
     // Height indicator tick
     ctx.strokeStyle = isComparison ? 'rgba(234, 88, 12, 0.4)' : 'rgba(39,79,227,0.35)'
     ctx.lineWidth = 1
     ctx.setLineDash([3, 4])
     ctx.beginPath()
-    ctx.moveTo(offsetX - 28, launchY)
-    ctx.lineTo(offsetX - 52, launchY)
+    ctx.moveTo(offsetX - 32, launchY)
+    ctx.lineTo(offsetX - 56, launchY)
     ctx.stroke()
     ctx.setLineDash([])
     ctx.restore()
@@ -210,7 +215,7 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   ctx.translate(offsetX, launchY)
 
   // Angle arc
-  const arcR = 36
+  const arcR = 40
   ctx.strokeStyle = colors.arc
   ctx.lineWidth = 1.5
   ctx.setLineDash([3, 4])
@@ -219,37 +224,80 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   ctx.stroke()
   ctx.setLineDash([])
 
-  // Angle label near the middle of the arc
+  // Angle label
   const midA = -thetaDeg * Math.PI / 360
   ctx.fillStyle = colors.label
-  ctx.font = 'bold 10px Inter, sans-serif'
+  ctx.font = 'bold 12px Inter, sans-serif'
   ctx.textAlign = 'left'
-  ctx.fillText(thetaDeg + '°', (arcR + 6) * Math.cos(midA), (arcR + 6) * Math.sin(midA))
+  ctx.fillText(thetaDeg + '°', (arcR + 8) * Math.cos(midA), (arcR + 8) * Math.sin(midA))
 
-  // Wheel
-  ctx.fillStyle = colors.wheel[0]
-  ctx.beginPath(); ctx.arc(3, 3, 13, 0, Math.PI * 2); ctx.fill()
-  ctx.strokeStyle = colors.wheel[1]; ctx.lineWidth = 2.5; ctx.stroke()
-  ctx.fillStyle = colors.wheel[2]
-  ctx.beginPath(); ctx.arc(3, 3, 4.5, 0, Math.PI * 2); ctx.fill()
-
-  // Barrel
+  // 1. Draw Barrel (Rotated)
+  ctx.save()
   ctx.rotate(-thetaDeg * Math.PI / 180)
-  const barGrad = ctx.createLinearGradient(0, -8, 0, 8)
-  barGrad.addColorStop(0,    colors.barrel[0])
-  barGrad.addColorStop(0.45, colors.barrel[1])
-  barGrad.addColorStop(1,    colors.barrel[2])
-  ctx.fillStyle = barGrad
-  ctx.beginPath(); ctx.roundRect(-2, -7, 42, 14, [3, 8, 8, 3]); ctx.fill()
+  
+  // Design dimensions - scaled down for fit
+  const bw = 55, bh = 32
+  
+  // Main Barrel Body
+  ctx.fillStyle = colors.primary
+  ctx.beginPath()
+  // border-radius: 10px 45px 45px 10px (scaled)
+  ctx.roundRect(-10, -bh/2, bw, bh, [6, 22, 22, 6])
+  ctx.fill()
+  
+  // Shadow for depth
+  ctx.fillStyle = 'rgba(0,0,0,0.15)'
+  ctx.beginPath()
+  ctx.roundRect(-10, bh/2 - 4, bw, 4, [0, 0, 22, 6])
+  ctx.fill()
 
-  // Muzzle
-  ctx.fillStyle = colors.barrel[2]
-  ctx.beginPath(); ctx.arc(40, 0, 8, 0, Math.PI * 2); ctx.fill()
-  ctx.fillStyle = colors.barrel[1]
-  ctx.beginPath(); ctx.arc(40, 0, 4, 0, Math.PI * 2); ctx.fill()
+  // Shared Golden Band
+  ctx.fillStyle = colors.gold
+  ctx.fillRect(-10 + bw * 0.25, -bh/2, 6, bh)
+  
+  // Wide Muzzle Mouth (Flare)
+  const mw = 10, mh = 42
+  ctx.fillStyle = colors.primary
+  ctx.beginPath()
+  ctx.roundRect(-10 + bw - 4, -mh/2, mw, mh, 8)
+  ctx.fill()
+  
+  // Muzzle Ring distinction
+  ctx.strokeStyle = 'rgba(0,0,0,0.1)'
+  ctx.lineWidth = 4
+  ctx.beginPath()
+  ctx.roundRect(-10 + bw - 4, -mh/2, mw, mh, 8)
+  ctx.stroke()
+  
+  ctx.restore()
+
+  // 2. Draw Wheel (In front of barrel base)
+  ctx.save()
+  const wr = 11
+  const wy = 1
+  
+  // Main wheel disk
+  ctx.fillStyle = colors.wheelBg
+  ctx.beginPath()
+  ctx.arc(0, wy, wr, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Wheel Border
+  ctx.strokeStyle = colors.accent
+  ctx.lineWidth = 4
+  ctx.stroke()
+  
+  // Hub Cap
+  ctx.fillStyle = '#fff'
+  ctx.beginPath()
+  ctx.arc(0, wy, 5, 0, Math.PI * 2)
+  ctx.fill()
+  
+  ctx.restore()
 
   ctx.restore()
 }
+
 
 // ─── Trajectory ──────────────────────────────────────────────────────────────
 
@@ -280,18 +328,63 @@ export function drawTrajectory(ctx, points, scale, offsetX, offsetY, color = '#1
 
 export function drawBall(ctx, x, y, scale, offsetX, offsetY, color = '#1CAB55', radius = 9) {
   const { sx, sy } = worldToScreen(x, y, scale, offsetX, offsetY)
-  const hl = radius * 0.28
   ctx.save()
-  ctx.shadowBlur = 18
-  ctx.shadowColor = color
-  ctx.beginPath(); ctx.arc(Math.round(sx), Math.round(sy), radius, 0, Math.PI * 2)
-  ctx.fillStyle = color; ctx.fill()
-  ctx.shadowBlur = 0
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke()
-  ctx.beginPath(); ctx.arc(Math.round(sx - hl), Math.round(sy - hl), hl, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
+  
+  // Determine if it's the Grey Cannonball or the Orange Energy Sphere
+  const isOrange = color.toLowerCase() === '#ea580c'
+  const isGrey = color.toLowerCase() === '#374151'
+
+  if (isGrey) {
+    // Moderne Grey Cannonball
+    // background: radial-gradient(circle at 30% 30%, #555, #222);
+    const grad = ctx.createRadialGradient(sx - radius * 0.4, sy - radius * 0.4, 0, sx, sy, radius)
+    grad.addColorStop(0, '#555')
+    grad.addColorStop(1, '#222')
+    
+    ctx.shadowBlur = 6
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'
+    ctx.shadowOffsetX = 2
+    ctx.shadowOffsetY = 2
+    
+    ctx.beginPath()
+    ctx.arc(sx, sy, radius, 0, Math.PI * 2)
+    ctx.fillStyle = grad
+    ctx.fill()
+  } else if (isOrange) {
+    // Rugged Orange Energy Sphere
+    // background: radial-gradient(circle at 50% 50%, #fff, #e67e22 70%);
+    const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, radius)
+    grad.addColorStop(0, '#fff')
+    grad.addColorStop(0.7, '#e67e22')
+    
+    ctx.shadowBlur = 15
+    ctx.shadowColor = 'rgba(255, 223, 0, 0.8)'
+    
+    ctx.beginPath()
+    ctx.arc(sx, sy, radius, 0, Math.PI * 2)
+    ctx.fillStyle = grad
+    ctx.fill()
+    
+    // Inset white glow
+    ctx.strokeStyle = 'white'
+    ctx.lineWidth = 2
+    ctx.stroke()
+  } else {
+    // Default Ball Style
+    const hl = radius * 0.28
+    ctx.shadowBlur = 18
+    ctx.shadowColor = color
+    ctx.beginPath(); ctx.arc(Math.round(sx), Math.round(sy), radius, 0, Math.PI * 2)
+    ctx.fillStyle = color; ctx.fill()
+    ctx.shadowBlur = 0
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke()
+    ctx.beginPath(); ctx.arc(Math.round(sx - hl), Math.round(sy - hl), hl, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
+  }
+  
   ctx.restore()
 }
+
 
 // ─── Time dots ───────────────────────────────────────────────────────────────
 

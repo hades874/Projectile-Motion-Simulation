@@ -9,12 +9,22 @@ import styles from './Forces.module.css'
 
 const s = strings.motion
 
-function CSSObject({ type }) {
+function CSSObject({ type, isMoving, flipped }) {
   if (type === 'car') {
     return (
-      <div className={styles.car}>
-        <div className={`${styles.carWheel} ${styles.wheelLeft}`} />
-        <div className={`${styles.carWheel} ${styles.wheelRight}`} />
+      <div className={`${styles.carContainer} ${!isMoving ? styles.notMoving : ''} ${flipped ? styles.flipped : ''}`}>
+        <div className={styles.carShadow} />
+        <div className={styles.carBouncer}>
+          <div className={styles.carTop}>
+            <div className={styles.window} />
+          </div>
+          <div className={styles.carBody}>
+            <div className={styles.headlight} />
+            <div className={styles.taillight} />
+          </div>
+          <div className={`${styles.wheel} ${styles.wheelFront}`} />
+          <div className={`${styles.wheel} ${styles.wheelBack}`} />
+        </div>
       </div>
     )
   }
@@ -28,9 +38,9 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
   const a   = accel(netMotionForce(Fapplied, obj.mass, obj.mu_s, obj.mu_k, boxV, frictionOn), obj.mass)
 
   // Object sizes for positioning
-  const sizes = { ice: 60, car: 120, fridge: 50, box: 70 }
+  const sizes = { ice: 60, car: 160, fridge: 50, box: 70 }
   const size = sizes[selectedObject] || 50
-  const objH = selectedObject === 'car' ? 55 : size
+  const objH = selectedObject === 'car' ? 90 : size
 
   return (
     <div className={styles.tabLayout}>
@@ -45,13 +55,17 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
               <div
                 className={styles.objectContainer}
                 style={{
-                  left: boxSX - (selectedObject === 'car' ? 60 : size / 2),
+                  left: boxSX - (selectedObject === 'car' ? 80 : size / 2),
                   top: gy - objH - 2,
-                  width: selectedObject === 'car' ? 120 : size,
+                  width: selectedObject === 'car' ? 160 : size,
                   height: objH
                 }}
               >
-                <CSSObject type={selectedObject} />
+                <CSSObject 
+                  type={selectedObject} 
+                  isMoving={isRunning && Math.abs(boxV) > 0.05}
+                  flipped={Fapplied < 0}
+                />
               </div>
             </>
           )
@@ -59,6 +73,12 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
       </ForceCanvas>
 
       <div className={styles.panel}>
+        <div className={styles.instructionBox}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--info)', flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <p className={`${styles.instructionText} bn`}>{s.hint}</p>
+        </div>
         <GuideCard title={strings.guideTitle} items={s.guides} />
         <div className={styles.paramRow}>
           <div className={styles.paramHeader}>

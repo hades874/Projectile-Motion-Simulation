@@ -684,15 +684,15 @@ export function drawTug(ctx, w, h, state) {
     drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, true)
   })
 
-  // Cart in the middle
-  drawCart(ctx, markerSX, gy)
-
   // Rope
   const ropeY = gy - 20
   const lActive = leftTeam.filter(Boolean).length
   const rActive = rightTeam.filter(Boolean).length
   const tension = Math.min((lActive + rActive) / 3, 1)
   drawRope(ctx, wx(-7.5, w), ropeY, wx(7.5, w), markerSX, state.isRunning, tension)
+
+  // Cart in the middle
+  drawCart(ctx, markerSX, gy)
 
   // Winner overlay
   if (winner) {

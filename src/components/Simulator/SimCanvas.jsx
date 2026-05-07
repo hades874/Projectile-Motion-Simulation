@@ -96,29 +96,31 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
       const pos = position(params.v0, params.theta, params.h0, clampT)
       drawBall(ctx, pos.x, pos.y, scale, offsetX, offsetY, ballColor, ballRadius)
 
-      if (isFinished) {
+      if (t >= results.T) {
         drawImpactMarker(ctx, pos.x, pos.y, scale, offsetX, offsetY, ballColor)
       }
 
-      if (overlays.vectors && (isPlaying || isPaused)) {
+      if (overlays.vectors && (isPlaying || isPaused) && t < results.T) {
         const vel = velocity(params.v0, params.theta, clampT)
         drawVectors(ctx, pos.x, pos.y, vel.vx, vel.vy, scale, offsetX, offsetY)
       }
 
-      if (comparison && (isPlaying || isPaused)) {
+      if (comparison && (isPlaying || isPaused || isFinished)) {
         const cClamp = Math.min(t, comparison.results.T)
         const cp     = comparison.params
         const cpos   = position(cp.v0, cp.theta, cp.h0, cClamp)
-        drawBall(ctx, cpos.x, cpos.y, scale, offsetX, offsetY, '#EA580C')
+        drawBall(ctx, cpos.x, cpos.y, scale, offsetX, offsetY, '#EA580C', ballRadius)
 
-        if (overlays.vectors) {
+        if (t >= comparison.results.T) {
+          drawImpactMarker(ctx, cpos.x, cpos.y, scale, offsetX, offsetY, '#EA580C')
+        }
+
+        if (overlays.vectors && (isPlaying || isPaused) && t < comparison.results.T) {
           const cvel = velocity(cp.v0, cp.theta, cClamp)
           drawVectors(ctx, cpos.x, cpos.y, cvel.vx, cvel.vy, scale, offsetX, offsetY)
         }
       }
     } else {
-      drawBall(ctx, 0, params.h0, scale, offsetX, offsetY, ballColor, ballRadius)
-      
       if (overlays.vectors) {
         const vel = velocity(params.v0, params.theta, 0)
         drawVectors(ctx, 0, params.h0, vel.vx, vel.vy, scale, offsetX, offsetY)
@@ -138,9 +140,10 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
   // RAF loop: advance time when playing, keep redrawing for background & impact ripple
   useAnimationFrame((delta) => {
     if (isPlaying) {
+      const maxT = comparison ? Math.max(results.T, comparison.results.T) : results.T
       const newT = animation.t + delta * animation.speed
-      if (newT >= results.T) {
-        onAnimTick(results.T, 'finished')
+      if (newT >= maxT) {
+        onAnimTick(maxT, 'finished')
       } else {
         onAnimTick(newT, 'playing')
       }
