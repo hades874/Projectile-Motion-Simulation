@@ -208,7 +208,7 @@ function drawBox(ctx, cx, cy, size, label) {
   
   // Main box
   ctx.fillStyle = '#EA580C'
-  ctx.beginPath(); ctx.roundRect(cx - hs, cy - size, size, size, 4); ctx.fill()
+  ctx.beginPath(); ctx.roundRect(Math.round(cx - hs), Math.round(cy - size), Math.round(size), Math.round(size), 4); ctx.fill()
   
   // Border
   ctx.strokeStyle = 'rgba(0,0,0,0.2)'
@@ -240,7 +240,7 @@ function drawSprite(ctx, key, cx, groundY, height) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
   ctx.fill()
   
-  ctx.drawImage(img, cx - w / 2, groundY - height, w, height)
+  ctx.drawImage(img, Math.round(cx - w / 2), Math.round(groundY - height), Math.round(w), Math.round(height))
   ctx.restore()
 }
 
@@ -291,7 +291,7 @@ function drawCart(ctx, cx, cy) {
   
   // Cart Body
   ctx.fillStyle = '#1CAB55'
-  ctx.beginPath(); ctx.roundRect(cx - cw / 2, cy - ch, cw, ch, 8); ctx.fill()
+  ctx.beginPath(); ctx.roundRect(Math.round(cx - cw / 2), Math.round(cy - ch), Math.round(cw), Math.round(ch), 8); ctx.fill()
   ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5; ctx.stroke()
   
   // Wheels

@@ -9,6 +9,9 @@
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -19,7 +22,27 @@ body {
   background: var(--bg);
   min-height: 100dvh;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Sharp Rendering Fixes */
+img, canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto; /* Fallback to default for smooth scaling if needed */
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent blurriness on transforms */
+.sharp-transform {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 
 #root {
   min-height: 100dvh;

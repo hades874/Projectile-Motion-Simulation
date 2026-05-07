@@ -32,6 +32,10 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
     const canvas = canvasRef.current
     if (!canvas || !width || !height) return
     const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+
+    ctx.save()
+    ctx.scale(dpr, dpr)
 
     const { color: ballColor, radius: ballRadius } = PROJECTILE_TYPES[params.projectileType ?? 'ball']
 
@@ -126,6 +130,8 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
         drawVectors(ctx, 0, cp.h0, cvel.vx, cvel.vy, scale, offsetX, offsetY)
       }
     }
+
+    ctx.restore()
   }, [width, height, points, params, results, animation, overlays, comparison, degenerate,
       isPlaying, isPaused, isFinished, isIdle])
 
@@ -146,9 +152,11 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
   useEffect(() => { draw() }, [draw, animation.t])
 
   useEffect(() => {
-    if (canvasRef.current && width && height) {
-      canvasRef.current.width  = width
-      canvasRef.current.height = height
+    const canvas = canvasRef.current
+    if (canvas && width && height) {
+      const dpr = window.devicePixelRatio || 1
+      canvas.width  = width * dpr
+      canvas.height = height * dpr
       draw()
     }
   }, [width, height, draw])

@@ -11,7 +11,12 @@ export function ForceCanvas({ drawFn, state, onTick, children }) {
     const canvas = canvasRef.current
     if (!canvas || !width || !height) return
     const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+
+    ctx.save()
+    ctx.scale(dpr, dpr)
     drawFn(ctx, width, height, state)
+    ctx.restore()
   }, [drawFn, state, width, height])
 
   useAnimationFrame((delta) => {
@@ -27,8 +32,9 @@ export function ForceCanvas({ drawFn, state, onTick, children }) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas && width && height) {
-      canvas.width  = width
-      canvas.height = height
+      const dpr = window.devicePixelRatio || 1
+      canvas.width  = width * dpr
+      canvas.height = height * dpr
       draw()
     }
   }, [width, height, draw])

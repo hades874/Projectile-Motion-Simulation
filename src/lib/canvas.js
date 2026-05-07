@@ -184,7 +184,7 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
     colGrad.addColorStop(1,   isComparison ? '#7C2D12' : '#374151')
     ctx.fillStyle = colGrad
     ctx.beginPath()
-    ctx.roundRect(offsetX - 8, launchY + 6, 16, platformH - 6, [0, 0, 4, 4])
+    ctx.roundRect(Math.round(offsetX - 8), Math.round(launchY + 6), 16, Math.round(platformH - 6), [0, 0, 4, 4])
     ctx.fill()
     // Cap plate
     const capGrad = ctx.createLinearGradient(0, launchY - 4, 0, launchY + 8)
@@ -192,7 +192,7 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
     capGrad.addColorStop(1, isComparison ? '#9A3412' : '#374151')
     ctx.fillStyle = capGrad
     ctx.beginPath()
-    ctx.roundRect(offsetX - 22, launchY - 4, 44, 10, 3)
+    ctx.roundRect(Math.round(offsetX - 22), Math.round(launchY - 4), 44, 10, 3)
     ctx.fill()
     // Height indicator tick
     ctx.strokeStyle = isComparison ? 'rgba(234, 88, 12, 0.4)' : 'rgba(39,79,227,0.35)'
@@ -284,11 +284,11 @@ export function drawBall(ctx, x, y, scale, offsetX, offsetY, color = '#1CAB55', 
   ctx.save()
   ctx.shadowBlur = 18
   ctx.shadowColor = color
-  ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2)
+  ctx.beginPath(); ctx.arc(Math.round(sx), Math.round(sy), radius, 0, Math.PI * 2)
   ctx.fillStyle = color; ctx.fill()
   ctx.shadowBlur = 0
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke()
-  ctx.beginPath(); ctx.arc(sx - hl, sy - hl, hl, 0, Math.PI * 2)
+  ctx.beginPath(); ctx.arc(Math.round(sx - hl), Math.round(sy - hl), hl, 0, Math.PI * 2)
   ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
   ctx.restore()
 }
@@ -437,7 +437,7 @@ export function drawDimensionLines(ctx, points, scale, offsetX, offsetY, results
 
   // Peak dot
   ctx.fillStyle = '#274FE3'
-  ctx.beginPath(); ctx.arc(peakSx, peakSy, 5, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.arc(Math.round(peakSx), Math.round(peakSy), 5, 0, Math.PI * 2); ctx.fill()
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke()
 
   // Landing dot
