@@ -30,14 +30,14 @@
 .screen::after {
   content: '';
   position: absolute;
-  top: 12%;
-  left: 12%;
-  width: 60px;
-  height: 60px;
+  top: calc(56px + 48px + 24px);
+  left: 14%;
+  width: 56px;
+  height: 56px;
   background: #fbbf24;
   border-radius: 50%;
   box-shadow: 0 0 50px #f59e0b;
-  opacity: 0.8;
+  opacity: 0.9;
   z-index: 0;
 }
 

@@ -1,27 +1,26 @@
 .card {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 200, 0, 0.3);
   border-radius: var(--r-lg);
-  padding: var(--s-4);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  margin-bottom: var(--s-4);
-  position: relative;
   overflow: hidden;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, #FFD600, #FFAB00);
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: center;
-  margin-bottom: var(--s-3);
+  justify-content: space-between;
+  padding: var(--s-3) var(--s-4);
+  background: linear-gradient(90deg, #fffbeb, #fef9c3);
+  border: none;
+  cursor: pointer;
+  gap: var(--s-2);
+  text-align: left;
+}
+
+.header:active {
+  background: #fef3c7;
 }
 
 .titleRow {
@@ -31,65 +30,40 @@
 }
 
 .icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .title {
   font-weight: 700;
-  color: #92400E;
-  font-size: 0.95rem;
+  color: #92400e;
+  font-size: 0.875rem;
 }
 
-.closeBtn {
-  background: none;
-  border: none;
-  color: #9CA3AF;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0 var(--s-1);
+.chevron {
+  color: #92400e;
+  flex-shrink: 0;
+  transition: transform 200ms var(--ease-out);
 }
 
-.closeBtn:hover {
-  color: #4B5563;
+.chevronOpen {
+  transform: rotate(180deg);
 }
 
 .list {
   margin: 0;
-  padding-left: var(--s-4);
+  padding: var(--s-3) var(--s-4) var(--s-3) calc(var(--s-4) + 16px);
   list-style-type: '✨ ';
+  border-top: 1px solid rgba(255, 200, 0, 0.2);
 }
 
 .item {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1.5;
-  color: #4B5563;
+  color: #4b5563;
   margin-bottom: var(--s-2);
 }
 
 .item:last-child {
   margin-bottom: 0;
-}
-
-.openBtn {
-  position: fixed;
-  bottom: calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
-  right: calc(var(--s-6) + env(safe-area-inset-right, 0px));
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  transition: transform 0.2s;
-}
-
-.openBtn:hover {
-  transform: scale(1.1);
 }
