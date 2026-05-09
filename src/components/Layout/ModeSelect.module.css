@@ -120,16 +120,17 @@
 .cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--s-6);
+  gap: var(--s-4);
   width: 100%;
-  max-width: 340px;
+  max-width: 100%;
   z-index: 1;
 }
 
 @media (min-width: 640px) {
   .cards {
     grid-template-columns: 1fr 1fr;
-    max-width: 680px;
+    max-width: 720px;
+    gap: var(--s-6);
   }
 }
 
@@ -160,9 +161,30 @@
 
 @media (max-width: 639px) {
   .card {
-    flex-direction: column;
-    text-align: center;
-    padding: var(--s-6) var(--s-4) var(--s-5);
+    flex-direction: row;
+    text-align: left;
+    padding: var(--s-5) var(--s-4);
+    gap: var(--s-4);
+  }
+
+  .cardBadge {
+    top: 10px;
+    right: 10px;
+  }
+
+  .cardIcon {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+
+  .icon3d {
+    width: 48px;
+    height: 48px;
+  }
+
+  .cardTitle {
+    font-size: 18px;
   }
 }
 

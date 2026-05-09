@@ -407,38 +407,38 @@ export function drawTrajectoryDots(ctx, points, T, scale, offsetX, offsetY, colo
 
 // ─── Vectors ─────────────────────────────────────────────────────────────────
 
-export function drawVectors(ctx, x, y, vx, vy, scale, offsetX, offsetY) {
+export function drawVectors(ctx, x, y, vx, vy, scale, offsetX, offsetY, canvasW = 600) {
   const { sx, sy } = worldToScreen(x, y, scale, offsetX, offsetY)
   const speed = Math.max(Math.sqrt(vx * vx + vy * vy), 0.1)
-  
-  // Use a fixed pixel target for arrow length so they are always visible
-  // regardless of the graph's world scale.
-  const targetPx = 100 
+
+  // Scale arrow sizes proportionally on small canvases (mobile)
+  const sf = Math.min(canvasW / 600, 1)
+
+  const targetPx = 100 * sf
   const vs = targetPx / speed
-  
-  // Main velocity: Solid and thick
-  drawArrow(ctx, sx, sy, sx + vx * vs, sy - vy * vs, '#2563EB', 'v',  6, false)
-  
-  // Components: Dashed and slightly thinner
-  drawArrow(ctx, sx, sy, sx + vx * vs, sy,           '#EA580C', 'vₓ', 4.5, true) 
-  drawArrow(ctx, sx, sy, sx,           sy - vy * vs, '#16A34A', 'vᵧ', 4.5, true)
-  
-  // Gravity: Solid (fixed length 90px)
-  drawArrow(ctx, sx, sy, sx,           sy + 90,       '#DC2626', 'g',  5, false)
+  const gravLen = 90 * sf
+
+  drawArrow(ctx, sx, sy, sx + vx * vs, sy - vy * vs, '#2563EB', 'v',  6 * sf,   false, sf)
+  drawArrow(ctx, sx, sy, sx + vx * vs, sy,           '#EA580C', 'vₓ', 4.5 * sf, true,  sf)
+  drawArrow(ctx, sx, sy, sx,           sy - vy * vs, '#16A34A', 'vᵧ', 4.5 * sf, true,  sf)
+  drawArrow(ctx, sx, sy, sx,           sy + gravLen,  '#DC2626', 'g',  5 * sf,   false, sf)
 }
 
-function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false) {
+function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false, sf = 1) {
   const dx = x2 - x1, dy = y2 - y1
   const len = Math.sqrt(dx * dx + dy * dy)
   if (len < 5) return
-  
+
+  const hs = 22 * sf
+  const fontSize = Math.round(20 * sf)
+
   ctx.save()
-  
+
   // White outline for maximum contrast
   ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = lw + 2.5
   if (dashed) ctx.setLineDash([5, 3])
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
-  
+
   // Main arrow shaft
   ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw
   ctx.lineCap = 'round'
@@ -446,16 +446,14 @@ function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false) {
   else ctx.setLineDash([])
 
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
-  ctx.setLineDash([]) // Reset for arrowhead and tail
+  ctx.setLineDash([])
 
-  // Arrow Tail (starting dot)
+  // Arrow tail dot
   ctx.beginPath(); ctx.arc(x1, y1, lw * 1.2, 0, Math.PI * 2); ctx.fill()
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke()
-  
-  // Balanced Arrowhead
+
+  // Arrowhead
   const angle = Math.atan2(dy, dx)
-  const hs = 22 // High-visibility arrowhead size
-  
   ctx.beginPath()
   ctx.moveTo(x2, y2)
   ctx.lineTo(x2 - hs * Math.cos(angle - 0.45), y2 - hs * Math.sin(angle - 0.45))
@@ -465,22 +463,21 @@ function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false) {
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke()
 
   if (label) {
-    ctx.font = 'bold 20px Inter, sans-serif'
+    ctx.font = `bold ${fontSize}px Inter, sans-serif`
     ctx.shadowBlur = 10; ctx.shadowColor = '#fff'
-    
-    // Explicit offsets for each label type to prevent overlap
+
     let ox = 0, oy = 0
-    if (label === 'v')  { ox = 15;  oy = -20; }
-    if (label === 'vₓ') { ox = 18;  oy = 20;  }
-    if (label === 'vᵧ') { ox = -25; oy = -18; }
-    if (label === 'g')  { ox = 0;   oy = 26;  }
-    
+    if (label === 'v')  { ox = 15 * sf;  oy = -20 * sf; }
+    if (label === 'vₓ') { ox = 18 * sf;  oy =  20 * sf; }
+    if (label === 'vᵧ') { ox = -25 * sf; oy = -18 * sf; }
+    if (label === 'g')  { ox = 0;        oy =  26 * sf; }
+
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillStyle = color
     ctx.fillText(label, x2 + ox, y2 + oy)
   }
-  
+
   ctx.restore()
 }
 

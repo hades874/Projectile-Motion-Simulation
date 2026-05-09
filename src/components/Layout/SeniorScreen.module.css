@@ -202,7 +202,30 @@
   border-radius: var(--r-pill);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
   z-index: 20;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .actionBar {
+    gap: 6px;
+    padding: 6px 10px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .actionBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 5px;
+  }
+
+  .launchBtn {
+    min-width: 110px;
+  }
+
+  .speedBtn {
+    padding: 8px 10px;
+  }
 }
 
 .actionBtn {

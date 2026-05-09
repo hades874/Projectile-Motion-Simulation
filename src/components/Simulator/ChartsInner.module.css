@@ -2,14 +2,35 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
-  padding: var(--s-4);
+  padding: var(--s-2) 0;
 }
 
 .chart {}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-2);
+}
 
 .chartLabel {
   font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--fg-2);
-  margin-bottom: var(--s-2);
+  margin: 0;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }

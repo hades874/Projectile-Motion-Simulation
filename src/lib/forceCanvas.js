@@ -673,7 +673,17 @@ export function drawTug(ctx, w, h, state) {
   ctx.fillText('শেষ রেখা', rightWin, gy - 85)
   ctx.restore()
 
-  // Left team (Red, pull left)
+  // Rope (drawn first so it appears behind cart and people)
+  const ropeY = gy - 20
+  const lActive = leftTeam.filter(Boolean).length
+  const rActive = rightTeam.filter(Boolean).length
+  const tension = Math.min((lActive + rActive) / 3, 1)
+  drawRope(ctx, wx(-7.5, w), ropeY, wx(7.5, w), markerSX, state.isRunning, tension)
+
+  // Cart in the middle (drawn before people so people render on top)
+  drawCart(ctx, markerSX, gy)
+
+  // Left team (Red, pull left) — drawn last so they appear in front of cart
   leftTeam.forEach((active, i) => {
     const px = wx(-7.6, w) + i * 32
     drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning, true)
@@ -683,16 +693,6 @@ export function drawTug(ctx, w, h, state) {
     const px = wx(7.6, w) - i * 32
     drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, true)
   })
-
-  // Rope
-  const ropeY = gy - 20
-  const lActive = leftTeam.filter(Boolean).length
-  const rActive = rightTeam.filter(Boolean).length
-  const tension = Math.min((lActive + rActive) / 3, 1)
-  drawRope(ctx, wx(-7.5, w), ropeY, wx(7.5, w), markerSX, state.isRunning, tension)
-
-  // Cart in the middle
-  drawCart(ctx, markerSX, gy)
 
   // Winner overlay
   if (winner) {

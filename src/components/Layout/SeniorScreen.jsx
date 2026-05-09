@@ -6,7 +6,10 @@ import { Toggle }          from '../Common/Toggle.jsx'
 import { Tooltip }         from '../Common/Tooltip.jsx'
 import { Slider }          from '../Common/Slider.jsx'
 import { FormulaPanel }    from '../Simulator/FormulaPanel.jsx'
+import { GraphsPanel }     from '../Simulator/GraphsPanel.jsx'
 import { ComparisonPanel } from '../Simulator/ComparisonPanel.jsx'
+import { IntroModal }      from '../Common/IntroModal.jsx'
+import TourOverlay         from '../Common/TourOverlay.jsx'
 import { formatNum }       from '../../lib/bangla.js'
 import glossary  from '../../content/glossary.bn.json'
 import strings   from '../../content/senior.bn.json'
@@ -20,7 +23,7 @@ const PROJECTILE_OPTIONS = [
 
 const TAB_ICONS = {
   controls:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 3v2M8 13v2M3 8h2M13 8h2"/><circle cx="16" cy="16" r="3"/><path d="M16 11v2M16 21v-2M11 16h2M21 16h-2"/></svg>,
-  vectors:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M15 8l4 4-4 4"/></svg>,
+  vectors:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
   formulas:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>,
   comparison: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>,
 }
@@ -42,6 +45,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
   const isIdle     = animation.status === 'idle'
   const isFinished = animation.status === 'finished'
   const showImpact = isFinished || isPlaying
+  const hasComp    = !!comparison
 
   const [activeTab, setActiveTab] = useState('controls')
 
@@ -63,6 +67,75 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
     { id: 'comparison', label: s.tabs.comparison },
   ]
 
+  const seniorSteps = [
+    {
+      targetId: 'senior-canvas',
+      placement: 'right',
+      title: {
+        beginner: 'ক্যানভাস এরিয়া',
+        expert: 'সিমুলেশন ক্যানভাস'
+      },
+      body: {
+        beginner: 'এখানে বলের গতিপথ দেখতে পাবে। আপনি জুম ইন/আউট করতে মাউস স্ক্রল ব্যবহার করতে পারেন।',
+        expert: 'প্রজেক্টাইলের ট্র্যাজেক্টরি এখানে রেন্ডার হয়। এটি রিয়েল-টাইম ফিজিক্স ক্যালকুলেশন প্রদর্শন করে।'
+      }
+    },
+    {
+      targetId: 'senior-actionbar',
+      placement: 'top',
+      title: {
+        beginner: 'অ্যাকশন বাটন',
+        expert: 'সিমুলেশন কন্ট্রোলস'
+      },
+      body: {
+        beginner: 'সিমুলেশন শুরু, বিরতি এবং গতি নিয়ন্ত্রণের জন্য এই বাটনগুলো ব্যবহার করুন।',
+        expert: 'লঞ্চ, পজ এবং প্লেব্যাক স্পিড অ্যাডজাস্ট করার ইন্টারফেস।'
+      }
+    },
+    {
+      targetId: 'senior-sidebar-tabs',
+      placement: 'left',
+      title: {
+        beginner: 'ট্যাব মেনু',
+        expert: 'সাইডবার নেভিগেশন'
+      },
+      body: {
+        beginner: 'এখানে বিভিন্ন মোড যেমন কন্ট্রোল, ভেক্টর, সূত্র এবং তুলনার মধ্যে সুইচ করা যায়।',
+        expert: 'প্যারামিটার অ্যাডজাস্টমেন্ট, ভেক্টর ভিজ্যুয়ালাইজেশন এবং গাণিতিক বিশ্লেষণের জন্য ট্যাব।'
+      }
+    },
+    {
+      targetId: 'senior-params',
+      placement: 'left',
+      title: {
+        beginner: 'প্যারামিটার স্লাইডার',
+        expert: 'ইনপুট ভেরিয়েবলস'
+      },
+      body: {
+        beginner: 'আদি বেগ, কোণ এবং উচ্চতা পরিবর্তন করে দেখুন বলটি কোথায় গিয়ে পড়ে।',
+        expert: 'v₀, θ এবং h₀ ভ্যালু সেট করে বিভিন্ন সিনারিও সিমুলেট করা যায়।'
+      }
+    },
+    {
+      targetId: 'senior-results',
+      placement: 'left',
+      title: {
+        beginner: 'ফলাফল কার্ড',
+        expert: 'আউটপুট ডেটা'
+      },
+      body: {
+        beginner: 'এখানে উড়ানের সময়, সর্বোচ্চ উচ্চতা এবং পাল্লা সরাসরি দেখতে পাবেন।',
+        expert: 'ক্যালকুলেটেড ফলাফল: R (পাল্লা), H (সর্বোচ্চ উচ্চতা) এবং T (বিচরণকাল)।'
+      }
+    }
+  ]
+
+  const handleBeforeStep = (step) => {
+    if (['senior-params', 'senior-results'].includes(step.targetId)) {
+      setActiveTab('controls');
+    }
+  };
+
   return (
     <div className={styles.screen}>
       {/* ── Header ── */}
@@ -82,9 +155,9 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
         <div className={styles.headerSpacer} />
 
         <div className={styles.headerActions}>
-          <button 
-            className={`${styles.resetBtn} ${isFinished ? styles.resetBtnFinished : ''}`} 
-            onClick={reset} 
+          <button
+            className={`${styles.resetBtn} ${isFinished ? styles.resetBtnFinished : ''}`}
+            onClick={reset}
             aria-label={s.buttons.reset}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -99,12 +172,12 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
       <div className={styles.mainArea}>
         {/* ── Canvas ── */}
         <div className={styles.canvasContainer}>
-          <div className={styles.canvasWrap}>
+          <div className={styles.canvasWrap} data-tour="senior-canvas">
             <SimCanvas state={state} onAnimTick={handleAnimTick} />
           </div>
 
           {/* Floating action bar */}
-          <div className={styles.actionBar}>
+          <div className={styles.actionBar} data-tour="senior-actionbar">
             {(isIdle || isFinished) && (
               <button
                 className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled : ''}`}
@@ -149,7 +222,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
 
         {/* ── Sidebar ── */}
         <aside className={styles.sidebar}>
-          <div className={styles.sidebarTabs}>
+          <div className={styles.sidebarTabs} data-tour="senior-sidebar-tabs">
             {sidebarTabs.map(tab => (
               <button
                 key={tab.id}
@@ -164,12 +237,12 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
 
           <div className={styles.sidebarContent}>
 
-            {/* Controls */}
+            {/* ── Controls ── */}
             {activeTab === 'controls' && (
               <div className={styles.tabPanel}>
                 <div className={`${styles.sectionTitle} bn`}>প্যারামিটার</div>
 
-                <div className={styles.paramsSection}>
+                <div className={styles.paramsSection} data-tour="senior-params">
                   <Tooltip text={glossary.v0}>
                     <Slider label={s.controls.v0} value={params.v0} min={1} max={100} step={1} unit={` ${s.controls.v0Unit}`} onChange={v => setParam('v0', v)} />
                   </Tooltip>
@@ -181,8 +254,6 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                   </Tooltip>
                 </div>
 
-
-
                 {degenerate && (
                   <div className={styles.hintBox}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
@@ -192,19 +263,37 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                   </div>
                 )}
 
-                <div className={`${styles.sectionTitle} bn`}>ফলাফল</div>
-                <div className={styles.resultsGrid}>
-                  <ResultCard label="R"    sublabel={s.readouts.range}  value={fmt(results.R)}     unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
-                  <ResultCard label="H"    sublabel={s.readouts.height} value={fmt(results.H)}     unit={s.readouts.heightUnit} meta={RESULT_META.H} />
-                  <ResultCard label="T"    sublabel={s.readouts.time}   value={fmt(results.T, 2)}  unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
-                  {showImpact && results.impact && (
-                    <ResultCard label="v" sublabel={s.readouts.impactSpeed} value={fmt(results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
+                {/* Results — main trajectory */}
+                <div className={`${styles.sectionTitle} bn`}>
+                  {hasComp ? 'ফলাফল — প্রক্ষেপ ১' : 'ফলাফল'}
+                </div>
+                <div className={styles.resultsGrid} data-tour="senior-results">
+                  <ResultCard label={hasComp ? 'R₁' : 'R'} sublabel={s.readouts.range}  value={fmt(results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
+                  <ResultCard label={hasComp ? 'H₁' : 'H'} sublabel={s.readouts.height} value={fmt(results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} />
+                  <ResultCard label={hasComp ? 'T₁' : 'T'} sublabel={s.readouts.time}   value={fmt(results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
+                  {(showImpact || hasComp) && results.impact && (
+                    <ResultCard label={hasComp ? 'v₁' : 'v'} sublabel={s.readouts.impactSpeed} value={fmt(results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
                   )}
                 </div>
+
+                {/* Results — comparison trajectory */}
+                {hasComp && comparison.results && (
+                  <>
+                    <div className={`${styles.sectionTitle} bn`}>ফলাফল — প্রক্ষেপ ২</div>
+                    <div className={styles.resultsGrid}>
+                      <ResultCard label="R₂" sublabel={s.readouts.range}  value={fmt(comparison.results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
+                      <ResultCard label="H₂" sublabel={s.readouts.height} value={fmt(comparison.results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} />
+                      <ResultCard label="T₂" sublabel={s.readouts.time}   value={fmt(comparison.results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
+                      {comparison.results.impact && (
+                        <ResultCard label="v₂" sublabel={s.readouts.impactSpeed} value={fmt(comparison.results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
-            {/* Vectors */}
+            {/* ── Graph Settings + Charts ── */}
             {activeTab === 'vectors' && (
               <div className={styles.tabPanel}>
                 <div className={`${styles.sectionTitle} bn`}>ভিজ্যুয়াল অপশন</div>
@@ -213,19 +302,23 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                   <OverlayRow color="#1CAB55" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} />
                   <OverlayRow color="#6B7280" label={s.overlays.axes}     checked={overlays.axes}    onChange={() => toggleOverlay('axes')} />
                 </div>
+
+                <div className={`${styles.sectionTitle} bn`}>গ্রাফ</div>
+                <GraphsPanel
+                  points={state.points}
+                  comparisonPoints={comparison?.points}
+                />
               </div>
             )}
 
-            {/* Formulas */}
+            {/* ── Formulas ── */}
             {activeTab === 'formulas' && (
               <div className={styles.tabPanel}>
-                <FormulaPanel params={params} results={results} strings={s.formulas} />
+                <FormulaPanel params={params} results={results} comparison={comparison} />
               </div>
             )}
 
-
-
-            {/* Comparison */}
+            {/* ── Comparison ── */}
             {activeTab === 'comparison' && (
               <div className={styles.tabPanel}>
                 <ComparisonPanel comparison={comparison} onSet={setComparison} />
@@ -235,6 +328,28 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
           </div>
         </aside>
       </div>
+
+      <TourOverlay 
+        steps={seniorSteps} 
+        storageKey="10ms_sim_senior_tour"
+        blockedByKey="10ms_sim_senior"
+        onBeforeStep={handleBeforeStep}
+      />
+
+      <IntroModal
+        storageKey="10ms_sim_senior"
+        variant="senior"
+        title="প্রক্ষেপণ গতি"
+        badge="সিনিয়র · এইচএসসি অধ্যায় ৩"
+        description="কোণ, বেগ ও উচ্চতা পরিবর্তন করে প্রক্ষেপণ গতির রহস্য নিজেই আবিষ্কার করো। গ্রাফ, সূত্র ও পাশাপাশি তুলনায় পদার্থবিজ্ঞান আরও স্পষ্ট হয়।"
+        outcomes={[
+          'পাল্লা (R), সর্বোচ্চ উচ্চতা (H) ও উড়ানের সময় (T) নির্ণয় করতে পারবে',
+          '৩০° ও ৬০° কোণে একই পাল্লা পাওয়ার কারণ ব্যাখ্যা করতে পারবে',
+          'বেগের উপাংশ vₓ ও vᵧ এর পরিবর্তন গ্রাফে বিশ্লেষণ করতে পারবে',
+          'দুটি প্রক্ষেপণ পাশাপাশি তুলনা করে পার্থক্য বের করতে পারবে',
+        ]}
+        ctaLabel="সিমুলেশন শুরু করি"
+      />
     </div>
   )
 }

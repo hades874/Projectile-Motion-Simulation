@@ -102,7 +102,7 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
 
       if (overlays.vectors && (isPlaying || isPaused) && t < results.T) {
         const vel = velocity(params.v0, params.theta, clampT)
-        drawVectors(ctx, pos.x, pos.y, vel.vx, vel.vy, scale, offsetX, offsetY)
+        drawVectors(ctx, pos.x, pos.y, vel.vx, vel.vy, scale, offsetX, offsetY, width)
       }
 
       if (comparison && (isPlaying || isPaused || isFinished)) {
@@ -117,19 +117,19 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
 
         if (overlays.vectors && (isPlaying || isPaused) && t < comparison.results.T) {
           const cvel = velocity(cp.v0, cp.theta, cClamp)
-          drawVectors(ctx, cpos.x, cpos.y, cvel.vx, cvel.vy, scale, offsetX, offsetY)
+          drawVectors(ctx, cpos.x, cpos.y, cvel.vx, cvel.vy, scale, offsetX, offsetY, width)
         }
       }
     } else {
       if (overlays.vectors) {
         const vel = velocity(params.v0, params.theta, 0)
-        drawVectors(ctx, 0, params.h0, vel.vx, vel.vy, scale, offsetX, offsetY)
+        drawVectors(ctx, 0, params.h0, vel.vx, vel.vy, scale, offsetX, offsetY, width)
       }
 
       if (comparison && overlays.vectors) {
         const cp = comparison.params
         const cvel = velocity(cp.v0, cp.theta, 0)
-        drawVectors(ctx, 0, cp.h0, cvel.vx, cvel.vy, scale, offsetX, offsetY)
+        drawVectors(ctx, 0, cp.h0, cvel.vx, cvel.vy, scale, offsetX, offsetY, width)
       }
     }
 

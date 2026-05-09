@@ -73,6 +73,19 @@
   box-shadow: var(--sh-card);
 }
 
+@media (max-width: 639px) {
+  .personBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .carContainer {
+    transform: scale(0.75);
+    transform-origin: bottom left;
+  }
+}
+
 .personBtn:active { transform: scale(0.92); }
 
 .personBtn.personActive {
