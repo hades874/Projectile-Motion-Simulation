@@ -4,6 +4,7 @@
   border: 1px solid rgba(255, 200, 0, 0.3);
   border-radius: var(--r-lg);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .header {

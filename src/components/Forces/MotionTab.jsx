@@ -79,7 +79,6 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
           </svg>
           <p className={`${styles.instructionText} bn`}>{s.hint}</p>
         </div>
-        <GuideCard title={strings.guideTitle} items={s.guides} />
         <div className={styles.paramRow}>
           <div className={styles.paramHeader}>
             <span className={`${styles.paramName} bn`}>{s.appliedForce}</span>
@@ -88,7 +87,7 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
           <input
             type="range"
             className={styles.rangeInput}
-            min={-500} max={500} step={5}
+            min={-800} max={800} step={10}
             value={Fapplied}
             onChange={e => setParam('motion', 'Fapplied', Number(e.target.value))}
           />
@@ -107,6 +106,14 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
               </button>
             ))}
           </div>
+          {s.objectTips?.[selectedObject] && (
+            <div className={styles.instructionBox} style={{ marginTop: 8 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--warning)', flexShrink: 0 }}>
+                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+              </svg>
+              <p className={`${styles.instructionText} bn`}>{s.objectTips[selectedObject]}</p>
+            </div>
+          )}
         </div>
 
         <div className={styles.frictionRow}>
@@ -125,13 +132,15 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
           <ReadoutCard label={s.readouts.frictionF}  value={`${Math.abs(Ff).toFixed(0)} N`} />
         </div>
 
+        <GuideCard title={strings.guideTitle} items={s.guides} defaultOpen />
+
         <div className={styles.actions}>
           {isRunning ? (
             <Button variant="secondary" onClick={pause}><span className="bn">{strings.actions.pause}</span></Button>
           ) : (
             <Button variant="primary"   onClick={start}><span className="bn">{strings.actions.start}</span></Button>
           )}
-          <Button variant="ghost" onClick={reset}><span className="bn">{strings.actions.reset}</span></Button>
+          <Button variant="danger" onClick={reset}><span className="bn">{strings.actions.reset}</span></Button>
         </div>
       </div>
     </div>

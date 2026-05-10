@@ -7,39 +7,7 @@
   position: relative;
 }
 
-/* Playful CSS Background Elements */
-.screen::before {
-  content: '';
-  position: absolute;
-  top: 28%;
-  left: 10%;
-  width: 130px;
-  height: 45px;
-  background: white;
-  border-radius: 50px;
-  box-shadow: 
-    60px 20px 0 -10px white, 
-    -40px 10px 0 -5px white,
-    250px 30px 0 5px white,
-    300px 45px 0 -10px white;
-  opacity: 0.8;
-  z-index: 0;
-  animation: float 30s infinite linear;
-}
-
-.screen::after {
-  content: '';
-  position: absolute;
-  top: calc(56px + 48px + 24px);
-  left: 14%;
-  width: 56px;
-  height: 56px;
-  background: #fbbf24;
-  border-radius: 50%;
-  box-shadow: 0 0 50px #f59e0b;
-  opacity: 0.9;
-  z-index: 0;
-}
+/* Sun and clouds are drawn by the canvas; no CSS pseudo-elements needed */
 
 .backgroundDecorations {
   position: absolute;
@@ -82,10 +50,6 @@
 .grassTuft::before { left: -5px; transform: rotate(-15deg); }
 .grassTuft::after { left: 5px; transform: rotate(15deg); }
 
-@keyframes float {
-  from { transform: translateX(-400px); }
-  to { transform: translateX(calc(100vw + 400px)); }
-}
 
 /* Header */
 .header {

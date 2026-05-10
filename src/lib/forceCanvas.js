@@ -20,6 +20,15 @@ Object.entries(SPRITES).forEach(([key, src]) => {
 // For dynamic background geometry
 let bgTime = 0
 
+function drawCloud(ctx, cx, cy, cw, ch) {
+  ctx.save()
+  ctx.fillStyle = 'rgba(255,255,255,0.82)'
+  ctx.beginPath(); ctx.ellipse(cx, cy, cw / 2, ch / 2, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(cx - cw * 0.30, cy + ch * 0.10, cw * 0.30, ch * 0.44, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(cx + cw * 0.28, cy + ch * 0.15, cw * 0.26, ch * 0.38, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.restore()
+}
+
 // World → screen X. World range: [-8, 8] m → [5%, 95%] of canvas width.
 export function wx(worldX, w) {
   return w / 2 + (worldX / 8) * (w * 0.44)
@@ -30,49 +39,74 @@ export function groundY(h) {
 }
 
 function drawBackground(ctx, w, h) {
+  if (w <= 0 || h <= 0) return
   bgTime += 0.01
-  
-  // Clean background (removed solid fill to show CSS background)
-  // Subtle Grid
+  const gy = groundY(h)
+
+  // Opaque sky gradient — ensures ground is always clearly visible at any canvas size
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, gy)
+  skyGrad.addColorStop(0, '#7dd3fc')
+  skyGrad.addColorStop(1, '#bae6fd')
+  ctx.fillStyle = skyGrad
+  ctx.fillRect(0, 0, w, gy)
+
+  // Sun — radius proportional to sky height so it stays correct on mobile
+  const sunR = Math.min(24, Math.max(12, gy * 0.12))
+  const sunX = w * 0.12, sunY = gy * 0.22
   ctx.save()
-  ctx.strokeStyle = 'rgba(209, 213, 219, 0.3)'
+  const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 2)
+  sunGlow.addColorStop(0, '#fbbf24')
+  sunGlow.addColorStop(0.55, '#fbbf24')
+  sunGlow.addColorStop(1, 'rgba(251,191,36,0)')
+  ctx.fillStyle = sunGlow
+  ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 2, 0, Math.PI * 2); ctx.fill()
+  ctx.restore()
+
+  // Clouds — sized relative to canvas width so they never overflow on mobile
+  const cs = Math.min(1, w / 480)
+  drawCloud(ctx, w * 0.38 + Math.sin(bgTime * 0.012) * 10, gy * 0.30, 90 * cs, 34 * cs)
+  if (w > 260) {
+    drawCloud(ctx, w * 0.73 + Math.sin(bgTime * 0.008 + 2) * 10, gy * 0.52, 70 * cs, 27 * cs)
+  }
+
+  // Subtle grid (sky area only)
+  ctx.save()
+  ctx.strokeStyle = 'rgba(209, 213, 219, 0.2)'
   ctx.lineWidth = 1
   const step = 40
   for (let x = 0; x < w; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, gy); ctx.stroke()
   }
-  for (let y = 0; y < h; y += step) {
+  for (let y = 0; y < gy; y += step) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke()
   }
   ctx.restore()
 
-  // Drifting Geometry (Triangle, Circle, Square)
+  // Drifting shapes — sizes scale with sky area so they stay subtle on all screen sizes
   ctx.save()
+  const dim = Math.min(w, gy)
   const shapes = [
-    { type: 'circle',   x: w * 0.1,  y: h * 0.2, size: 40, color: '#E8001D', speed: 0.8 },
-    { type: 'triangle', x: w * 0.85, y: h * 0.4, size: 30, color: '#1CAB55', speed: -1.2 },
-    { type: 'square',   x: w * 0.2,  y: h * 0.7, size: 35, color: '#274FE3', speed: 0.5 }
+    { type: 'circle',   x: w * 0.08, y: gy * 0.25, size: dim * 0.08,  color: '#E8001D', speed: 0.8 },
+    { type: 'triangle', x: w * 0.88, y: gy * 0.55, size: dim * 0.065, color: '#1CAB55', speed: -1.2 },
+    { type: 'square',   x: w * 0.18, y: gy * 0.68, size: dim * 0.07,  color: '#274FE3', speed: 0.5 }
   ]
-
   shapes.forEach(s => {
-    const ox = Math.sin(bgTime * s.speed) * 15
-    const oy = Math.cos(bgTime * s.speed * 0.7) * 15
+    const ox = Math.sin(bgTime * s.speed) * 12
+    const oy = Math.cos(bgTime * s.speed * 0.7) * 10
     const rot = bgTime * s.speed * 0.2
-    
     ctx.save()
     ctx.translate(s.x + ox, s.y + oy)
     ctx.rotate(rot)
     ctx.strokeStyle = s.color
-    ctx.globalAlpha = 0.08
+    ctx.globalAlpha = 0.1
     ctx.lineWidth = 2
-
     if (s.type === 'circle') {
       ctx.beginPath(); ctx.arc(0, 0, s.size / 2, 0, Math.PI * 2); ctx.stroke()
     } else if (s.type === 'triangle') {
-      ctx.beginPath();
-      ctx.moveTo(0, -s.size / 2);
-      ctx.lineTo(s.size / 2, s.size / 2);
-      ctx.lineTo(-s.size / 2, s.size / 2);
+      ctx.beginPath()
+      ctx.moveTo(0, -s.size / 2)
+      ctx.lineTo(s.size / 2, s.size / 2)
+      ctx.lineTo(-s.size / 2, s.size / 2)
       ctx.closePath(); ctx.stroke()
     } else {
       ctx.strokeRect(-s.size / 2, -s.size / 2, s.size, s.size)

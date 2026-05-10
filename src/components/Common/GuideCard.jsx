@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import styles from './GuideCard.module.css'
 
-export function GuideCard({ title, items }) {
-  const [isOpen, setIsOpen] = useState(false)
+export function GuideCard({ title, items, defaultOpen = false }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
     <div className={styles.card}>
