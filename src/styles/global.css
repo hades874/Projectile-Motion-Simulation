@@ -12,6 +12,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-smooth: always;
 }
 
 body {
@@ -26,10 +27,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+
 /* Sharp Rendering Fixes */
 img, canvas {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: auto; /* Fallback to default for smooth scaling if needed */
+  image-rendering: -webkit-optimize-contrast; /* Safari */
+  image-rendering: crisp-edges;            /* Standard */
+  image-rendering: pixelated;               /* Chrome fallback for some cases */
+}
+
+svg {
+  shape-rendering: geometricPrecision;
 }
 
 * {
@@ -38,9 +45,11 @@ img, canvas {
 }
 
 /* Prevent blurriness on transforms */
-.sharp-transform {
+.sharp-transform, .premium-card, .btn-action {
   transform: translateZ(0);
   backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
 }
 
 

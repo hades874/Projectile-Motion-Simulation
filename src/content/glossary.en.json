@@ -1,0 +1,11 @@
+{
+  "v0": "Initial Velocity: The velocity of the object at the moment it is thrown.",
+  "theta": "Launch Angle: The angle at which the object is thrown relative to the horizontal.",
+  "h0": "Initial Height: How high the object was from the ground at the time of launch.",
+  "R": "Range: How far the object travels horizontally.",
+  "H": "Maximum Height: The highest point the object reaches.",
+  "T": "Time of Flight: The total time the object stays in the air.",
+  "g": "Gravitational Acceleration: Acceleration downwards due to Earth's gravity (9.8 m/s²).",
+  "vx": "Horizontal Component: The horizontal part of the velocity (remains constant).",
+  "vy": "Vertical Component: The vertical part of the velocity (changes with time)."
+}

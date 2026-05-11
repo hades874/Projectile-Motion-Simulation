@@ -1,0 +1,132 @@
+{
+  "appTitle": "Projectile Motion Simulator",
+  "controls": {
+    "v0": "Initial Velocity",
+    "v0Unit": "m/s",
+    "theta": "Launch Angle",
+    "thetaUnit": "°",
+    "h0": "Initial Height",
+    "h0Unit": "m"
+  },
+  "buttons": {
+    "launch": "Launch",
+    "pause": "Pause",
+    "resume": "Resume",
+    "reset": "Reset",
+    "speed": "Speed"
+  },
+  "readouts": {
+    "range": "Range (R)",
+    "height": "Max Height (H)",
+    "time": "Time of Flight (T)",
+    "impactSpeed": "Impact Speed",
+    "impactAngle": "Impact Angle",
+    "rangeUnit": "m",
+    "heightUnit": "m",
+    "timeUnit": "s",
+    "speedUnit": "m/s",
+    "angleUnit": "°"
+  },
+  "formulas": {
+    "range": "R = v₀ cos θ · T",
+    "height": "H = h₀ + (v₀ sin θ)² / 2g",
+    "time": "T = [v₀ sin θ + √((v₀ sin θ)² + 2gh₀)] / g",
+    "title": "Formulas"
+  },
+  "overlays": {
+    "vectors": "Show Velocity Vector",
+    "dots": "Show Time Points",
+    "axes": "Show Axes"
+  },
+  "comparison": {
+    "title": "Comparative Launch",
+    "add": "Add 2nd Projectile",
+    "remove": "Remove",
+    "v0": "Initial Velocity 2",
+    "theta": "Angle 2",
+    "h0": "Height 2"
+  },
+  "errors": {
+    "noVelocity": "Increase speed.",
+    "flat": "No projectile at this angle, increase angle."
+  },
+  "numeralToggle": "Numbers",
+  "tabs": {
+    "controls":   "Controls",
+    "vectors":    "Vectors & Graphs",
+    "formulas":   "Formulas",
+    "comparison": "Comparison"
+  },
+  "sections": {
+    "parameters": "Parameters",
+    "results": "Results",
+    "resultsP1": "Results: Projectile 1",
+    "resultsP2": "Results: Projectile 2",
+    "visualOptions": "Visual Options",
+    "graphs": "Graphs"
+  },
+  "canvasLabels": {
+    "x": "x (m)",
+    "y": "y (m)",
+    "range": "Range",
+    "height": "Height",
+    "rangeComparison": "Range 2",
+    "heightComparison": "Height 2",
+    "unitM": "m"
+  },
+  "projectileSection": "Projectile Object",
+  "projectiles": {
+    "ball":       "Ball",
+    "cannonball": "Cannonball",
+    "stone":      "Stone",
+    "football":   "Football"
+  },
+  "formulaLabels": {
+    "T": "Flight Time",
+    "H": "Maximum Height",
+    "R": "Horizontal Range",
+    "p1": "Projectile 1",
+    "p2": "Projectile 2",
+    "analysis": "Comparative Analysis"
+  },
+  "formulaUnits": {
+    "s": "s",
+    "m": "m"
+  },
+  "chartLabels": {
+    "yt": "Height-Time (y-t)",
+    "vyt": "Vertical Velocity-Time (vᵧ-t)",
+    "loading": "Loading...",
+    "p1": "Projectile 1",
+    "p2": "Projectile 2",
+    "p1Short": "1st",
+    "p2Short": "2nd"
+  },
+  "insights": {
+    "T": {
+      "approx": "The flight time of both projectiles is nearly equal (≈ {val} s). The vertical velocity components and initial heights are almost the same, resulting in similar values in the T = (v₀sinθ + √…)/g formula.",
+      "p1Higher": "Projectile 1 stays in the air longer (T₁ = {t1} s > T₂ = {t2} s). Reason: {reasons}. Objects stay in the air longer with higher vertical velocity or height.",
+      "p2Higher": "Projectile 2 stays in the air longer (T₂ = {t2} s > T₁ = {t1} s). Reason: {reasons}. Objects stay in the air longer with higher vertical velocity or height.",
+      "reasonVy": "higher vertical velocity (v₀{n}sinθ{n} ≈ {vy} m/s)",
+      "reasonH0": "higher initial height (h₀{n} = {h0} m)",
+      "reasonGeneric": "difference in vertical motion"
+    },
+    "H": {
+      "approx": "Both projectiles reached nearly the same height (≈ {val} m). Since vertical velocity and initial height are equal, the height H in H = h₀ + (v₀sinθ)²/2g remains the same.",
+      "p1Higher": "Projectile 1 reached a greater height (H₁ = {h1} m > H₂ = {h2} m). Reason: {reasons}. In H = h₀ + (v₀sinθ)²/2g, height increases with the square of the vertical velocity.",
+      "p2Higher": "Projectile 2 reached a greater height (H₂ = {h2} m > H₁ = {h1} m). Reason: {reasons}. In H = h₀ + (v₀sinθ)²/2g, height increases with the square of the vertical velocity.",
+      "reasonVy": "higher vertical velocity ({vy1} m/s > {vy2} m/s)",
+      "reasonH0": "higher initial height (h₀{n} = {h0} m)",
+      "reasonGeneric": "difference in vertical motion"
+    },
+    "R": {
+      "complementary": "Both projectiles have the same range (≈ {val} m), a famous symmetry in projectile motion! Complementary angles {theta1}° and {theta2}° (summing to 90°) yield the same range at the same initial velocity because R = v₀²sin(2θ)/g and sin(2θ) = sin(180°−2θ).",
+      "approx": "Both projectiles have nearly the same range (≈ {val} m). This occurs because the product of horizontal velocity and flight time (R = v₀cosθ × T) is very close.",
+      "p1Higher": "Projectile 1 travels further (R₁ = {r1} m > R₂ = {r2} m). Reason: {reasons}. In R = v₀cosθ × T, increasing both factors increases the range.",
+      "p2Higher": "Projectile 2 travels further (R₂ = {r2} m > R₁ = {r1} m). Reason: {reasons}. In R = v₀cosθ × T, increasing both factors increases the range.",
+      "reasonVx": "higher horizontal velocity (v₀{n}cosθ{n} ≈ {vx} m/s)",
+      "reasonT": "longer flight time (T{n} = {t} s)",
+      "reasonGeneric": "difference in horizontal motion"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../../hooks/useLanguage.jsx'
 import styles from './IntroModal.module.css'
 
 const ICONS = {
@@ -34,6 +35,7 @@ const CHECK_COLORS = {
 }
 
 export function IntroModal({ storageKey, variant = 'home', title, badge, description, outcomes, ctaLabel }) {
+  const { language } = useLanguage()
   const [shown, setShown]     = useState(false)
   const [leaving, setLeaving] = useState(false)
 
@@ -80,7 +82,7 @@ export function IntroModal({ storageKey, variant = 'home', title, badge, descrip
           <span className={`${styles.decoDot} ${styles.decoDot3}`} />
 
           {/* Close button */}
-          <button className={styles.closeBtn} onClick={dismiss} aria-label="বন্ধ করো">
+          <button className={styles.closeBtn} onClick={dismiss} aria-label={language === 'bn' ? 'বন্ধ করো' : 'Close'}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
@@ -92,18 +94,20 @@ export function IntroModal({ storageKey, variant = 'home', title, badge, descrip
               {ICONS[variant]}
             </div>
             <div className={styles.headerText}>
-              <h2 id="intro-modal-title" className={`${styles.title} bn`}>{title}</h2>
-              {badge && <span className={`${styles.badge} bn`}>{badge}</span>}
+              <h2 id="intro-modal-title" className={`${styles.title} ${language === 'bn' ? 'bn' : ''}`}>{title}</h2>
+              {badge && <span className={`${styles.badge} ${language === 'bn' ? 'bn' : ''}`}>{badge}</span>}
             </div>
           </div>
         </div>
 
         {/* ── Body ── */}
         <div className={styles.body}>
-          <p className={`${styles.description} bn`}>{description}</p>
+          <p className={`${styles.description} ${language === 'bn' ? 'bn' : ''}`}>{description}</p>
 
           <div className={styles.outcomesSection}>
-            <span className={`${styles.outcomesHeading} bn`}>এই সিমুলেশনে তুমি যা শিখবে</span>
+            <span className={`${styles.outcomesHeading} ${language === 'bn' ? 'bn' : ''}`}>
+              {language === 'bn' ? 'এই সিমুলেশনে তুমি যা শিখবে' : 'What you will learn in this simulation'}
+            </span>
             <ul className={styles.outcomesList}>
               {outcomes.map((item, i) => (
                 <li key={i} className={styles.outcomeItem}>
@@ -115,7 +119,7 @@ export function IntroModal({ storageKey, variant = 'home', title, badge, descrip
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
                   </span>
-                  <span className={`${styles.outcomeText} bn`}>{item}</span>
+                  <span className={`${styles.outcomeText} ${language === 'bn' ? 'bn' : ''}`}>{item}</span>
                 </li>
               ))}
             </ul>
@@ -125,7 +129,7 @@ export function IntroModal({ storageKey, variant = 'home', title, badge, descrip
         {/* ── Footer ── */}
         <div className={styles.footer}>
           <button
-            className={`${styles.cta} ${styles[`cta_${variant}`]} bn`}
+            className={`${styles.cta} ${styles[`cta_${variant}`]} ${language === 'bn' ? 'bn' : ''}`}
             onClick={dismiss}
           >
             <span>{ctaLabel}</span>

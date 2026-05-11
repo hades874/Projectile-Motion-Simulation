@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HelpCircle, ChevronRight, ChevronLeft, X, BookOpen, Settings } from 'lucide-react';
 import styles from './TourOverlay.module.css';
 
-const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
-  const [phase, setPhase] = useState('idle'); // 'idle', 'picker', 'active'
+const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigger, triggerRef }) => {
+  const [phase, setPhase] = useState('idle'); // 'idle', 'active'
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
   const [tooltipStyle, setTooltipStyle] = useState({});
   const [showTooltip, setShowTooltip] = useState(false);
   const [tourMode, setTourMode] = useState(localStorage.getItem('10ms_tour_mode') || 'beginner');
-  
+
   const tooltipRef = useRef(null);
   const resizeObserver = useRef(null);
 
@@ -26,7 +26,8 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
     const poll = () => {
       const isBlocked = blockedByKey && localStorage.getItem(blockedByKey) !== '1';
       if (!isBlocked || (Date.now() - startTime > 15000)) {
-        setPhase('picker');
+        setPhase('active');
+        setCurrentStepIndex(0);
         clearInterval(pollInterval);
       }
     };
@@ -58,21 +59,21 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
 
     const calculatePosition = async () => {
       setShowTooltip(false);
-      
+
       if (onBeforeStep) {
         onBeforeStep(currentStep);
       }
 
       // Wait for React re-render/tab switches
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       updateTargetRect();
-      
-      // Wait for spotlight transition
+
+      // Wait for spotlight transition and tab switches to stabilize
       setTimeout(() => {
         updateTooltipPosition();
         setShowTooltip(true);
-      }, 300);
+      }, 450);
     };
 
     calculatePosition();
@@ -185,47 +186,29 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
 
   const getStepText = (field) => {
     const text = currentStep[field];
-    return typeof text === 'object' ? text[tourMode] : text;
+    if (typeof text === 'object') {
+      return text.beginner || text.expert || Object.values(text)[0];
+    }
+    return text;
   };
 
-  if (phase === 'picker') {
-    return (
-      <div className={styles.pickerOverlay}>
-        <div className={styles.pickerModal}>
-          <h2 className={styles.pickerTitle}>টিউটোরিয়াল ভাষা বেছে নিন</h2>
-          <div className={styles.pickerCards}>
-            <div 
-              className={`${styles.pickerCard} ${styles.beginnerCard}`}
-              onClick={() => handleStartTour('beginner')}
-            >
-              <div className={styles.pickerCardIcon}><BookOpen size={24} /></div>
-              <span className={styles.pickerCardTitle}>সহজ ভাষায়</span>
-              <p className={styles.pickerCardDesc}>সাধারণ বাংলা ব্যবহার করে অ্যাপের ফিচারগুলো বুঝুন</p>
-            </div>
-            <div 
-              className={`${styles.pickerCard} ${styles.expertCard}`}
-              onClick={() => handleStartTour('expert')}
-            >
-              <div className={styles.pickerCardIcon}><Settings size={24} /></div>
-              <span className={styles.pickerCardTitle}>টেকনিক্যাল ভাষায়</span>
-              <p className={styles.pickerCardDesc}>ফিজিক্স এর পরিভাষা ও টেকনিক্যাল শব্দে গাইড</p>
-            </div>
-          </div>
-          <button className={styles.pickerSkip} onClick={handleDismiss}>এখন থাক, পরে দেখবো</button>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (triggerRef) {
+      triggerRef.current = () => { setPhase('active'); setCurrentStepIndex(0); };
+    }
+  }, [triggerRef]);
 
   return (
     <>
-      <button 
-        className={styles.helpButton} 
-        onClick={() => setPhase('picker')}
-        title="টিউটোরিয়াল শুরু করুন"
-      >
-        <HelpCircle size={24} />
-      </button>
+      {!hideTrigger && (
+        <button
+          className={styles.helpButton}
+          onClick={() => { setPhase('active'); setCurrentStepIndex(0); }}
+          title="টিউটোরিয়াল শুরু করুন"
+        >
+          <HelpCircle size={24} />
+        </button>
+      )}
 
       {phase === 'active' && (
         <div className={`${styles.overlay} ${styles.overlayActive}`}>
@@ -250,7 +233,7 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
           </svg>
 
           {targetRect && (
-            <div 
+            <div
               className={styles.glowRing}
               style={{
                 top: targetRect.y - 5,
@@ -261,7 +244,7 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
             />
           )}
 
-          <div 
+          <div
             ref={tooltipRef}
             className={`${styles.tooltip} ${!showTooltip ? styles.tooltipHidden : ''}`}
             style={tooltipStyle}
@@ -282,9 +265,9 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
                     <ChevronLeft size={18} />
                   </button>
                 )}
-                <button 
-                  className={styles.helpButton} 
-                  style={{position: 'static', width: 'auto', height: '36px', padding: '0 12px', borderRadius: '8px', background: '#2563eb', color: 'white', borderColor: '#2563eb'}} 
+                <button
+                  className={styles.helpButton}
+                  style={{position: 'static', width: 'auto', height: '36px', padding: '0 12px', borderRadius: '8px', background: '#2563eb', color: 'white', borderColor: '#2563eb'}}
                   onClick={handleNext}
                 >
                   {currentStepIndex === steps.length - 1 ? 'শেষ করুন' : 'পরবর্তী'}
@@ -292,7 +275,7 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep }) => {
                 </button>
               </div>
             </div>
-            <button 
+            <button
               onClick={handleDismiss}
               style={{position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8'}}
             >

@@ -1,0 +1,101 @@
+{
+  "title": "Fundamentals of Force & Motion",
+  "guideTitle": "Tutorials & Tips",
+  "tabs": {
+    "tug":      "Tug of War",
+    "motion":   "Motion & Friction"
+  },
+  "netforce": {
+    "leftForce":  "Left Force",
+    "rightForce": "Right Force",
+    "readouts": {
+      "netForce":    "Net Force",
+      "accel":       "Acceleration",
+      "velocity":    "Velocity",
+      "position":    "Position"
+    },
+    "hint": "Add or remove people, the trolley will move!"
+  },
+  "motion": {
+    "appliedForce":  "Applied Force (Newton)",
+    "frictionLabel": "Friction",
+    "frictionOn":    "ON",
+    "frictionOff":   "OFF",
+    "guides": [
+      "What is friction? → When you push an object, the ground or surface tries to stop it. This resisting force is friction.",
+      "When will it move? → The object moves only when your applied force is greater than the friction force.",
+      "The box is light, so low friction. It will move with just ~80N.",
+      "The fridge is heavier than the box; it needs about 270N to move.",
+      "The car is the heaviest; it needs about 590N or more to move!",
+      "What if friction is OFF? → Like an icy floor! Even the smallest force will keep the object moving.",
+      "With friction ON, the object won't move unless you apply enough force, just like in real life."
+    ],
+    "objectTips": {
+      "ice":    "Ice is very light and slippery, moves with just 5N!",
+      "box":    "Apply about 80N to move the box.",
+      "fridge": "The fridge is heavy! Apply about 270N or more to move it.",
+      "car":    "The car is the heaviest! Apply about 590N or more to move it!"
+    },
+    "objects": {
+      "ice":    "Ice",
+      "box":    "Box",
+      "fridge": "Fridge",
+      "car":    "Car"
+    },
+    "readouts": {
+      "velocity":    "Velocity",
+      "accel":       "Acceleration",
+      "appliedF":    "Applied Force",
+      "frictionF":   "Friction Force"
+    },
+    "hint": "Slide to apply force and watch when the object starts moving!"
+  },
+  "friction": {
+    "appliedForce": "Applied Force (Newton)",
+    "surfaces": {
+      "ice":      "Ice",
+      "wood":     "Wood",
+      "concrete": "Concrete"
+    },
+    "surfaceType": "Surface Type",
+    "readouts": {
+      "appliedF": "Applied Force",
+      "frictionF": "Friction Force",
+      "maxStatic": "Max Static Friction",
+      "velocity": "Velocity"
+    },
+    "graphTitle": "F vs Ff Graph",
+    "hint": "Increase force, when does it start moving?",
+    "guides": [
+      "The rougher the surface, the higher the friction!",
+      "The object moves only after overcoming maximum static friction."
+    ]
+  },
+  "tug": {
+    "leftTeam":  "Red Team",
+    "rightTeam": "Blue Team",
+    "winLeft":   "Red Team Wins!",
+    "winRight":  "Blue Team Wins!",
+    "hint":      "Add people to teams, which side will pull the rope?",
+    "guides": [
+      "The cart moves towards the team with more net force!",
+      "If force is equal on both sides, the cart stays still."
+    ]
+  },
+  "canvasLabels": {
+    "force1": "Force 1",
+    "force2": "Force 2",
+    "netForce": "Net Force",
+    "appliedF": "Applied Force",
+    "frictionF": "Friction Force",
+    "velocity": "Velocity",
+    "finishLine": "Finish Line",
+    "unitM": "m",
+    "unitMs": "m/s"
+  },
+  "actions": {
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset"
+  }
+}

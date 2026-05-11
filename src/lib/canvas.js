@@ -1,3 +1,5 @@
+import { formatNum } from './bangla.js'
+
 const PAD_L = 0.10
 const PAD_R = 0.06
 const PAD_T = 0.08
@@ -49,10 +51,10 @@ export function drawBackground(ctx, w, h) {
   ctx.lineWidth = 1
   const step = 40
   for (let x = 0; x < w; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(Math.round(x), 0); ctx.lineTo(Math.round(x), h); ctx.stroke()
   }
   for (let y = 0; y < h; y += step) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(0, Math.round(y)); ctx.lineTo(w, Math.round(y)); ctx.stroke()
   }
   ctx.restore()
 
@@ -102,21 +104,23 @@ export function drawGrid(ctx, scale, offsetX, offsetY, canvasW, canvasH) {
 
   for (let x = 0; x <= maxWorldX + step; x += step) {
     const { sx } = worldToScreen(x, 0, scale, offsetX, offsetY)
-    ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, canvasH); ctx.stroke()
+    const rsx = Math.round(sx)
+    ctx.beginPath(); ctx.moveTo(rsx, 0); ctx.lineTo(rsx, canvasH); ctx.stroke()
     if (x > 0) {
       ctx.fillStyle = 'rgba(107,114,128,0.5)'
       ctx.font = '9px Inter, sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText(x, sx, offsetY + 12)
+      ctx.fillText(x, rsx, Math.round(offsetY + 12))
     }
   }
   for (let y = step; y <= maxWorldY + step; y += step) {
     const { sy } = worldToScreen(0, y, scale, offsetX, offsetY)
-    ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(canvasW, sy); ctx.stroke()
+    const rsy = Math.round(sy)
+    ctx.beginPath(); ctx.moveTo(0, rsy); ctx.lineTo(canvasW, rsy); ctx.stroke()
     ctx.fillStyle = 'rgba(107,114,128,0.5)'
     ctx.font = '9px Inter, sans-serif'
     ctx.textAlign = 'right'
-    ctx.fillText(y, offsetX - 4, sy + 3)
+    ctx.fillText(y, Math.round(offsetX - 4), rsy + 3)
   }
   ctx.restore()
 }
@@ -126,17 +130,20 @@ function pickGridStep(scale) {
   return 100
 }
 
-export function drawAxes(ctx, scale, offsetX, offsetY, canvasW, canvasH) {
+export function drawAxes(ctx, scale, offsetX, offsetY, canvasW, canvasH, strings) {
   ctx.save()
+  const rx = Math.round(offsetX)
+  const ry = Math.round(offsetY)
   ctx.strokeStyle = 'rgba(75,85,99,0.4)'
   ctx.lineWidth = 1.5
-  ctx.beginPath(); ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, canvasH); ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, offsetY); ctx.lineTo(canvasW, offsetY); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx, canvasH); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(canvasW, ry); ctx.stroke()
   ctx.fillStyle = 'rgba(75,85,99,0.55)'
   ctx.font = 'bold 10px Inter, sans-serif'
   ctx.textAlign = 'left'
-  ctx.fillText('x (মি)', canvasW - 42, offsetY - 6)
-  ctx.fillText('y (মি)', offsetX + 6, 14)
+  const labels = strings?.canvasLabels || { x: 'x (m)', y: 'y (m)' }
+  ctx.fillText(labels.x, Math.round(canvasW - 42), ry - 6)
+  ctx.fillText(labels.y, rx + 6, 14)
   ctx.restore()
 }
 
@@ -144,21 +151,23 @@ export function drawAxes(ctx, scale, offsetX, offsetY, canvasW, canvasH) {
 
 export function drawGround(ctx, offsetY, canvasW) {
   ctx.save()
-  const g = ctx.createLinearGradient(0, offsetY, 0, offsetY + 20)
+  const ry = Math.round(offsetY)
+  const g = ctx.createLinearGradient(0, ry, 0, ry + 20)
   g.addColorStop(0,    '#22c55e')
   g.addColorStop(0.35, '#4ade80')
   g.addColorStop(1,    '#bbf7d0')
   ctx.fillStyle = g
-  ctx.fillRect(0, offsetY, canvasW, 20)
+  ctx.fillRect(0, ry, canvasW, 20)
   ctx.strokeStyle = '#16a34a'
   ctx.lineWidth = 2
-  ctx.beginPath(); ctx.moveTo(0, offsetY); ctx.lineTo(canvasW, offsetY); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(canvasW, ry); ctx.stroke()
   ctx.restore()
 }
 
 // ─── Launcher (cannon) ───────────────────────────────────────────────────────
 
-export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1, isComparison = false) {
+export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1, isComparison = false, canvasW = 600) {
+  const sf = Math.min(canvasW / 600, 1)
   const launchY = offsetY - h0 * scale
 
   // Colors based on the new "Toon Cannon" themes
@@ -184,19 +193,19 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   if (h0 > 0) {
     const platformH = offsetY - launchY
     ctx.save()
-    const colGrad = ctx.createLinearGradient(offsetX - 10, 0, offsetX + 10, 0)
+    const colGrad = ctx.createLinearGradient(offsetX - 10 * sf, 0, offsetX + 10 * sf, 0)
     colGrad.addColorStop(0,   isComparison ? '#9A3412' : '#1F2937')
     colGrad.addColorStop(0.5, colors.primary)
     colGrad.addColorStop(1,   isComparison ? '#9A3412' : '#1F2937')
     ctx.fillStyle = colGrad
     ctx.beginPath()
-    ctx.roundRect(Math.round(offsetX - 10), Math.round(launchY + 8), 20, Math.round(platformH - 8), [0, 0, 4, 4])
+    ctx.roundRect(Math.round(offsetX - 10 * sf), Math.round(launchY + 8 * sf), 20 * sf, Math.round(platformH - 8 * sf), [0, 0, 4 * sf, 4 * sf])
     ctx.fill()
     
     // Cap plate
     ctx.fillStyle = colors.accent
     ctx.beginPath()
-    ctx.roundRect(Math.round(offsetX - 24), Math.round(launchY - 4), 48, 12, 4)
+    ctx.roundRect(Math.round(offsetX - 24 * sf), Math.round(launchY - 4 * sf), 48 * sf, 12 * sf, 4 * sf)
     ctx.fill()
     
     // Height indicator tick
@@ -204,8 +213,8 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
     ctx.lineWidth = 1
     ctx.setLineDash([3, 4])
     ctx.beginPath()
-    ctx.moveTo(offsetX - 32, launchY)
-    ctx.lineTo(offsetX - 56, launchY)
+    ctx.moveTo(offsetX - 32 * sf, launchY)
+    ctx.lineTo(offsetX - 56 * sf, launchY)
     ctx.stroke()
     ctx.setLineDash([])
     ctx.restore()
@@ -215,7 +224,7 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   ctx.translate(offsetX, launchY)
 
   // Angle arc
-  const arcR = 40
+  const arcR = 40 * sf
   ctx.strokeStyle = colors.arc
   ctx.lineWidth = 1.5
   ctx.setLineDash([3, 4])
@@ -227,54 +236,54 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   // Angle label
   const midA = -thetaDeg * Math.PI / 360
   ctx.fillStyle = colors.label
-  ctx.font = 'bold 12px Inter, sans-serif'
+  ctx.font = `bold ${Math.round(12 * sf)}px Inter, sans-serif`
   ctx.textAlign = 'left'
-  ctx.fillText(thetaDeg + '°', (arcR + 8) * Math.cos(midA), (arcR + 8) * Math.sin(midA))
+  ctx.fillText(thetaDeg + '°', (arcR + 8 * sf) * Math.cos(midA), (arcR + 8 * sf) * Math.sin(midA))
 
   // 1. Draw Barrel (Rotated)
   ctx.save()
   ctx.rotate(-thetaDeg * Math.PI / 180)
   
   // Design dimensions - scaled down for fit
-  const bw = 55, bh = 32
+  const bw = 55 * sf, bh = 32 * sf
   
   // Main Barrel Body
   ctx.fillStyle = colors.primary
   ctx.beginPath()
   // border-radius: 10px 45px 45px 10px (scaled)
-  ctx.roundRect(-10, -bh/2, bw, bh, [6, 22, 22, 6])
+  ctx.roundRect(-10 * sf, -bh/2, bw, bh, [6 * sf, 22 * sf, 22 * sf, 6 * sf])
   ctx.fill()
   
   // Shadow for depth
   ctx.fillStyle = 'rgba(0,0,0,0.15)'
   ctx.beginPath()
-  ctx.roundRect(-10, bh/2 - 4, bw, 4, [0, 0, 22, 6])
+  ctx.roundRect(-10 * sf, bh/2 - 4 * sf, bw, 4 * sf, [0, 0, 22 * sf, 6 * sf])
   ctx.fill()
 
   // Shared Golden Band
   ctx.fillStyle = colors.gold
-  ctx.fillRect(-10 + bw * 0.25, -bh/2, 6, bh)
+  ctx.fillRect(-10 * sf + bw * 0.25, -bh/2, 6 * sf, bh)
   
   // Wide Muzzle Mouth (Flare)
-  const mw = 10, mh = 42
+  const mw = 10 * sf, mh = 42 * sf
   ctx.fillStyle = colors.primary
   ctx.beginPath()
-  ctx.roundRect(-10 + bw - 4, -mh/2, mw, mh, 8)
+  ctx.roundRect(-10 * sf + bw - 4 * sf, -mh/2, mw, mh, 8 * sf)
   ctx.fill()
   
   // Muzzle Ring distinction
   ctx.strokeStyle = 'rgba(0,0,0,0.1)'
-  ctx.lineWidth = 4
+  ctx.lineWidth = 4 * sf
   ctx.beginPath()
-  ctx.roundRect(-10 + bw - 4, -mh/2, mw, mh, 8)
+  ctx.roundRect(-10 * sf + bw - 4 * sf, -mh/2, mw, mh, 8 * sf)
   ctx.stroke()
   
   ctx.restore()
 
   // 2. Draw Wheel (In front of barrel base)
   ctx.save()
-  const wr = 11
-  const wy = 1
+  const wr = 11 * sf
+  const wy = 1 * sf
   
   // Main wheel disk
   ctx.fillStyle = colors.wheelBg
@@ -284,13 +293,13 @@ export function drawLauncher(ctx, offsetX, offsetY, thetaDeg, h0 = 0, scale = 1,
   
   // Wheel Border
   ctx.strokeStyle = colors.accent
-  ctx.lineWidth = 4
+  ctx.lineWidth = 4 * sf
   ctx.stroke()
   
   // Hub Cap
   ctx.fillStyle = '#fff'
   ctx.beginPath()
-  ctx.arc(0, wy, 5, 0, Math.PI * 2)
+  ctx.arc(0, wy, 5 * sf, 0, Math.PI * 2)
   ctx.fill()
   
   ctx.restore()
@@ -306,21 +315,35 @@ export function drawTrajectory(ctx, points, scale, offsetX, offsetY, color = '#1
   ctx.save()
   ctx.globalAlpha = opacity
   ctx.strokeStyle = color
-  ctx.lineWidth = dashed ? 2.5 : 3
-  if (dashed) ctx.setLineDash([6, 4])
+  ctx.lineWidth = dashed ? 2.5 : 4
+  if (dashed) ctx.setLineDash([8, 6])
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
-  if (opacity > 0.4) {
-    ctx.shadowBlur = 10
+  
+  if (opacity > 0.4 && !dashed) {
+    ctx.shadowBlur = 12
     ctx.shadowColor = color
+    // Add a slight glow effect for high-contrast trail
+    ctx.beginPath()
+    points.forEach((p, i) => {
+      const { sx, sy } = worldToScreen(p.x, p.y, scale, offsetX, offsetY)
+      if (i === 0) ctx.moveTo(sx, sy)
+      else ctx.lineTo(sx, sy)
+    })
+    ctx.stroke()
+    ctx.lineWidth = 1.5
+    ctx.strokeStyle = '#fff'
+    ctx.globalAlpha = opacity * 0.4
+    ctx.stroke()
+  } else {
+    ctx.beginPath()
+    points.forEach((p, i) => {
+      const { sx, sy } = worldToScreen(p.x, p.y, scale, offsetX, offsetY)
+      if (i === 0) ctx.moveTo(sx, sy)
+      else ctx.lineTo(sx, sy)
+    })
+    ctx.stroke()
   }
-  ctx.beginPath()
-  points.forEach((p, i) => {
-    const { sx, sy } = worldToScreen(p.x, p.y, scale, offsetX, offsetY)
-    if (i === 0) ctx.moveTo(sx, sy)
-    else ctx.lineTo(sx, sy)
-  })
-  ctx.stroke()
   ctx.restore()
 }
 
@@ -483,7 +506,7 @@ function drawArrow(ctx, x1, y1, x2, y2, color, label, lw = 4, dashed = false, sf
 
 // ─── Dimension lines (idle / finished) ───────────────────────────────────────
 
-export function drawDimensionLines(ctx, points, scale, offsetX, offsetY, results) {
+export function drawDimensionLines(ctx, points, scale, offsetX, offsetY, results, isComparison = false, strings, lang = 'bn') {
   if (!points || points.length < 2 || !results || results.R <= 0 || results.H <= 0) return
 
   const peakIdx = points.reduce((best, p, i) => p.y > points[best].y ? i : best, 0)
@@ -493,46 +516,65 @@ export function drawDimensionLines(ctx, points, scale, offsetX, offsetY, results
   const { sx: originSx }           = worldToScreen(0,        0,      scale, offsetX, offsetY)
   const { sx: landSx }             = worldToScreen(results.R, 0,     scale, offsetX, offsetY)
 
+  const hColor = isComparison ? '#EA580C' : '#274FE3'
+  const rColor = isComparison ? '#D35400' : '#1CAB55'
+  const hBg    = isComparison ? 'rgba(234, 88, 12, 0.35)' : 'rgba(39,79,227,0.4)'
+  const rBg    = isComparison ? 'rgba(211, 84, 0, 0.35)' : 'rgba(28,171,85,0.6)'
+
+  const labels = strings?.canvasLabels || { range: 'Range', height: 'Height', rangeComparison: 'Range 2', heightComparison: 'Height 2', unitM: 'm' }
+  const rf = v => lang === 'bn' ? formatNum(v, 1, 'bangla') : v.toFixed(1)
+
   ctx.save()
 
   // Height dashed vertical
   ctx.setLineDash([4, 4])
-  ctx.strokeStyle = 'rgba(39,79,227,0.4)'
-  ctx.lineWidth = 1.5
+  ctx.strokeStyle = hBg
+  ctx.lineWidth = 2
   ctx.beginPath(); ctx.moveTo(peakSx, peakSy); ctx.lineTo(peakSx, offsetY); ctx.stroke()
 
   // Range dashed horizontal (below ground strip)
-  const rangeY = offsetY + 28
-  ctx.strokeStyle = 'rgba(28,171,85,0.5)'
+  const rangeY = offsetY + (isComparison ? 52 : 32)
+  ctx.strokeStyle = rBg
   ctx.beginPath(); ctx.moveTo(originSx, rangeY); ctx.lineTo(landSx, rangeY); ctx.stroke()
   ctx.setLineDash([])
 
   // Range arrowheads
-  ctx.fillStyle = '#1CAB55'
+  ctx.fillStyle = rColor
   for (const [tx, dir] of [[originSx, 1], [landSx, -1]]) {
     ctx.beginPath()
     ctx.moveTo(tx, rangeY)
-    ctx.lineTo(tx + dir * 7, rangeY - 4)
-    ctx.lineTo(tx + dir * 7, rangeY + 4)
+    ctx.lineTo(tx + dir * 8, rangeY - 5)
+    ctx.lineTo(tx + dir * 8, rangeY + 5)
     ctx.closePath(); ctx.fill()
   }
+
+  // Range Label & Value
   ctx.font = 'bold 11px Inter, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('R', (originSx + landSx) / 2, rangeY + 13)
+  ctx.textBaseline = 'top'
+  ctx.fillStyle = rColor
+  const rangeLabel = isComparison ? labels.rangeComparison : labels.range
+  ctx.fillText(`${rangeLabel} (R${isComparison ? '₂' : ''}): ${rf(results.R)} ${labels.unitM}`, (originSx + landSx) / 2, rangeY + 12)
 
-  // Height label
-  ctx.fillStyle = '#274FE3'
+  // Height label & Value
+  ctx.fillStyle = hColor
   ctx.textAlign = 'left'
-  ctx.fillText('H', peakSx + 5, (peakSy + offsetY) / 2 + 4)
+  ctx.textBaseline = 'middle'
+  ctx.font = 'bold 11px Inter, sans-serif'
+  const heightLabel = isComparison ? labels.heightComparison : labels.height
+  ctx.fillText(`${heightLabel} (H${isComparison ? '₂' : ''}): ${rf(results.H)} ${labels.unitM}`, peakSx + 10, (peakSy + offsetY) / 2)
 
   // Peak dot
-  ctx.fillStyle = '#274FE3'
-  ctx.beginPath(); ctx.arc(Math.round(peakSx), Math.round(peakSy), 5, 0, Math.PI * 2); ctx.fill()
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke()
+  ctx.shadowBlur = 8
+  ctx.shadowColor = hBg
+  ctx.fillStyle = hColor
+  ctx.beginPath(); ctx.arc(Math.round(peakSx), Math.round(peakSy), 6, 0, Math.PI * 2); ctx.fill()
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke()
 
   // Landing dot
-  ctx.fillStyle = '#1CAB55'
-  ctx.beginPath(); ctx.arc(landSx, offsetY, 5, 0, Math.PI * 2); ctx.fill()
+  ctx.shadowColor = rBg
+  ctx.fillStyle = rColor
+  ctx.beginPath(); ctx.arc(landSx, offsetY, 6, 0, Math.PI * 2); ctx.fill()
   ctx.strokeStyle = '#fff'; ctx.stroke()
 
   ctx.restore()

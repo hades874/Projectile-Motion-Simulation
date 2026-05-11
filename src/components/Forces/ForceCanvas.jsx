@@ -1,11 +1,15 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useViewport } from '../../hooks/useViewport.js'
 import { useAnimationFrame } from '../../hooks/useAnimationFrame.js'
+import { useLanguage } from '../../hooks/useLanguage.jsx'
+import { getTranslations } from '../../content/translations.js'
 
 export function ForceCanvas({ drawFn, state, onTick, children }) {
   const containerRef = useRef(null)
   const canvasRef    = useRef(null)
   const { width, height } = useViewport(containerRef)
+  const { language } = useLanguage()
+  const strings = getTranslations(language).forces
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -15,9 +19,9 @@ export function ForceCanvas({ drawFn, state, onTick, children }) {
 
     ctx.save()
     ctx.scale(dpr, dpr)
-    drawFn(ctx, width, height, state)
+    drawFn(ctx, width, height, state, language, strings)
     ctx.restore()
-  }, [drawFn, state, width, height])
+  }, [drawFn, state, width, height, language, strings])
 
   useAnimationFrame((delta) => {
     if (state.isRunning) {

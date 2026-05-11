@@ -1,4 +1,4 @@
-import { OBJECTS, SURFACES, FORCE_PER_PERSON, frictionForce } from './forcesPhysics.js'
+import { OBJECTS, SURFACES, FORCE_PER_PERSON, frictionForce, WIN_DISTANCE } from './forcesPhysics.js'
 
 // Preload object sprites
 const IMG = {}
@@ -20,15 +20,6 @@ Object.entries(SPRITES).forEach(([key, src]) => {
 // For dynamic background geometry
 let bgTime = 0
 
-function drawCloud(ctx, cx, cy, cw, ch) {
-  ctx.save()
-  ctx.fillStyle = 'rgba(255,255,255,0.82)'
-  ctx.beginPath(); ctx.ellipse(cx, cy, cw / 2, ch / 2, 0, 0, Math.PI * 2); ctx.fill()
-  ctx.beginPath(); ctx.ellipse(cx - cw * 0.30, cy + ch * 0.10, cw * 0.30, ch * 0.44, 0, 0, Math.PI * 2); ctx.fill()
-  ctx.beginPath(); ctx.ellipse(cx + cw * 0.28, cy + ch * 0.15, cw * 0.26, ch * 0.38, 0, 0, Math.PI * 2); ctx.fill()
-  ctx.restore()
-}
-
 // World → screen X. World range: [-8, 8] m → [5%, 95%] of canvas width.
 export function wx(worldX, w) {
   return w / 2 + (worldX / 8) * (w * 0.44)
@@ -41,54 +32,27 @@ export function groundY(h) {
 function drawBackground(ctx, w, h) {
   if (w <= 0 || h <= 0) return
   bgTime += 0.01
-  const gy = groundY(h)
 
-  // Opaque sky gradient — ensures ground is always clearly visible at any canvas size
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, gy)
-  skyGrad.addColorStop(0, '#7dd3fc')
-  skyGrad.addColorStop(1, '#bae6fd')
-  ctx.fillStyle = skyGrad
-  ctx.fillRect(0, 0, w, gy)
-
-  // Sun — radius proportional to sky height so it stays correct on mobile
-  const sunR = Math.min(24, Math.max(12, gy * 0.12))
-  const sunX = w * 0.12, sunY = gy * 0.22
+  // Subtle grid (full canvas — sky is transparent so CSS background shows through)
   ctx.save()
-  const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 2)
-  sunGlow.addColorStop(0, '#fbbf24')
-  sunGlow.addColorStop(0.55, '#fbbf24')
-  sunGlow.addColorStop(1, 'rgba(251,191,36,0)')
-  ctx.fillStyle = sunGlow
-  ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 2, 0, Math.PI * 2); ctx.fill()
-  ctx.restore()
-
-  // Clouds — sized relative to canvas width so they never overflow on mobile
-  const cs = Math.min(1, w / 480)
-  drawCloud(ctx, w * 0.38 + Math.sin(bgTime * 0.012) * 10, gy * 0.30, 90 * cs, 34 * cs)
-  if (w > 260) {
-    drawCloud(ctx, w * 0.73 + Math.sin(bgTime * 0.008 + 2) * 10, gy * 0.52, 70 * cs, 27 * cs)
-  }
-
-  // Subtle grid (sky area only)
-  ctx.save()
-  ctx.strokeStyle = 'rgba(209, 213, 219, 0.2)'
+  ctx.strokeStyle = 'rgba(209, 213, 219, 0.3)'
   ctx.lineWidth = 1
   const step = 40
   for (let x = 0; x < w; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, gy); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke()
   }
-  for (let y = 0; y < gy; y += step) {
+  for (let y = 0; y < h; y += step) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke()
   }
   ctx.restore()
 
-  // Drifting shapes — sizes scale with sky area so they stay subtle on all screen sizes
+  // Drifting shapes — proportional to canvas so they stay subtle on all screen sizes
   ctx.save()
-  const dim = Math.min(w, gy)
+  const dim = Math.min(w, h)
   const shapes = [
-    { type: 'circle',   x: w * 0.08, y: gy * 0.25, size: dim * 0.08,  color: '#E8001D', speed: 0.8 },
-    { type: 'triangle', x: w * 0.88, y: gy * 0.55, size: dim * 0.065, color: '#1CAB55', speed: -1.2 },
-    { type: 'square',   x: w * 0.18, y: gy * 0.68, size: dim * 0.07,  color: '#274FE3', speed: 0.5 }
+    { type: 'circle',   x: w * 0.1,  y: h * 0.2, size: dim * 0.08,  color: '#E8001D', speed: 0.8 },
+    { type: 'triangle', x: w * 0.85, y: h * 0.4, size: dim * 0.065, color: '#1CAB55', speed: -1.2 },
+    { type: 'square',   x: w * 0.2,  y: h * 0.6, size: dim * 0.07,  color: '#274FE3', speed: 0.5 }
   ]
   shapes.forEach(s => {
     const ox = Math.sin(bgTime * s.speed) * 12
@@ -309,43 +273,38 @@ function drawParticles(ctx, x, y, velocity, count = 5) {
   ctx.restore()
 }
 
-function drawCart(ctx, cx, cy) {
-  const cw = 72, ch = 30, wr = 11
+function drawCart(ctx, cx, cy, scale = 1) {
+  const cw = 72 * scale, ch = 30 * scale, wr = 11 * scale
   ctx.save()
-  
-  // Original Shadow (Restored)
+
   ctx.fillStyle = 'rgba(0,0,0,0.1)'
-  ctx.fillRect(cx - cw / 2 + 4, cy - ch + 4, cw, ch)
-  
-  // Fix 4: Contrast backdrop
+  ctx.fillRect(cx - cw / 2 + 4 * scale, cy - ch + 4 * scale, cw, ch)
+
   ctx.beginPath()
   ctx.ellipse(cx, cy - ch / 2, cw * 0.6, ch * 0.8, 0, 0, Math.PI * 2)
   ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
   ctx.fill()
-  
-  // Cart Body
+
   ctx.fillStyle = '#1CAB55'
-  ctx.beginPath(); ctx.roundRect(Math.round(cx - cw / 2), Math.round(cy - ch), Math.round(cw), Math.round(ch), 8); ctx.fill()
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5; ctx.stroke()
-  
-  // Wheels
+  ctx.beginPath(); ctx.roundRect(Math.round(cx - cw / 2), Math.round(cy - ch), Math.round(cw), Math.round(ch), 8 * scale); ctx.fill()
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5 * scale; ctx.stroke()
+
   const wheelCenters = [-cw / 3, cw / 3]
   wheelCenters.forEach(ox => {
     ctx.fillStyle = '#1F2937'
     ctx.beginPath(); ctx.arc(cx + ox, cy, wr, 0, Math.PI * 2); ctx.fill()
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke()
-    
-    // Hub
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5 * scale; ctx.stroke()
+
     ctx.fillStyle = '#4B5563'
-    ctx.beginPath(); ctx.arc(cx + ox, cy, 4, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(cx + ox, cy, 4 * scale, 0, Math.PI * 2); ctx.fill()
   })
   ctx.restore()
 }
 
 // Stick figure. direction: 'left'|'right' (which way person faces / arm extends)
-function drawPerson(ctx, cx, cy, active, direction, color, isRunning, isPulling = false) {
+function drawPerson(ctx, cx, cy, active, direction, color, isRunning, isPulling = false, scale = 1) {
   const drawColor = active ? color : '#9CA3AF'
-  const headR = 8, bodyH = 24, legH = 20, armLen = 16
+  const headR = 8 * scale, bodyH = 24 * scale, legH = 20 * scale, armLen = 16 * scale
   const dir = direction === 'left' ? -1 : 1
 
   // Straining animation
@@ -369,7 +328,7 @@ function drawPerson(ctx, cx, cy, active, direction, color, isRunning, isPulling 
   ctx.save()
   ctx.translate(ox, oy)
   ctx.strokeStyle = drawColor; ctx.fillStyle = drawColor
-  ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+  ctx.lineWidth = Math.max(1.5, 3.5 * scale); ctx.lineCap = 'round'; ctx.lineJoin = 'round'
 
   // Head with subtle glow if active
   if (active) {
@@ -434,62 +393,54 @@ function drawPerson(ctx, cx, cy, active, direction, color, isRunning, isPulling 
   ctx.restore()
 }
 
-function drawRope(ctx, x1, y, x2, markerX, isRunning, tension = 0) {
+function drawRope(ctx, x1, y, x2, markerX, isRunning, tension = 0, scale = 1) {
   ctx.save()
-  
-  // Rope vibration and wave
+
   const time = Date.now() * 0.05
   const wave = isRunning ? Math.sin(time) * (1 + tension * 2) : 0
-  
-  // Rope shadow
+
   ctx.shadowBlur = 4
   ctx.shadowColor = 'rgba(0,0,0,0.3)'
   ctx.shadowOffsetY = 2
 
-  // Rope style (braided look via line dash or double stroke)
-  ctx.strokeStyle = '#78350F'; ctx.lineWidth = 6; ctx.lineCap = 'round'
-  
-  // Draw rope segments with tension-based curvature
+  ctx.strokeStyle = '#78350F'; ctx.lineWidth = 6 * scale; ctx.lineCap = 'round'
+
   ctx.beginPath()
   ctx.moveTo(x1, y)
-  
-  // Left segment: from x1 to markerX (cart)
-  // Less sag with more tension
-  const sag = (1 - tension) * 12
+
+  const sag = (1 - tension) * 12 * scale
   const cp1x = (x1 + markerX) / 2
   const cp1y = y + sag + wave
   ctx.quadraticCurveTo(cp1x, cp1y, markerX, y)
-  
-  // Right segment: from markerX to x2
+
   const cp2x = (markerX + x2) / 2
   const cp2y = y + sag - wave
   ctx.quadraticCurveTo(cp2x, cp2y, x2, y)
-  
+
   ctx.stroke()
-  
-  // Overlap a lighter stroke for texture
-  ctx.setLineDash([4, 8])
+
+  ctx.setLineDash([4 * scale, 8 * scale])
   ctx.strokeStyle = '#92400E'
-  ctx.lineWidth = 2
+  ctx.lineWidth = 2 * scale
   ctx.stroke()
   ctx.restore()
 
-  // Flag on the cart or rope
+  // Flag on the cart marker
   ctx.save()
-  // Flag pole
-  ctx.strokeStyle = '#374151'; ctx.lineWidth = 2.5
-  ctx.beginPath(); ctx.moveTo(markerX, y - 35); ctx.lineTo(markerX, y - 5); ctx.stroke()
-  
-  // Flag with wave animation
+  const poleTop = y - 35 * scale
+  const poleBot = y - 5 * scale
+  ctx.strokeStyle = '#374151'; ctx.lineWidth = 2.5 * scale
+  ctx.beginPath(); ctx.moveTo(markerX, poleTop); ctx.lineTo(markerX, poleBot); ctx.stroke()
+
   ctx.shadowBlur = 6
   ctx.shadowColor = 'rgba(255, 214, 0, 0.4)'
-  ctx.fillStyle = '#FFD600'; ctx.strokeStyle = '#374151'; ctx.lineWidth = 1.5
-  
-  const flagWave = Math.sin(Date.now() * 0.01) * 4
+  ctx.fillStyle = '#FFD600'; ctx.strokeStyle = '#374151'; ctx.lineWidth = 1.5 * scale
+
+  const flagWave = Math.sin(Date.now() * 0.01) * 4 * scale
   ctx.beginPath()
-  ctx.moveTo(markerX, y - 35)
-  ctx.lineTo(markerX + 22, y - 25 + flagWave)
-  ctx.lineTo(markerX, y - 15)
+  ctx.moveTo(markerX, poleTop)
+  ctx.lineTo(markerX + 22 * scale, poleTop + 10 * scale + flagWave)
+  ctx.lineTo(markerX, poleTop + 20 * scale)
   ctx.closePath(); ctx.fill(); ctx.stroke()
   ctx.restore()
 }
@@ -550,7 +501,7 @@ function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h) {
 
 // ─── Tab drawing functions ───────────────────────────────────────────────────
 
-export function drawNetForce(ctx, w, h, state) {
+export function drawNetForce(ctx, w, h, state, lang = 'bn', strings) {
   const { leftPushers, rightPushers, cartX, cartV } = state
   const gy = groundY(h)
   const cartSX = wx(cartX, w)
@@ -558,6 +509,7 @@ export function drawNetForce(ctx, w, h, state) {
   const rCount = rightPushers.filter(Boolean).length
   const Fnet = (rCount - lCount) * FORCE_PER_PERSON
   const maxF = 4 * FORCE_PER_PERSON
+  const s = strings?.canvasLabels || { force1: 'Force 1', force2: 'Force 2', netForce: 'Net Force', unitM: 'm', unitMs: 'm/s' }
 
   ctx.clearRect(0, 0, w, h)
   drawBackground(ctx, w, h)
@@ -585,27 +537,31 @@ export function drawNetForce(ctx, w, h, state) {
   // Force arrows stacked above cart (offset by half-cart width)
   const baseArrowY = gy - 75
   const cartOffset = 36
-  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `বল ১ = ${lCount * 50} N`, cartOffset)
-  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `বল ২ = ${rCount * 50} N`, cartOffset)
+  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `${s.force1} = ${lCount * 50} N`, cartOffset)
+  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `${s.force2} = ${rCount * 50} N`, cartOffset)
   if (lCount > 0 || rCount > 0) {
-    drawForceArrow(ctx, cartSX, baseArrowY - 64, Fnet, maxF, '#1CAB55', `লব্ধি বল = ${Fnet} N`, cartOffset)
+    drawForceArrow(ctx, cartSX, baseArrowY - 64, Fnet, maxF, '#1CAB55', `${s.netForce} = ${Fnet} N`, cartOffset)
   }
 
   // Position readout
   ctx.save()
   ctx.fillStyle = '#4B5563'; ctx.font = 'bold 13px Inter, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText(`${cartX >= 0 ? '+' : ''}${cartX.toFixed(1)} মি  |  ${cartV.toFixed(1)} মি/সে`, cartSX, gy - 115)
+  const px = cartX >= 0 ? '+' : ''
+  const posStr = `${px}${cartX.toFixed(1)} ${s.unitM}`
+  const velStr = `${cartV.toFixed(1)} ${s.unitMs}`
+  ctx.fillText(`${posStr}  |  ${velStr}`, cartSX, gy - 115)
   ctx.restore()
 }
 
-export function drawMotion(ctx, w, h, state) {
+export function drawMotion(ctx, w, h, state, lang = 'bn', strings) {
   const { Fapplied, selectedObject, frictionOn, boxX, boxV, isRunning } = state
   const obj = OBJECTS[selectedObject]
   const gy = groundY(h)
   const boxSX = wx(boxX, w)
   const boxSize = 44 + Math.min(Math.log10(obj.mass + 1) * 16, 32)
   const maxF = 500
+  const s = strings?.canvasLabels || { appliedF: 'Applied Force', frictionF: 'Friction Force', unitMs: 'm/s' }
 
   const Ff = frictionOn ? frictionForce(Fapplied, obj.mass, obj.mu_s, obj.mu_k, boxV) : 0
   const isStruggling = Math.abs(Fapplied) > 10 && Math.abs(boxV) < 0.1
@@ -620,28 +576,24 @@ export function drawMotion(ctx, w, h, state) {
     shakeX = (Math.random() - 0.5) * 2
   }
 
-  /* Person and Sprite are now handled by CSS in React component */
-  // if (Math.abs(Fapplied) > 0.5) { ... }
-  // drawSprite(ctx, selectedObject, boxSX + shakeX, gy, boxSize)
-
   drawParticles(ctx, boxSX, gy, boxV)
 
   const arrowY = gy - boxSize - 20
   const boxOffset = boxSize / 2
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `প্রযুক্ত বল = ${Fapplied.toFixed(0)} N`, boxOffset)
-  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `ঘর্ষণ বল = ${Math.abs(Ff).toFixed(0)} N`, boxOffset)
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, boxOffset)
+  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, boxOffset)
 
   // Speed readout
   if (Math.abs(boxV) > 0.05) {
     ctx.save()
     ctx.fillStyle = '#1CAB55'; ctx.font = 'bold 14px Inter, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`v = ${boxV.toFixed(1)} মি/সে`, boxSX, gy - boxSize - 65)
+    ctx.fillText(`v = ${boxV.toFixed(1)} ${s.unitMs}`, boxSX, gy - boxSize - 65)
     ctx.restore()
   }
 }
 
-export function drawFriction(ctx, w, h, state) {
+export function drawFriction(ctx, w, h, state, lang = 'bn', strings) {
   const { Fapplied, surface, mass, boxX, boxV, isRunning } = state
   const surf = SURFACES[surface]
   const gy = groundY(h)
@@ -651,6 +603,8 @@ export function drawFriction(ctx, w, h, state) {
   const Fs_max = surf.mu_s * mass * 9.8
   const Fk     = surf.mu_k * mass * 9.8
   const isStruggling = Math.abs(Fapplied) > 10 && Math.abs(boxV) < 0.1
+  const s = strings?.canvasLabels || { appliedF: 'Applied Force', frictionF: 'Friction Force' }
+  const surfStrings = strings?.friction?.surfaces || {}
 
   ctx.clearRect(0, 0, w, h)
   drawBackground(ctx, w, h)
@@ -659,7 +613,8 @@ export function drawFriction(ctx, w, h, state) {
   // Surface label
   ctx.save()
   ctx.fillStyle = '#6B7280'; ctx.font = 'bold 12px Hind Siliguri, sans-serif'; ctx.textAlign = 'left'
-  ctx.fillText(`তল: ${surf.label}  (μₛ=${surf.mu_s})`, 16, h - 12)
+  const surfLabel = surfStrings[surface] || surf.label
+  ctx.fillText(`${lang === 'bn' ? 'তল' : 'Surface'}: ${surfLabel}  (μₛ=${surf.mu_s})`, 16, h - 12)
   ctx.restore()
 
   // Shake if struggling
@@ -678,54 +633,68 @@ export function drawFriction(ctx, w, h, state) {
 
   const arrowY = gy - 70
   const objOffset = 24 // Fixed size for friction sprites usually
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `প্রযুক্ত বল = ${Fapplied.toFixed(0)} N`, objOffset)
-  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `ঘর্ষণ বল = ${Math.abs(Ff).toFixed(0)} N`, objOffset)
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, objOffset)
+  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, objOffset)
 
   drawFrictionGraph(ctx, Fapplied, -Ff, Fs_max, Fk, w, h)
 }
 
-export function drawTug(ctx, w, h, state) {
+export function drawTug(ctx, w, h, state, lang = 'bn', strings) {
   const { leftTeam, rightTeam, ropeX, winner } = state
   const gy = groundY(h)
-  const markerSX = wx(ropeX, w)
+  const s = strings?.canvasLabels || { finishLine: 'Finish Line' }
+  const tugStrings = strings?.tug || {}
+
+  // Physics runs in ±WIN_DISTANCE (6 m) but we only show the cart in ±VISUAL_WIN (3 world units)
+  // so it never reaches the people. People sit fixed in the outer zone (±4.5 to ±7.5).
+  const VISUAL_WIN = 3
+  const visualRopeX = (ropeX / WIN_DISTANCE) * VISUAL_WIN
+  const markerSX = wx(visualRopeX, w)
+
+  // One scale factor drives all elements so proportions stay consistent.
+  const sceneScale = Math.min(1, w / 520)
 
   ctx.clearRect(0, 0, w, h)
   drawBackground(ctx, w, h)
   drawSurface(ctx, w, h)
 
-  // Win zone lines
-  const leftWin  = wx(-6, w)
-  const rightWin = wx(6, w)
+  // Win zone lines at ±VISUAL_WIN — matches the cart's visual travel limit
+  const leftWin  = wx(-VISUAL_WIN, w)
+  const rightWin = wx(VISUAL_WIN, w)
+  const lineH = 80 * sceneScale
   ctx.save()
   ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 2; ctx.setLineDash([6, 5])
   ;[leftWin, rightWin].forEach(lx => {
-    ctx.beginPath(); ctx.moveTo(lx, gy - 80); ctx.lineTo(lx, gy); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(lx, gy - lineH); ctx.lineTo(lx, gy); ctx.stroke()
   })
   ctx.setLineDash([])
-  ctx.fillStyle = '#9CA3AF'; ctx.font = 'bold 11px Hind Siliguri, sans-serif'; ctx.textAlign = 'center'
-  ctx.fillText('শেষ রেখা', leftWin, gy - 85)
-  ctx.fillText('শেষ রেখা', rightWin, gy - 85)
+  ctx.fillStyle = '#9CA3AF'; ctx.font = `bold ${Math.round(11 * sceneScale)}px Hind Siliguri, sans-serif`; ctx.textAlign = 'center'
+  ctx.fillText(s.finishLine, leftWin, gy - lineH - 5)
+  ctx.fillText(s.finishLine, rightWin, gy - lineH - 5)
   ctx.restore()
 
-  // Rope (drawn first so it appears behind cart and people)
-  const ropeY = gy - 20
+  // Rope spans from people outer edge to people outer edge
+  const ropeY = gy - 20 * sceneScale
   const lActive = leftTeam.filter(Boolean).length
   const rActive = rightTeam.filter(Boolean).length
   const tension = Math.min((lActive + rActive) / 3, 1)
-  drawRope(ctx, wx(-7.5, w), ropeY, wx(7.5, w), markerSX, state.isRunning, tension)
+  drawRope(ctx, wx(-7.5, w), ropeY, wx(7.5, w), markerSX, state.isRunning, tension, sceneScale)
 
-  // Cart in the middle (drawn before people so people render on top)
-  drawCart(ctx, markerSX, gy)
+  // Cart drawn before people so people render on top
+  drawCart(ctx, markerSX, gy, sceneScale)
 
-  // Left team (Red, pull left) — drawn last so they appear in front of cart
+  const personScale = sceneScale
+  const outerWorld = 7.5
+  const innerWorld = 4.5
+  const n = leftTeam.length - 1  // 3 for 4-person teams
+
   leftTeam.forEach((active, i) => {
-    const px = wx(-7.6, w) + i * 32
-    drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning, true)
+    const px = wx(-outerWorld + i * ((outerWorld - innerWorld) / n), w)
+    drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning, true, personScale)
   })
-  // Right team (Blue, pull right)
   rightTeam.forEach((active, i) => {
-    const px = wx(7.6, w) - i * 32
-    drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, true)
+    const px = wx(outerWorld - i * ((outerWorld - innerWorld) / n), w)
+    drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, true, personScale)
   })
 
   // Winner overlay
@@ -746,7 +715,7 @@ export function drawTug(ctx, w, h, state) {
     
     ctx.fillStyle = '#111827'; ctx.font = `bold ${Math.floor(24 * pulse)}px Hind Siliguri, sans-serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    const msg = winner === 'right' ? 'নীল দল জিতেছে!' : 'লাল দল জিতেছে!'
+    const msg = winner === 'right' ? (tugStrings.winRight || 'Blue Team Wins!') : (tugStrings.winLeft || 'Red Team Wins!')
     ctx.fillText(msg, w / 2, h / 2)
     ctx.restore()
   }

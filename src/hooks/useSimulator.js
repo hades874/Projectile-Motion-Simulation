@@ -11,13 +11,41 @@ function makeInitialState(modeOrConfig = 'senior') {
     ? { mode: modeOrConfig, overrides: {} }
     : modeOrConfig
   const { mode = 'senior', overrides = {} } = config
-  const params = { ...DEFAULTS[mode], ...overrides, g: 9.8 }
+  const params = {
+    v0: overrides.v0 ?? DEFAULTS[mode].v0,
+    theta: overrides.theta ?? DEFAULTS[mode].theta,
+    h0: overrides.h0 ?? DEFAULTS[mode].h0,
+    g: 9.8
+  }
+
+  let comparison = null
+  if (overrides['comp-v0'] != null || overrides['comp-theta'] != null || overrides['comp-h0'] != null) {
+    const cp = {
+      v0: overrides['comp-v0'] ?? params.v0,
+      theta: overrides['comp-theta'] ?? params.theta,
+      h0: overrides['comp-h0'] ?? params.h0,
+    }
+    comparison = {
+      params: cp,
+      points: trajectoryPoints(cp.v0, cp.theta, cp.h0),
+      results: computeResults(cp.v0, cp.theta, cp.h0),
+    }
+  }
+
+  const overlays = {
+    vectors: overrides['show-vectors'] ?? false,
+    dots: overrides['show-dots'] ?? false,
+    axes: overrides['show-axes'] ?? true,
+    formulas: false,
+    graphs: false
+  }
+
   return {
     mode,
     params,
-    comparison: null,
-    animation: { status: 'idle', t: 0, speed: 1 },
-    overlays: { vectors: false, dots: false, axes: true, formulas: false, graphs: false },
+    comparison,
+    animation: { status: 'idle', t: 0, speed: overrides.speed ?? 1 },
+    overlays,
     display: { numerals: 'bangla' },
     results: computeResults(params.v0, params.theta, params.h0),
     points: trajectoryPoints(params.v0, params.theta, params.h0),

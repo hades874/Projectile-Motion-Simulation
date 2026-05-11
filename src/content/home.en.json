@@ -1,0 +1,54 @@
+{
+  "brandSeries": "Mechanics Series",
+  "heroTourBtn": "Start Tutorial",
+  "appTitle": "See Physics",
+  "appSubtitle": "Through New Eyes",
+  "appDesc": "Choose a simulation from below and get started",
+  "junior": {
+    "badge": "Junior",
+    "age": "Class 6–9",
+    "title": "Force & Motion",
+    "subtitle": "Newton's Laws & Friction",
+    "labs": "Labs",
+    "visuals": "Visuals",
+    "time": "Time",
+    "timeVal": "15 m."
+  },
+  "senior": {
+    "badge": "Senior",
+    "age": "HSC · Board",
+    "title": "Projectile Motion",
+    "subtitle": "Graphs · Formulas · Compare",
+    "params": "Parameters",
+    "graphs": "Graphs",
+    "time": "Time",
+    "timeVal": "20 m."
+  },
+  "tour": [
+    {
+      "title": "Welcome!",
+      "body": "Welcome to the 10 Minute School Mechanics Series. You can choose your preferred simulation mode from here."
+    },
+    {
+      "title": "Junior Mode",
+      "body": "Here you will find simple and fun labs related to force, motion, and friction."
+    },
+    {
+      "title": "Senior Mode",
+      "body": "Here you can perform detailed simulations and mathematical analysis of projectile motion."
+    }
+  ],
+  "intro": {
+    "title": "Physics Simulator",
+    "badge": "10 Minute School · Mechanics Series",
+    "description": "The most fun way to learn the core concepts of physics through two interactive simulations: Force, Motion, and Projectile Motion.",
+    "outcomes": [
+      "Directly test the core principles of force and motion",
+      "Visually apply the formulas of projectile motion",
+      "Analyze physics through graphs, formulas, and numbers",
+      "Become proficient in solving board-level physics problems"
+    ],
+    "cta": "Start Simulation"
+  },
+  "langSwitch": "বাংলায় দেখুন"
+}

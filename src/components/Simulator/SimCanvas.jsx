@@ -1,6 +1,8 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useViewport } from '../../hooks/useViewport.js'
 import { useAnimationFrame } from '../../hooks/useAnimationFrame.js'
+import { useLanguage } from '../../hooks/useLanguage.jsx'
+import { getTranslations } from '../../content/translations.js'
 import { position, velocity } from '../../lib/physics.js'
 import {
   computeScale, drawGrid, drawAxes, drawGround,
@@ -21,6 +23,8 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
   const containerRef = useRef(null)
   const canvasRef    = useRef(null)
   const { width, height } = useViewport(containerRef)
+  const { language } = useLanguage()
+  const strings = getTranslations(language).senior
 
   const { params, points, results, animation, overlays, comparison, degenerate } = state
   const isPlaying  = animation.status === 'playing'
@@ -37,7 +41,8 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
     ctx.save()
     ctx.scale(dpr, dpr)
 
-    const { color: ballColor, radius: ballRadius } = PROJECTILE_TYPES[params.projectileType ?? 'ball']
+    const { color: ballColor, radius: baseRadius } = PROJECTILE_TYPES[params.projectileType ?? 'ball']
+    const ballRadius = baseRadius * Math.min(width / 600, 1)
 
     drawBackground(ctx, width, height)
 
@@ -48,16 +53,16 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
 
     if (overlays.axes) {
       drawGrid(ctx, scale, offsetX, offsetY, width, height)
-      drawAxes(ctx, scale, offsetX, offsetY, width, height)
+      drawAxes(ctx, scale, offsetX, offsetY, width, height, strings)
     }
     drawGround(ctx, offsetY, width)
     
     // Main Canon
-    drawLauncher(ctx, offsetX, offsetY, params.theta, params.h0, scale)
+    drawLauncher(ctx, offsetX, offsetY, params.theta, params.h0, scale, false, width)
 
     // Comparison Canon
     if (comparison) {
-      drawLauncher(ctx, offsetX, offsetY, comparison.params.theta, comparison.params.h0, scale, true)
+      drawLauncher(ctx, offsetX, offsetY, comparison.params.theta, comparison.params.h0, scale, true, width)
     }
 
     // Main trajectory drawing
@@ -85,7 +90,10 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
 
     // Dimension lines on idle / finished
     if ((isIdle || isFinished) && !degenerate) {
-      drawDimensionLines(ctx, points, scale, offsetX, offsetY, results)
+      drawDimensionLines(ctx, points, scale, offsetX, offsetY, results, false, strings, language)
+      if (comparison) {
+        drawDimensionLines(ctx, comparison.points, scale, offsetX, offsetY, comparison.results, true, strings, language)
+      }
     }
 
     // Ball, vectors, impact
@@ -135,7 +143,7 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
 
     ctx.restore()
   }, [width, height, points, params, results, animation, overlays, comparison, degenerate,
-      isPlaying, isPaused, isFinished, isIdle])
+      isPlaying, isPaused, isFinished, isIdle, strings, language])
 
   // RAF loop: advance time when playing, keep redrawing for background & impact ripple
   useAnimationFrame((delta) => {

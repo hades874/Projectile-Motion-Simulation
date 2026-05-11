@@ -1,0 +1,54 @@
+{
+  "appTitle": "Projectile Motion",
+  "modeSelect": {
+    "title": "What grade are you in?",
+    "junior": "Junior",
+    "juniorSub": "Grade 6–8",
+    "senior": "Senior",
+    "seniorSub": "Grade 9–10 & HSC"
+  },
+  "controls": {
+    "speed": "Speed",
+    "speedSlow": "Slow",
+    "speedFast": "Fast",
+    "angle": "Angle",
+    "angleLow": "Low",
+    "angleHigh": "High"
+  },
+  "buttons": {
+    "launch": "Launch!",
+    "reset": "Try Again",
+    "explainer": "What is this?"
+  },
+  "readouts": {
+    "range": "Distance traveled",
+    "height": "Peak height",
+    "time": "Time in air",
+    "rangeUnit": "meters away!",
+    "heightUnit": "meters high!",
+    "timeUnit": "seconds in air!"
+  },
+  "explainer": {
+    "title": "What is this?",
+    "close": "Close",
+    "pages": [
+      {
+        "heading": "What is a Throw?",
+        "body": "When something is thrown into the air, it moves along a curved path. This is called projectile motion."
+      },
+      {
+        "heading": "Why does it come down?",
+        "body": "The Earth pulls everything towards itself; this force is called gravity. This pull makes the ball fall to the ground."
+      },
+      {
+        "heading": "Try it yourself!",
+        "body": "Move the sliders, change the speed and angle. See how far the ball goes!"
+      }
+    ]
+  },
+  "errors": {
+    "noVelocity": "Increase speed.",
+    "flat": "No projectile at this angle, increase angle."
+  },
+  "numeralToggle": "Numbers"
+}

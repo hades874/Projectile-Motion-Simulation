@@ -4,16 +4,21 @@ import {
   step, clamp, WIN_DISTANCE, OBJECTS, SURFACES, CART_MASS, ROPE_MASS,
 } from '../lib/forcesPhysics.js'
 
-function makeInitial() {
+function makeInitial(overrides = {}) {
+  const tugLeft = overrides['tug-left'] ? overrides['tug-left'].split(',').map(v => v === '1') : [false, false, false]
+  const tugRight = overrides['tug-right'] ? overrides['tug-right'].split(',').map(v => v === '1') : [false, false, false]
+
   return {
-    activeTab: 'tug',
+    activeTab: overrides.tab || 'tug',
     motion: {
-      Fapplied: 0, selectedObject: 'box', frictionOn: true,
+      Fapplied: overrides['motion-force'] ?? 0,
+      selectedObject: overrides['motion-obj'] || 'box',
+      frictionOn: overrides['motion-friction'] ?? true,
       boxX: 0, boxV: 0, isRunning: false,
     },
     tug: {
-      leftTeam:  [false, false, false, false],
-      rightTeam: [false, false, false, false],
+      leftTeam: tugLeft.length === 3 ? tugLeft : [false, false, false],
+      rightTeam: tugRight.length === 3 ? tugRight : [false, false, false],
       ropeX: 0, ropeV: 0, isRunning: false, winner: null,
     },
   }
@@ -100,8 +105,8 @@ function reducer(state, action) {
   }
 }
 
-export function useForceSimulator() {
-  const [state, dispatch] = useReducer(reducer, null, makeInitial)
+export function useForceSimulator(initialOverrides = {}) {
+  const [state, dispatch] = useReducer(reducer, initialOverrides, makeInitial)
 
   const setTab       = useCallback((tab)              => dispatch({ type: 'SET_TAB',       tab }),             [])
   const togglePusher = useCallback((tabKey, side, idx) => dispatch({ type: 'TOGGLE_PUSHER', tabKey, side, idx }), [])

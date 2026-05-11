@@ -3,10 +3,13 @@
 This plan outlines the visual and interactive improvements for the Physics Simulation Hub, aiming for a "wow" factor while maintaining the 10 Minute School (10MS) brand identity and NCTB curriculum alignment.
 
 ## 1. Aesthetic Direction: "Premium Educational Lab"
+
+> **Status (2026-05-11):** The Home Screen (ModeSelect) redesign in Section 3A has been **implemented** via the SIM-P1 Home Redesign design bundle. The glassmorphism approach was replaced with a cleaner white-card + gradient-hero design that is more performant on low-end devices. See current state below.
+
 The goal is to move from a "flat" functional UI to a "premium lab" feel that inspires students, with a **strict mobile-first priority**.
-- **Glassmorphism:** Use frosted glass effects (`backdrop-filter: blur()`) for control panels and overlays.
+- ~~**Glassmorphism:** Use frosted glass effects for control panels and overlays.~~ **Superseded** — ModeSelect now uses clean white cards (`1px solid var(--border)`) with subtle hover lifts. Glassmorphism is used only for the sticky bottom callout and SeniorScreen's floating action bar.
 - **Physics Glow:** Add a subtle "bloom" or "glow" effect to trajectories, force arrows, and active physics elements.
-- **Dynamic Backgrounds:** Introduce drifting geometry (△ ○ ▢) and subtle grids to make the interface feel "alive."
+- **Dynamic Backgrounds:** Introduce drifting geometry (△ ○ ▢) and subtle grids to make the interface feel "alive." **Partially done** — hero section has static SVG corner geometry.
 - **Mobile-First Responsiveness:** Every new design element will be validated first at **360px - 414px width** (typical Bangladeshi mobile viewport) before scaling to desktop.
 
 ## 2. Mobile-First Excellence
@@ -26,12 +29,15 @@ Update `src/styles/tokens.css` with new premium tokens:
 
 ## 3. Component-Specific Redesigns
 
-### A. Home Screen (ModeSelect)
-- **Visuals:** Add a Hero section with a background illustration of a physics lab or abstract geometry.
-- **Cards:** 
-  - Redesign cards with a "Glass" look and **mobile-friendly sizing**.
-  - On hover (and touch-active): Scale up by 2%, increase border thickness, and add a soft shadow colored by the segment.
-  - Use high-quality 3D-styled icons (generated) that are clear even on smaller screens.
+### A. Home Screen (ModeSelect) — ✅ IMPLEMENTED (2026-05-11)
+
+Current implementation replaces the glassmorphism card design with:
+- **Hero band** — `linear-gradient(#FFF5F6 → #fff)` with decorative SVG corner geometry, brand row, title/subtitle, and an animated `TrajectoryHero` HTML5 canvas (red ball tracing 45° parabola arc with `requestAnimationFrame`; honors `prefers-reduced-motion`).
+- **Product cards** (`juniorCard` / `seniorCard`) — clean white `1px solid var(--border)` cards, `border-radius: 24px`. Each has a top color bar (green/blue), inline SVG icon (`ForcesIcon` / `ProjectileIcon`), tag+age, title, hover lift + border color change, and a 3-col stats strip.
+- **Features rail** — 3-column grid of feature tiles (রিয়েল-টাইম, বোর্ড স্ট্যান্ডার্ড, বাংলায়).
+- **Sticky bottom callout** — `position: sticky; bottom: 0` with blur backdrop and green "শুরু করো →" CTA.
+
+Original plan items (glass look, 3D icons) were superseded by the design bundle spec.
 
 ### B. Simulation Interface (Junior & Senior)
 - **Header:** Use a blurred sticky header. Turn the Numeral Toggle into a custom "Toggle Switch" component.

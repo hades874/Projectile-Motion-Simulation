@@ -52,7 +52,8 @@ export function trajectoryPoints(v0, thetaDeg, h0) {
   for (let i = 0; i <= SAMPLE_COUNT; i++) {
     const t = (i / SAMPLE_COUNT) * T
     const { x, y } = position(v0, thetaDeg, h0, t)
-    points.push({ x, y, t })
+    const { vx, vy, speed } = velocity(v0, thetaDeg, t)
+    points.push({ x, y, t, vx, vy, speed })
   }
   return points
 }

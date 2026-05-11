@@ -91,22 +91,21 @@
 }
 
 .helpButton {
-  position: fixed;
-  top: 80px; /* Below header */
-  right: 20px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: white;
-  border: 1.5px solid #e2e8f0;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 153;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   color: #64748b;
+  flex-shrink: 0;
 }
 
 .helpButton:hover {
@@ -116,123 +115,7 @@
   border-color: #bfdbfe;
 }
 
-/* Mode Picker Modal */
-.pickerOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 155;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.pickerModal {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalIn 0.3s ease-out;
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.pickerTitle {
-  font-size: 1.5rem;
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 24px;
-  color: #1e293b;
-}
-
-.pickerCards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-@media (max-width: 480px) {
-  .pickerCards {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pickerCard {
-  border: 2px solid #f1f5f9;
-  border-radius: 16px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-}
-
-.pickerCardIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.beginnerCard {
-  border-color: #f0fdf4;
-}
-.beginnerCard .pickerCardIcon { background: #dcfce7; color: #166534; }
-.beginnerCard:hover { border-color: #22c55e; background: #f0fdf4; }
-
-.expertCard {
-  border-color: #eff6ff;
-}
-.expertCard .pickerCardIcon { background: #dbeafe; color: #1e40af; }
-.expertCard:hover { border-color: #3b82f6; background: #eff6ff; }
-
-.pickerCardTitle {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #334155;
-}
-
-.pickerCardDesc {
-  font-size: 0.85rem;
-  color: #64748b;
-  line-height: 1.4;
-}
-
-.pickerSkip {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  text-align: center;
-  color: #94a3b8;
-  font-size: 0.9rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.pickerSkip:hover {
-  color: #64748b;
-  text-decoration: underline;
-}
-
-/* Mobile responsive tooltip */
+/* Mobile responsive */
 @media (max-width: 600px) {
   .tooltip {
     bottom: 20px !important;
@@ -241,5 +124,10 @@
     top: auto !important;
     width: auto !important;
     transform: none !important;
+  }
+
+  .helpButton {
+    width: 44px;
+    height: 44px;
   }
 }

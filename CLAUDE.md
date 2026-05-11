@@ -31,6 +31,24 @@ React 18 + Vite SPA. React Router v6 in **hash mode** (iframe-embed safe).
 - `/junior` → `ForceScreen` — Forces and Motion simulation (4 tabs: Net Force, Motion, Friction, Tug of War)
 - `/senior` → `SeniorPage` → `SeniorScreen` — full-featured projectile motion sim
 
+### ModeSelect layout
+
+`ModeSelect` (`src/components/Layout/ModeSelect.jsx`) has three sections:
+
+1. **Hero band** (`heroSection`) — gradient background (`#FFF5F6 → #fff`), decorative corner SVG geometry (clipped by `overflow: hidden` on the section, NOT on `.page`), brand row, headline, subtitle, and an animated `TrajectoryHero` canvas.
+
+2. **Scrollable content** (`content`) — two numbered section labels with Bengali kicker text, product cards, and a features rail:
+   - **Cards** (`juniorCard` / `seniorCard`) — each has a featured color bar (top 3px), SVG icon, tag+age row, title+sub, arrow affordance, and a 3-column stats strip (dashed border-top). Cards use inline SVG components `ForcesIcon` and `ProjectileIcon` (not `<img>` tags).
+   - **Features rail** (`featuresRail`) — 3-column grid of `featureTile` items (real-time, board-standard, Bangla).
+
+3. **Sticky bottom callout** (`bottomCallout`) — `position: sticky; bottom: 0`, blur backdrop, green "শুরু করো →" CTA navigating to `/senior`.
+
+**CSS sticky note:** `.page` must NOT have `overflow-x: hidden` — doing so would implicitly set `overflow-y: auto` (CSS spec), making `.page` a scroll container and breaking `position: sticky` on `.bottomCallout`. The hero section's own `overflow: hidden` clips the geo SVGs instead.
+
+**`TrajectoryHero`** — inline sub-component; uses `requestAnimationFrame` to animate a red ball along a 45° parabola ghost arc. Checks `window.matchMedia('(prefers-reduced-motion: reduce)')` before starting RAF — if true, renders the full arc statically (`t=1`) with no animation. Canvas drawn at `devicePixelRatio` scale for sharpness on Retina/high-DPI screens.
+
+Bangla strings in JSX use actual UTF-8 characters. Do NOT write bare `\uXXXX` escapes in JSX text nodes (between tags) or JSX attribute strings \u2014 JSX does not process JS escape sequences there, so they render as literal backslash text. JS string literals inside `{" "}` expressions do process `\uXXXX` correctly if needed.
+
 ### Forces and Motion (Junior)
 
 `ForceScreen` owns `useForceSimulator`. Four tabs, each with a canvas + controls panel:
@@ -45,6 +63,8 @@ React 18 + Vite SPA. React Router v6 in **hash mode** (iframe-embed safe).
 - Left: canvas (trajectory + animation)
 - Right panel: sliders for v₀/θ/h₀, result cards (R, H, T, v_impact)
 - Bottom: action bar (launch/pause/speed/reset) + collapsible tabs (vectors/formulas/graphs/comparison)
+
+**Mobile canvas constraint (≤639px):** `canvasContainer` is `flex: none; height: 220px` (fixed, smaller) and `sidebar` becomes `flex: 1; height: auto` (takes remaining space). Desktop (≥1024px) layout is unchanged.
 
 ### Forces simulation state
 
@@ -137,6 +157,8 @@ No English fallback — Bangla-only by design. Numeral conversion in `src/lib/ba
 | `src/content/senior.bn.json` | Bangla strings for Projectile simulation |
 | `src/content/glossary.bn.json` | Physics term definitions |
 | `src/styles/tokens.css` | 10MS design tokens |
+| `src/components/Layout/ModeSelect.jsx` | Landing page — hero, animated canvas, cards, sticky callout |
+| `src/components/Layout/ModeSelect.module.css` | ModeSelect styles — heroSection, cards, featuresRail, bottomCallout |
 | `src/components/Layout/ForceScreen.jsx` | Forces sim — 4-tab shell with ForceCanvas |
 | `src/components/Layout/SeniorPage.jsx` | Wrapper: `useSimulator('senior')` → SeniorScreen |
 | `src/components/Layout/SeniorScreen.jsx` | Projectile sim — split canvas/panel layout |

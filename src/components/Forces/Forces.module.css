@@ -74,14 +74,78 @@
 }
 
 @media (max-width: 639px) {
+  /* Tighter vertical rhythm so the canvas above gets more breathing room */
+  .panel {
+    padding: var(--s-3) var(--s-4);
+    gap: var(--s-3);
+    max-height: 55dvh;
+  }
+
+  .section {
+    gap: var(--s-2);
+  }
+
+  .sectionLabel {
+    margin-bottom: var(--s-1);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+  }
+
+  .pusherRow {
+    gap: var(--s-3);
+    margin-top: var(--s-1);
+    padding: 0 var(--s-1);
+  }
+
+  /* Pusher buttons already 48×48 — keep as-is */
   .personBtn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  /* Object & surface preset buttons: original padding gives only ~37 px */
+  .objectBtn {
+    min-height: 44px;
+    padding: 8px 4px;
+  }
+
+  .surfaceBtn {
+    min-height: 44px;
+    padding: 8px 4px;
+  }
+
+  .readouts {
+    gap: var(--s-2);
+    margin-top: var(--s-1);
+  }
+
+  .readoutCard {
+    padding: var(--s-3);
+    border-radius: 14px;
+  }
+
+  .readoutLabel {
+    font-size: 10px;
+  }
+
+  .readoutValue {
+    font-size: 15px;
+  }
+
+  .instructionBox {
+    padding: var(--s-3) var(--s-3);
+    border-radius: 14px;
+    gap: var(--s-2);
+  }
+
+  .instructionText {
+    font-size: 14px;
   }
 
   .carContainer {
-    transform: scale(0.75);
+    transform: scale(0.6);
     transform-origin: bottom left;
   }
 }
@@ -266,8 +330,8 @@
 
 /* Ice block - glossy crystalline appearance */
 .ice {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 8px;
@@ -298,7 +362,14 @@
   transition: transform 0.3s var(--ease-out);
 }
 
-.carContainer.flipped {
+.carInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.carInner.flipped {
   transform: scaleX(-1);
 }
 
@@ -461,8 +532,8 @@
 
 /* Cardboard box - realistic texture */
 .box {
-  width: 70px;
-  height: 70px;
+  width: 50px;
+  height: 50px;
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
   border: 2.5px solid #92400e;
   border-radius: 3px;
@@ -639,3 +710,4 @@
   margin: 0;
   font-style: italic;
 }
+

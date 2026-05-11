@@ -2,10 +2,9 @@ import { ForceCanvas } from './ForceCanvas.jsx'
 import { drawNetForce } from '../../lib/forceCanvas.js'
 import { FORCE_PER_PERSON, CART_MASS } from '../../lib/forcesPhysics.js'
 import { Button } from '../Common/Button.jsx'
-import strings from '../../content/forces.bn.json'
+import { useLanguage } from '../../hooks/useLanguage.jsx'
+import { getTranslations } from '../../content/translations.js'
 import styles from './Forces.module.css'
-
-const s = strings.netforce
 
 // Simple person SVG icon
 function PersonIcon({ color }) {
@@ -18,6 +17,9 @@ function PersonIcon({ color }) {
 }
 
 export function NetForceTab({ state, togglePusher, start, pause, reset, tick }) {
+  const { language } = useLanguage()
+  const strings = getTranslations(language).forces
+  const s = strings.netforce
   const { leftPushers, rightPushers, cartX, cartV, isRunning } = state
   const lCount = leftPushers.filter(Boolean).length
   const rCount = rightPushers.filter(Boolean).length
@@ -31,7 +33,7 @@ export function NetForceTab({ state, togglePusher, start, pause, reset, tick }) 
       <div className={styles.panel}>
         {/* Left pushers */}
         <div className={styles.section}>
-          <span className={`${styles.sectionLabel} bn`}>{s.leftForce}</span>
+          <span className={`${styles.sectionLabel} ${language === 'bn' ? 'bn' : ''}`}>{s.leftForce}</span>
           <div className={styles.pusherRow}>
             {leftPushers.map((active, i) => (
               <button
@@ -48,7 +50,7 @@ export function NetForceTab({ state, togglePusher, start, pause, reset, tick }) 
 
         {/* Right pushers */}
         <div className={styles.section}>
-          <span className={`${styles.sectionLabel} bn`}>{s.rightForce}</span>
+          <span className={`${styles.sectionLabel} ${language === 'bn' ? 'bn' : ''}`}>{s.rightForce}</span>
           <div className={styles.pusherRow}>
             {rightPushers.map((active, i) => (
               <button
@@ -69,32 +71,33 @@ export function NetForceTab({ state, togglePusher, start, pause, reset, tick }) 
             label={s.readouts.netForce}
             value={`${Fnet > 0 ? '+' : ''}${Fnet} N`}
             color={Fnet === 0 ? '#6B7280' : Fnet > 0 ? '#274FE3' : '#E8001D'}
+            lang={language}
           />
-          <ReadoutCard label={s.readouts.accel}    value={`${a} মি/সে²`} />
-          <ReadoutCard label={s.readouts.velocity} value={`${cartV.toFixed(1)} মি/সে`} />
-          <ReadoutCard label={s.readouts.position} value={`${cartX.toFixed(1)} মি`} />
+          <ReadoutCard label={s.readouts.accel}    value={`${a} m/s²`} lang={language} />
+          <ReadoutCard label={s.readouts.velocity} value={`${cartV.toFixed(1)} m/s`} lang={language} />
+          <ReadoutCard label={s.readouts.position} value={`${cartX.toFixed(1)} m`} lang={language} />
         </div>
 
         {/* Actions */}
         <div className={styles.actions}>
           {isRunning ? (
-            <Button variant="secondary" onClick={pause}><span className="bn">{strings.actions.pause}</span></Button>
+            <Button variant="secondary" onClick={pause}><span className={language === 'bn' ? 'bn' : ''}>{strings.actions.pause}</span></Button>
           ) : (
-            <Button variant="primary"   onClick={start}><span className="bn">{strings.actions.start}</span></Button>
+            <Button variant="primary"   onClick={start}><span className={language === 'bn' ? 'bn' : ''}>{strings.actions.start}</span></Button>
           )}
-          <Button variant="ghost" onClick={reset}><span className="bn">{strings.actions.reset}</span></Button>
+          <Button variant="ghost" onClick={reset}><span className={language === 'bn' ? 'bn' : ''}>{strings.actions.reset}</span></Button>
         </div>
 
-        <p className={`${styles.hint} bn`}>{s.hint}</p>
+        <p className={`${styles.hint} ${language === 'bn' ? 'bn' : ''}`}>{s.hint}</p>
       </div>
     </div>
   )
 }
 
-function ReadoutCard({ label, value, color }) {
+function ReadoutCard({ label, value, color, lang }) {
   return (
     <div className={styles.readoutCard}>
-      <span className={`${styles.readoutLabel} bn`}>{label}</span>
+      <span className={`${styles.readoutLabel} ${lang === 'bn' ? 'bn' : ''}`}>{label}</span>
       <span className={styles.readoutValue} style={color ? { color } : undefined}>{value}</span>
     </div>
   )

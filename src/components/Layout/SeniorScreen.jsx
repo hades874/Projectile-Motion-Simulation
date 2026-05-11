@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SimCanvas }       from '../Simulator/SimCanvas.jsx'
+import { parseUrlParams, updateUrlParams } from '../../lib/urlParams.js'
 import { Button }          from '../Common/Button.jsx'
 import { Toggle }          from '../Common/Toggle.jsx'
 import { Tooltip }         from '../Common/Tooltip.jsx'
@@ -11,8 +12,8 @@ import { ComparisonPanel } from '../Simulator/ComparisonPanel.jsx'
 import { IntroModal }      from '../Common/IntroModal.jsx'
 import TourOverlay         from '../Common/TourOverlay.jsx'
 import { formatNum }       from '../../lib/bangla.js'
-import glossary  from '../../content/glossary.bn.json'
-import strings   from '../../content/senior.bn.json'
+import { useLanguage }     from '../../hooks/useLanguage.jsx'
+import { getTranslations } from '../../content/translations.js'
 import styles    from './SeniorScreen.module.css'
 
 const SPEED_OPTIONS = [0.5, 1, 2]
@@ -37,7 +38,9 @@ const RESULT_META = {
 
 export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, setComparison, reset }) {
   const navigate = useNavigate()
-  const s = strings
+  const { language } = useLanguage()
+  const s = getTranslations(language).senior
+  const glossary = getTranslations(language).glossary
   const { params, animation, results, overlays, comparison, degenerate } = state
 
   const isPlaying  = animation.status === 'playing'
@@ -47,9 +50,41 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
   const showImpact = isFinished || isPlaying
   const hasComp    = !!comparison
 
-  const [activeTab, setActiveTab] = useState('controls')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') || 'controls'
+  const [activeTab, setActiveTab] = useState(initialTab)
 
-  const fmt = useCallback((v, d = 1) => formatNum(v ?? 0, d, 'bangla'), [])
+  // Sync state to URL
+  useEffect(() => {
+    const urlState = {
+      tab: activeTab,
+      v0: params.v0,
+      theta: params.theta,
+      h0: params.h0,
+      'show-vectors': overlays.vectors,
+      'show-dots': overlays.dots,
+      'show-axes': overlays.axes,
+      speed: animation.speed,
+    }
+    if (comparison) {
+      urlState['comp-v0'] = comparison.params.v0
+      urlState['comp-theta'] = comparison.params.theta
+      urlState['comp-h0'] = comparison.params.h0
+    } else {
+      urlState['comp-v0'] = null
+      urlState['comp-theta'] = null
+      urlState['comp-h0'] = null
+    }
+    updateUrlParams(urlState)
+  }, [
+    activeTab, 
+    params.v0, params.theta, params.h0, 
+    overlays.vectors, overlays.dots, overlays.axes, 
+    animation.speed,
+    comparison?.params?.v0, comparison?.params?.theta, comparison?.params?.h0
+  ])
+
+  const fmt = useCallback((v, d = 1) => formatNum(v ?? 0, d, language === 'bn' ? 'bangla' : 'western'), [language])
 
   const handleAnimTick = useCallback((t, status) => setAnimation({ t, status }), [setAnimation])
   const handleLaunch   = () => { if (!degenerate) setAnimation({ status: 'playing', t: 0, speed: animation.speed }) }
@@ -61,72 +96,73 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
   }
 
   const sidebarTabs = [
-    { id: 'controls',   label: 'কন্ট্রোল' },
-    { id: 'vectors',    label: s.tabs.vectors },
-    { id: 'formulas',   label: s.tabs.formulas },
-    { id: 'comparison', label: s.tabs.comparison },
+    { id: 'controls',   label: s.tabs?.controls || 'Controls' },
+    { id: 'vectors',    label: s.tabs?.vectors || 'Vectors' },
+    { id: 'formulas',   label: s.tabs?.formulas || 'Formulas' },
+    { id: 'comparison', label: s.tabs?.comparison || 'Comparison' },
   ]
 
-  const seniorSteps = [
+  const seniorSteps = language === 'bn' ? [
     {
       targetId: 'senior-canvas',
       placement: 'right',
-      title: {
-        beginner: 'ক্যানভাস এরিয়া',
-        expert: 'সিমুলেশন ক্যানভাস'
-      },
-      body: {
-        beginner: 'এখানে বলের গতিপথ দেখতে পাবে। আপনি জুম ইন/আউট করতে মাউস স্ক্রল ব্যবহার করতে পারেন।',
-        expert: 'প্রজেক্টাইলের ট্র্যাজেক্টরি এখানে রেন্ডার হয়। এটি রিয়েল-টাইম ফিজিক্স ক্যালকুলেশন প্রদর্শন করে।'
-      }
+      title: 'ক্যানভাস এরিয়া',
+      body: 'এখানে বলের গতিপথ দেখতে পাবে। আপনি জুম ইন/আউট করতে মাউস স্ক্রল ব্যবহার করতে পারেন।'
     },
     {
       targetId: 'senior-actionbar',
       placement: 'top',
-      title: {
-        beginner: 'অ্যাকশন বাটন',
-        expert: 'সিমুলেশন কন্ট্রোলস'
-      },
-      body: {
-        beginner: 'সিমুলেশন শুরু, বিরতি এবং গতি নিয়ন্ত্রণের জন্য এই বাটনগুলো ব্যবহার করুন।',
-        expert: 'লঞ্চ, পজ এবং প্লেব্যাক স্পিড অ্যাডজাস্ট করার ইন্টারফেস।'
-      }
+      title: 'অ্যাকশন বাটন',
+      body: 'সিমুলেশন শুরু, বিরতি এবং গতি নিয়ন্ত্রণের জন্য এই বাটনগুলো ব্যবহার করুন।'
     },
     {
       targetId: 'senior-sidebar-tabs',
       placement: 'left',
-      title: {
-        beginner: 'ট্যাব মেনু',
-        expert: 'সাইডবার নেভিগেশন'
-      },
-      body: {
-        beginner: 'এখানে বিভিন্ন মোড যেমন কন্ট্রোল, ভেক্টর, সূত্র এবং তুলনার মধ্যে সুইচ করা যায়।',
-        expert: 'প্যারামিটার অ্যাডজাস্টমেন্ট, ভেক্টর ভিজ্যুয়ালাইজেশন এবং গাণিতিক বিশ্লেষণের জন্য ট্যাব।'
-      }
+      title: 'ট্যাব মেনু',
+      body: 'এখান থেকে বিভিন্ন মোড যেমন কন্ট্রোল, ভেক্টর, সূত্র এবং তুলনার মধ্যে সুইচ করা যায়।'
     },
     {
       targetId: 'senior-params',
       placement: 'left',
-      title: {
-        beginner: 'প্যারামিটার স্লাইডার',
-        expert: 'ইনপুট ভেরিয়েবলস'
-      },
-      body: {
-        beginner: 'আদি বেগ, কোণ এবং উচ্চতা পরিবর্তন করে দেখুন বলটি কোথায় গিয়ে পড়ে।',
-        expert: 'v₀, θ এবং h₀ ভ্যালু সেট করে বিভিন্ন সিনারিও সিমুলেট করা যায়।'
-      }
+      title: 'প্যারামিটার স্লাইডার',
+      body: 'আদি বেগ, কোণ এবং উচ্চতা পরিবর্তন করে দেখুন বলটি কোথায় গিয়ে পড়ে।'
     },
     {
       targetId: 'senior-results',
       placement: 'left',
-      title: {
-        beginner: 'ফলাফল কার্ড',
-        expert: 'আউটপুট ডেটা'
-      },
-      body: {
-        beginner: 'এখানে উড়ানের সময়, সর্বোচ্চ উচ্চতা এবং পাল্লা সরাসরি দেখতে পাবেন।',
-        expert: 'ক্যালকুলেটেড ফলাফল: R (পাল্লা), H (সর্বোচ্চ উচ্চতা) এবং T (বিচরণকাল)।'
-      }
+      title: 'ফলাফল কার্ড',
+      body: 'এখানে উড়ানের সময়, সর্বোচ্চ উচ্চতা এবং পাল্লা সরাসরি দেখতে পাবেন।'
+    }
+  ] : [
+    {
+      targetId: 'senior-canvas',
+      placement: 'right',
+      title: 'Canvas Area',
+      body: 'See the projectile trajectory here. Use mouse scroll to zoom in/out.'
+    },
+    {
+      targetId: 'senior-actionbar',
+      placement: 'top',
+      title: 'Action Buttons',
+      body: 'Use these buttons to start, pause, and control the simulation speed.'
+    },
+    {
+      targetId: 'senior-sidebar-tabs',
+      placement: 'left',
+      title: 'Tab Menu',
+      body: 'Switch between different modes like Controls, Vectors, Formulas, and Comparison here.'
+    },
+    {
+      targetId: 'senior-params',
+      placement: 'left',
+      title: 'Parameter Sliders',
+      body: 'Change initial velocity, angle, and height to see where the projectile lands.'
+    },
+    {
+      targetId: 'senior-results',
+      placement: 'left',
+      title: 'Result Cards',
+      body: 'View flight time, maximum height, and range directly here.'
     }
   ]
 
@@ -140,7 +176,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
     <div className={styles.screen}>
       {/* ── Header ── */}
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate('/')} aria-label="পেছনে">
+        <button className={styles.backBtn} onClick={() => navigate('/')} aria-label={language === 'bn' ? 'পেছনে' : 'Back'}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
@@ -149,14 +185,20 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
         <div className={styles.headerBrand}>
           <span className={styles.logo}>10MS</span>
           <div className={styles.headerDivider} />
-          <h1 className={`${styles.title} bn`}>{s.appTitle}</h1>
+          <h1 className={`${styles.title} ${language === 'bn' ? 'bn' : ''}`}>{s.appTitle}</h1>
         </div>
 
         <div className={styles.headerSpacer} />
 
         <div className={styles.headerActions}>
+          <TourOverlay
+            steps={seniorSteps}
+            storageKey="10ms_sim_senior_tour"
+            blockedByKey="10ms_sim_senior"
+            onBeforeStep={handleBeforeStep}
+          />
           <button
-            className={`${styles.resetBtn} ${isFinished ? styles.resetBtnFinished : ''}`}
+            className={`${styles.resetBtn} ${isFinished ? styles.resetBtnFinished: ''}`}
             onClick={reset}
             aria-label={s.buttons.reset}
           >
@@ -164,7 +206,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
             </svg>
-            <span className="bn">{s.buttons.reset}</span>
+            <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.reset}</span>
           </button>
         </div>
       </header>
@@ -180,14 +222,14 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
           <div className={styles.actionBar} data-tour="senior-actionbar">
             {(isIdle || isFinished) && (
               <button
-                className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled : ''}`}
+                className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled: ''}`}
                 onClick={handleLaunch}
                 disabled={!!degenerate}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 11.4 12.6 15M15 9l-6 6M5 3h4l2 2-5 5-2-2V3z"/><path d="M9 11.4A9.97 9.97 0 0 0 21 3c-4.97 0-8.73 3.26-9.6 7.4M5 14.6A9.97 9.97 0 0 0 3 21c2.57 0 4.97-.92 6.82-2.44"/>
                 </svg>
-                <span className="bn">{s.buttons.launch}</span>
+                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.launch}</span>
               </button>
             )}
 
@@ -196,7 +238,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
                 </svg>
-                <span className="bn">{s.buttons.pause}</span>
+                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.pause}</span>
               </button>
             )}
 
@@ -205,7 +247,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="5 3 19 12 5 21 5 3"/>
                 </svg>
-                <span className="bn">{s.buttons.resume}</span>
+                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.resume}</span>
               </button>
             )}
 
@@ -226,7 +268,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
             {sidebarTabs.map(tab => (
               <button
                 key={tab.id}
-                className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ''} bn`}
+                className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab: ''} ${language === 'bn' ? 'bn' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span className={styles.tabIcon}>{TAB_ICONS[tab.id]}</span>
@@ -240,7 +282,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
             {/* ── Controls ── */}
             {activeTab === 'controls' && (
               <div className={styles.tabPanel}>
-                <div className={`${styles.sectionTitle} bn`}>প্যারামিটার</div>
+                <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>{s.sections.parameters}</div>
 
                 <div className={styles.paramsSection} data-tour="senior-params">
                   <Tooltip text={glossary.v0}>
@@ -257,35 +299,35 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                 {degenerate && (
                   <div className={styles.hintBox}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
-                    <p className={`${styles.hint} bn`}>
-                      {degenerate === 'no-velocity' ? s.errors.noVelocity : s.errors.flat}
+                    <p className={`${styles.hint} ${language === 'bn' ? 'bn' : ''}`}>
+                      {degenerate === 'no-velocity' ? s.errors.noVelocity: s.errors.flat}
                     </p>
                   </div>
                 )}
 
-                {/* Results — main trajectory */}
-                <div className={`${styles.sectionTitle} bn`}>
-                  {hasComp ? 'ফলাফল — প্রক্ষেপ ১' : 'ফলাফল'}
+                {/* Results: main trajectory */}
+                <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>
+                  {hasComp ? s.sections.resultsP1 : s.sections.results}
                 </div>
                 <div className={styles.resultsGrid} data-tour="senior-results">
-                  <ResultCard label={hasComp ? 'R₁' : 'R'} sublabel={s.readouts.range}  value={fmt(results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
-                  <ResultCard label={hasComp ? 'H₁' : 'H'} sublabel={s.readouts.height} value={fmt(results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} />
-                  <ResultCard label={hasComp ? 'T₁' : 'T'} sublabel={s.readouts.time}   value={fmt(results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
+                  <ResultCard label={hasComp ? 'R₁': 'R'} sublabel={s.readouts.range}  value={fmt(results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} lang={language} />
+                  <ResultCard label={hasComp ? 'H₁': 'H'} sublabel={s.readouts.height} value={fmt(results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} lang={language} />
+                  <ResultCard label={hasComp ? 'T₁': 'T'} sublabel={s.readouts.time}   value={fmt(results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} lang={language} />
                   {(showImpact || hasComp) && results.impact && (
-                    <ResultCard label={hasComp ? 'v₁' : 'v'} sublabel={s.readouts.impactSpeed} value={fmt(results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
+                    <ResultCard label={hasComp ? 'v₁': 'v'} sublabel={s.readouts.impactSpeed} value={fmt(results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} lang={language} />
                   )}
                 </div>
 
-                {/* Results — comparison trajectory */}
+                {/* Results: comparison trajectory */}
                 {hasComp && comparison.results && (
                   <>
-                    <div className={`${styles.sectionTitle} bn`}>ফলাফল — প্রক্ষেপ ২</div>
+                    <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>{s.sections.resultsP2}</div>
                     <div className={styles.resultsGrid}>
-                      <ResultCard label="R₂" sublabel={s.readouts.range}  value={fmt(comparison.results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} />
-                      <ResultCard label="H₂" sublabel={s.readouts.height} value={fmt(comparison.results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} />
-                      <ResultCard label="T₂" sublabel={s.readouts.time}   value={fmt(comparison.results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} />
+                      <ResultCard label="R₂" sublabel={s.readouts.range}  value={fmt(comparison.results.R)}    unit={s.readouts.rangeUnit}  meta={RESULT_META.R} lang={language} />
+                      <ResultCard label="H₂" sublabel={s.readouts.height} value={fmt(comparison.results.H)}    unit={s.readouts.heightUnit} meta={RESULT_META.H} lang={language} />
+                      <ResultCard label="T₂" sublabel={s.readouts.time}   value={fmt(comparison.results.T, 2)} unit={s.readouts.timeUnit}   meta={RESULT_META.T} lang={language} />
                       {comparison.results.impact && (
-                        <ResultCard label="v₂" sublabel={s.readouts.impactSpeed} value={fmt(comparison.results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} />
+                        <ResultCard label="v₂" sublabel={s.readouts.impactSpeed} value={fmt(comparison.results.impact.speed)} unit={s.readouts.speedUnit} meta={RESULT_META.v_imp} lang={language} />
                       )}
                     </div>
                   </>
@@ -296,14 +338,14 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
             {/* ── Graph Settings + Charts ── */}
             {activeTab === 'vectors' && (
               <div className={styles.tabPanel}>
-                <div className={`${styles.sectionTitle} bn`}>ভিজ্যুয়াল অপশন</div>
+                <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>{s.sections.visualOptions}</div>
                 <div className={styles.overlayToggles}>
-                  <OverlayRow color="#274FE3" label={s.overlays.vectors}  checked={overlays.vectors} onChange={() => toggleOverlay('vectors')} />
-                  <OverlayRow color="#1CAB55" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} />
-                  <OverlayRow color="#6B7280" label={s.overlays.axes}     checked={overlays.axes}    onChange={() => toggleOverlay('axes')} />
+                  <OverlayRow color="#274FE3" label={s.overlays.vectors}  checked={overlays.vectors} onChange={() => toggleOverlay('vectors')} lang={language} />
+                  <OverlayRow color="#1CAB55" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} lang={language} />
+                  <OverlayRow color="#6B7280" label={s.overlays.axes}     checked={overlays.axes}    onChange={() => toggleOverlay('axes')} lang={language} />
                 </div>
 
-                <div className={`${styles.sectionTitle} bn`}>গ্রাফ</div>
+                <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>{s.sections.graphs}</div>
                 <GraphsPanel
                   points={state.points}
                   comparisonPoints={comparison?.points}
@@ -329,26 +371,24 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
         </aside>
       </div>
 
-      <TourOverlay 
-        steps={seniorSteps} 
-        storageKey="10ms_sim_senior_tour"
-        blockedByKey="10ms_sim_senior"
-        onBeforeStep={handleBeforeStep}
-      />
-
       <IntroModal
         storageKey="10ms_sim_senior"
         variant="senior"
-        title="প্রক্ষেপণ গতি"
-        badge="সিনিয়র · এইচএসসি অধ্যায় ৩"
-        description="কোণ, বেগ ও উচ্চতা পরিবর্তন করে প্রক্ষেপণ গতির রহস্য নিজেই আবিষ্কার করো। গ্রাফ, সূত্র ও পাশাপাশি তুলনায় পদার্থবিজ্ঞান আরও স্পষ্ট হয়।"
-        outcomes={[
+        title={language === 'bn' ? "প্রক্ষেপণ গতি" : "Projectile Motion"}
+        badge={language === 'bn' ? "সিনিয়র · এইচএসসি অধ্যায় ৩" : "Senior · HSC Chapter 3"}
+        description={language === 'bn' ? "কোণ, বেগ ও উচ্চতা পরিবর্তন করে প্রক্ষেপণ গতির রহস্য নিজেই আবিষ্কার করো। গ্রাফ, সূত্র ও পাশাপাশি তুলনায় পদার্থবিজ্ঞান আরও স্পষ্ট হয়।" : "Discover the secrets of projectile motion by changing angle, velocity, and height. Physics becomes clearer through graphs, formulas, and side-by-side comparisons."}
+        outcomes={language === 'bn' ? [
           'পাল্লা (R), সর্বোচ্চ উচ্চতা (H) ও উড়ানের সময় (T) নির্ণয় করতে পারবে',
           '৩০° ও ৬০° কোণে একই পাল্লা পাওয়ার কারণ ব্যাখ্যা করতে পারবে',
           'বেগের উপাংশ vₓ ও vᵧ এর পরিবর্তন গ্রাফে বিশ্লেষণ করতে পারবে',
           'দুটি প্রক্ষেপণ পাশাপাশি তুলনা করে পার্থক্য বের করতে পারবে',
+        ] : [
+          'Calculate Range (R), Maximum Height (H), and Flight Time (T)',
+          'Explain why the same range is achieved at 30° and 60° angles',
+          'Analyze the change in velocity components vₓ and vᵧ in graphs',
+          'Compare two projectile motions side-by-side to find differences',
         ]}
-        ctaLabel="সিমুলেশন শুরু করি"
+        ctaLabel={language === 'bn' ? "সিমুলেশন শুরু করি" : "Start Simulation"}
       />
     </div>
   )
@@ -356,7 +396,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function ResultCard({ label, sublabel, value, unit, meta }) {
+function ResultCard({ label, sublabel, value, unit, meta, lang }) {
   return (
     <div className={styles.resultCard} style={{ '--card-color': meta.color, '--card-bg': meta.bg, '--card-border': meta.border }}>
       <div className={styles.resultCardTop}>
@@ -364,19 +404,19 @@ function ResultCard({ label, sublabel, value, unit, meta }) {
         <span className={styles.resultLabel} style={{ color: meta.color }}>{label}</span>
       </div>
       <div className={styles.resultValueWrap}>
-        <span className={`${styles.resultValue} bn`}>{value}</span>
+        <span className={`${styles.resultValue} ${lang === 'bn' ? 'bn' : ''}`}>{value}</span>
         <span className={styles.resultUnit}>{unit}</span>
       </div>
-      <span className={`${styles.resultSublabel} bn`}>{sublabel}</span>
+      <span className={`${styles.resultSublabel} ${lang === 'bn' ? 'bn' : ''}`}>{sublabel}</span>
     </div>
   )
 }
 
-function OverlayRow({ color, label, checked, onChange }) {
+function OverlayRow({ color, label, checked, onChange, lang }) {
   return (
     <div className={styles.overlayRow}>
       <div className={styles.overlayDot} style={{ background: color }} />
-      <span className={`${styles.overlayLabel} bn`}>{label}</span>
+      <span className={`${styles.overlayLabel} ${lang === 'bn' ? 'bn' : ''}`}>{label}</span>
       <Toggle checked={checked} onChange={onChange} />
     </div>
   )
