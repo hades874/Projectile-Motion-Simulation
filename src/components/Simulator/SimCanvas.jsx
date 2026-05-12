@@ -14,7 +14,7 @@ import styles from './SimCanvas.module.css'
 
 const PROJECTILE_TYPES = {
   ball:       { color: '#1CAB55', radius: 9 },
-  cannonball: { color: '#374151', radius: 11 },
+  cannonball: { color: '#7F8C8D', radius: 11 },
   stone:      { color: '#92400e', radius: 8 },
   football:   { color: '#F97316', radius: 9 },
 }
@@ -88,8 +88,8 @@ export function SimCanvas({ state, onAnimTick, isComparisonInstance = false }) {
       drawTrajectoryDots(ctx, points, results.T, scale, offsetX, offsetY, ballColor, dotT)
     }
 
-    // Dimension lines on idle / finished
-    if ((isIdle || isFinished) && !degenerate) {
+    // Dimension lines only when finished
+    if (isFinished && !degenerate) {
       drawDimensionLines(ctx, points, scale, offsetX, offsetY, results, false, strings, language)
       if (comparison) {
         drawDimensionLines(ctx, comparison.points, scale, offsetX, offsetY, comparison.results, true, strings, language)

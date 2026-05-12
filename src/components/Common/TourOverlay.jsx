@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { HelpCircle, ChevronRight, ChevronLeft, X, BookOpen, Settings } from 'lucide-react';
+import { useLanguage } from '../../hooks/useLanguage.jsx';
 import styles from './TourOverlay.module.css';
 
 const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigger, triggerRef }) => {
@@ -8,6 +9,7 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigge
   const [targetRect, setTargetRect] = useState(null);
   const [tooltipStyle, setTooltipStyle] = useState({});
   const [showTooltip, setShowTooltip] = useState(false);
+  const { language } = useLanguage();
   const [tourMode, setTourMode] = useState(localStorage.getItem('10ms_tour_mode') || 'beginner');
 
   const tooltipRef = useRef(null);
@@ -57,6 +59,8 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigge
   useEffect(() => {
     if (phase !== 'active') return;
 
+    let isMounted = true;
+
     const calculatePosition = async () => {
       setShowTooltip(false);
 
@@ -65,19 +69,22 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigge
       }
 
       // Wait for React re-render/tab switches
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 250));
+      if (!isMounted) return;
 
       updateTargetRect();
 
       // Wait for spotlight transition and tab switches to stabilize
       setTimeout(() => {
+        if (!isMounted) return;
         updateTooltipPosition();
         setShowTooltip(true);
-      }, 450);
+      }, 400);
     };
 
     calculatePosition();
-  }, [currentStepIndex, phase, onBeforeStep, updateTargetRect]);
+    return () => { isMounted = false; };
+  }, [currentStepIndex, phase]); // Only trigger on step or phase change
 
   const updateTooltipPosition = useCallback(() => {
     const element = document.querySelector(`[data-tour="${currentStep.targetId}"]`);
@@ -257,7 +264,7 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigge
             </p>
             <div className={styles.tooltipFooter}>
               <span className={styles.stepCounter}>
-                ধাপ {currentStepIndex + 1} / {steps.length}
+                {language === 'bn' ? 'ধাপ' : 'Step'} {currentStepIndex + 1} / {steps.length}
               </span>
               <div className={styles.navButtons}>
                 {currentStepIndex > 0 && (
@@ -270,7 +277,9 @@ const TourOverlay = ({ steps, storageKey, blockedByKey, onBeforeStep, hideTrigge
                   style={{position: 'static', width: 'auto', height: '36px', padding: '0 12px', borderRadius: '8px', background: '#2563eb', color: 'white', borderColor: '#2563eb'}}
                   onClick={handleNext}
                 >
-                  {currentStepIndex === steps.length - 1 ? 'শেষ করুন' : 'পরবর্তী'}
+                  {currentStepIndex === steps.length - 1 
+                    ? (language === 'bn' ? 'শেষ করুন' : 'Finish') 
+                    : (language === 'bn' ? 'পরবর্তী' : 'Next')}
                   {currentStepIndex !== steps.length - 1 && <ChevronRight size={18} />}
                 </button>
               </div>

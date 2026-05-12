@@ -3,7 +3,7 @@ import { formatNum } from './bangla.js'
 const PAD_L = 0.10
 const PAD_R = 0.06
 const PAD_T = 0.08
-const PAD_B = 0.18   // extra bottom room for dimension labels
+const PAD_B = 0.25   // extra bottom room for dimension labels
 
 export function computeScale(points, canvasW, canvasH, h0 = 0) {
   if (!points || points.length < 2) {
@@ -355,14 +355,14 @@ export function drawBall(ctx, x, y, scale, offsetX, offsetY, color = '#1CAB55', 
   
   // Determine if it's the Grey Cannonball or the Orange Energy Sphere
   const isOrange = color.toLowerCase() === '#ea580c'
-  const isGrey = color.toLowerCase() === '#374151'
+  const isGrey = color.toLowerCase() === '#7f8c8d'
 
   if (isGrey) {
     // Moderne Grey Cannonball
     // background: radial-gradient(circle at 30% 30%, #555, #222);
     const grad = ctx.createRadialGradient(sx - radius * 0.4, sy - radius * 0.4, 0, sx, sy, radius)
-    grad.addColorStop(0, '#555')
-    grad.addColorStop(1, '#222')
+    grad.addColorStop(0, '#9CA3AF')
+    grad.addColorStop(1, '#4B5563')
     
     ctx.shadowBlur = 6
     ctx.shadowColor = 'rgba(0,0,0,0.5)'

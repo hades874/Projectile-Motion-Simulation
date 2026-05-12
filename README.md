@@ -1,4 +1,4 @@
-# SIM-P1 — Physics Simulation Hub
+# Physics Simulation Hub
 
 A Bangla-first, mobile-first React app for [10 Minute School's](https://10minuteschool.com) TenTen platform. Two fully custom HTML5 Canvas simulations aligned to the Bangladeshi SSC/HSC curriculum.
 
@@ -26,8 +26,3 @@ npm test         # 17 physics unit tests
 npm run lint
 ```
 
-## Design
-
-Bangla-only UI (`Hind Siliguri` font). Mobile floor: 360 px. All touch targets ≥ 44×44 px. Bundle ≤ 200 KB gzipped.
-
-See `CLAUDE.md` for full architecture reference and `md/design.md` for the 10MS design system.

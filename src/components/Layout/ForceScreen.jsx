@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useForceSimulator } from '../../hooks/useForceSimulator.js'
 import { parseUrlParams, updateUrlParams } from '../../lib/urlParams.js'
 import { MotionTab }   from '../Forces/MotionTab.jsx'
@@ -47,7 +47,7 @@ export function ForceScreen() {
     { id: 'motion', label: strings.tabs.motion },
   ]
 
-  const forceSteps = language === 'bn' ? [
+  const forceSteps = useMemo(() => language === 'bn' ? [
     {
       targetId: 'force-tabs',
       placement: 'bottom',
@@ -63,7 +63,7 @@ export function ForceScreen() {
     {
       targetId: 'tug-people',
       placement: 'left',
-      title: 'টানাহেঁচড়া',
+      title: 'টানাহেঁচড়া (মানুষ)',
       body: 'মানুষগুলোর উপর ক্লিক করে তাদের দড়িতে যোগ করুন। এরপর স্টার্ট বাটনে চাপ দিন।'
     },
     {
@@ -73,9 +73,15 @@ export function ForceScreen() {
       body: 'এখানে লব্ধি বল, ত্বরণ এবং বেগের মান সরাসরি দেখতে পাবেন।'
     },
     {
+      targetId: 'tug-actions',
+      placement: 'left',
+      title: 'কন্ট্রোল বাটন',
+      body: 'সিমুলেশন শুরু, বিরতি এবং রিসেট করার জন্য এই বাটনগুলো ব্যবহার করুন।'
+    },
+    {
       targetId: 'motion-force',
       placement: 'left',
-      title: 'চলন ও ঘর্ষণ (গতি)',
+      title: 'চলন ও ঘর্ষণ (বল)',
       body: 'স্লাইডার ব্যবহার করে বস্তুর উপর প্রযুক্ত বল পরিবর্তন করুন।'
     },
     {
@@ -89,6 +95,18 @@ export function ForceScreen() {
       placement: 'left',
       title: 'ঘর্ষণ বল',
       body: 'ঘর্ষণ চালু বা বন্ধ করে দেখুন এটি গতিকে কীভাবে প্রভাবিত করে।'
+    },
+    {
+      targetId: 'motion-readouts',
+      placement: 'left',
+      title: 'ফলাফল ও গ্রাফ',
+      body: 'এখানে বস্তুর বেগ, ত্বরণ এবং ঘর্ষণ বলের মান সরাসরি দেখতে পাবেন।'
+    },
+    {
+      targetId: 'motion-actions',
+      placement: 'left',
+      title: 'অ্যাকশন বাটন',
+      body: 'সিমুলেশন শুরু ও রিসেট করার জন্য এই বাটনগুলো ব্যবহার করুন।'
     }
   ] : [
     {
@@ -116,9 +134,15 @@ export function ForceScreen() {
       body: 'View net force, acceleration, and velocity values here.'
     },
     {
+      targetId: 'tug-actions',
+      placement: 'left',
+      title: 'Control Buttons',
+      body: 'Use these buttons to start, pause, and reset the simulation.'
+    },
+    {
       targetId: 'motion-force',
       placement: 'left',
-      title: 'Pushing (Motion & Friction)',
+      title: 'Applied Force',
       body: 'Use the slider to change the force applied to the object.'
     },
     {
@@ -132,8 +156,20 @@ export function ForceScreen() {
       placement: 'left',
       title: 'Friction Force',
       body: 'Turn friction ON or OFF to see how it influences motion.'
+    },
+    {
+      targetId: 'motion-readouts',
+      placement: 'left',
+      title: 'Results & Metrics',
+      body: 'View velocity, acceleration, and friction force values here.'
+    },
+    {
+      targetId: 'motion-actions',
+      placement: 'left',
+      title: 'Action Buttons',
+      body: 'Use these buttons to start and reset the motion simulation.'
     }
-  ]
+  ], [language]);
 
   const handleBeforeStep = useCallback((step) => {
     if (['tug-people', 'tug-readouts', 'tug-actions'].some(id => id === step.targetId)) {

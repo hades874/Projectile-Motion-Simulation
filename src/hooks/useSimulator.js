@@ -2,7 +2,7 @@ import { useReducer, useCallback } from 'react'
 import { computeResults, trajectoryPoints, isDegenerate } from '../lib/physics.js'
 
 const DEFAULTS = {
-  junior:  { v0: 20, theta: 45, h0: 0, projectileType: 'ball' },
+  junior:  { v0: 20, theta: 45, h0: 0, projectileType: 'cannonball' },
   senior:  { v0: 20, theta: 45, h0: 0, projectileType: 'cannonball' },
 }
 
@@ -15,6 +15,7 @@ function makeInitialState(modeOrConfig = 'senior') {
     v0: overrides.v0 ?? DEFAULTS[mode].v0,
     theta: overrides.theta ?? DEFAULTS[mode].theta,
     h0: overrides.h0 ?? DEFAULTS[mode].h0,
+    projectileType: overrides.projectileType ?? DEFAULTS[mode].projectileType,
     g: 9.8
   }
 

@@ -185,7 +185,7 @@
 @media (max-width: 639px) {
   .canvasContainer {
     flex: none;
-    height: clamp(280px, 45vh, 440px);
+    height: clamp(320px, 50vh, 480px);
   }
   .sidebar {
     flex: 1;
@@ -233,13 +233,13 @@
   align-items: center;
   justify-content: center;
   gap: var(--s-2);
-  padding: 8px 12px;
+  padding: 4px 6px;
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: var(--r-pill);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 20;
   flex-wrap: nowrap;
   white-space: nowrap;
@@ -248,7 +248,7 @@
 @media (max-width: 639px) {
   .actionBar {
     gap: 6px;
-    padding: 6px 10px;
+    padding: 3px 5px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
@@ -297,6 +297,17 @@
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.launchHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+  width: 0;
+  min-width: 0 !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .pauseBtn {
@@ -350,6 +361,9 @@
     height: 100%;
     border-top: none;
     border-left: 1px solid var(--border);
+  }
+  .sidebarTabs {
+    justify-content: center;
   }
 }
 

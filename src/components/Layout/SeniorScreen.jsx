@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SimCanvas }       from '../Simulator/SimCanvas.jsx'
 import { parseUrlParams, updateUrlParams } from '../../lib/urlParams.js'
@@ -86,10 +86,20 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
 
   const fmt = useCallback((v, d = 1) => formatNum(v ?? 0, d, language === 'bn' ? 'bangla' : 'western'), [language])
 
+  const [hasLaunched, setHasLaunched] = useState(false)
+
   const handleAnimTick = useCallback((t, status) => setAnimation({ t, status }), [setAnimation])
-  const handleLaunch   = () => { if (!degenerate) setAnimation({ status: 'playing', t: 0, speed: animation.speed }) }
+  const handleLaunch   = () => { 
+    if (degenerate || isPlaying) return
+    setAnimation({ status: 'playing', t: 0, speed: animation.speed })
+    setHasLaunched(true)
+  }
   const handlePause    = () => setAnimation({ status: 'paused' })
   const handleResume   = () => setAnimation({ status: 'playing' })
+  const handleReset    = () => {
+    reset()
+    setHasLaunched(false)
+  }
   const cycleSpeed     = () => {
     const next = SPEED_OPTIONS[(SPEED_OPTIONS.indexOf(animation.speed) + 1) % SPEED_OPTIONS.length]
     setAnimation({ speed: next })
@@ -102,7 +112,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
     { id: 'comparison', label: s.tabs?.comparison || 'Comparison' },
   ]
 
-  const seniorSteps = language === 'bn' ? [
+  const seniorSteps = useMemo(() => language === 'bn' ? [
     {
       targetId: 'senior-canvas',
       placement: 'right',
@@ -164,7 +174,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
       title: 'Result Cards',
       body: 'View flight time, maximum height, and range directly here.'
     }
-  ]
+  ], [language])
 
   const handleBeforeStep = (step) => {
     if (['senior-params', 'senior-results'].includes(step.targetId)) {
@@ -199,7 +209,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
           />
           <button
             className={`${styles.resetBtn} ${isFinished ? styles.resetBtnFinished: ''}`}
-            onClick={reset}
+            onClick={handleReset}
             aria-label={s.buttons.reset}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -219,47 +229,49 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
           </div>
 
           {/* Floating action bar */}
-          <div className={styles.actionBar} data-tour="senior-actionbar">
-            {(isIdle || isFinished) && (
-              <button
-                className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled: ''}`}
-                onClick={handleLaunch}
-                disabled={!!degenerate}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 11.4 12.6 15M15 9l-6 6M5 3h4l2 2-5 5-2-2V3z"/><path d="M9 11.4A9.97 9.97 0 0 0 21 3c-4.97 0-8.73 3.26-9.6 7.4M5 14.6A9.97 9.97 0 0 0 3 21c2.57 0 4.97-.92 6.82-2.44"/>
-                </svg>
-                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.launch}</span>
-              </button>
-            )}
+          {(!hasLaunched || isPlaying || isPaused) && (
+            <div className={styles.actionBar} data-tour="senior-actionbar">
+              {(isIdle || isFinished || hasLaunched) && (
+                <button
+                  className={`${styles.actionBtn} ${styles.launchBtn} ${degenerate ? styles.disabled: ''} ${hasLaunched ? styles.launchHidden : ''}`}
+                  onClick={handleLaunch}
+                  disabled={!!degenerate || isPlaying}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 11.4 12.6 15M15 9l-6 6M5 3h4l2 2-5 5-2-2V3z"/><path d="M9 11.4A9.97 9.97 0 0 0 21 3c-4.97 0-8.73 3.26-9.6 7.4M5 14.6A9.97 9.97 0 0 0 3 21c2.57 0 4.97-.92 6.82-2.44"/>
+                  </svg>
+                  <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.launch}</span>
+                </button>
+              )}
 
-            {isPlaying && (
-              <button className={`${styles.actionBtn} ${styles.pauseBtn}`} onClick={handlePause}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
-                </svg>
-                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.pause}</span>
-              </button>
-            )}
+              {isPlaying && (
+                <button className={`${styles.actionBtn} ${styles.pauseBtn}`} onClick={handlePause}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+                  </svg>
+                  <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.pause}</span>
+                </button>
+              )}
 
-            {isPaused && (
-              <button className={`${styles.actionBtn} ${styles.resumeBtn}`} onClick={handleResume}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.resume}</span>
-              </button>
-            )}
+              {isPaused && (
+                <button className={`${styles.actionBtn} ${styles.resumeBtn}`} onClick={handleResume}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  <span className={language === 'bn' ? 'bn' : ''}>{s.buttons.resume}</span>
+                </button>
+              )}
 
-            {(isPlaying || isPaused) && (
-              <button className={`${styles.actionBtn} ${styles.speedBtn}`} onClick={cycleSpeed}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                </svg>
-                <span>{animation.speed}×</span>
-              </button>
-            )}
-          </div>
+              {(isPlaying || isPaused) && (
+                <button className={`${styles.actionBtn} ${styles.speedBtn}`} onClick={cycleSpeed}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                  <span>{animation.speed}×</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Sidebar ── */}
@@ -341,7 +353,7 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
                 <div className={`${styles.sectionTitle} ${language === 'bn' ? 'bn' : ''}`}>{s.sections.visualOptions}</div>
                 <div className={styles.overlayToggles}>
                   <OverlayRow color="#274FE3" label={s.overlays.vectors}  checked={overlays.vectors} onChange={() => toggleOverlay('vectors')} lang={language} />
-                  <OverlayRow color="#1CAB55" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} lang={language} />
+                  <OverlayRow color="#7F8C8D" label={s.overlays.dots}     checked={overlays.dots}    onChange={() => toggleOverlay('dots')} lang={language} />
                   <OverlayRow color="#6B7280" label={s.overlays.axes}     checked={overlays.axes}    onChange={() => toggleOverlay('axes')} lang={language} />
                 </div>
 
@@ -376,17 +388,17 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
         variant="senior"
         title={language === 'bn' ? "প্রক্ষেপণ গতি" : "Projectile Motion"}
         badge={language === 'bn' ? "সিনিয়র · এইচএসসি অধ্যায় ৩" : "Senior · HSC Chapter 3"}
-        description={language === 'bn' ? "কোণ, বেগ ও উচ্চতা পরিবর্তন করে প্রক্ষেপণ গতির রহস্য নিজেই আবিষ্কার করো। গ্রাফ, সূত্র ও পাশাপাশি তুলনায় পদার্থবিজ্ঞান আরও স্পষ্ট হয়।" : "Discover the secrets of projectile motion by changing angle, velocity, and height. Physics becomes clearer through graphs, formulas, and side-by-side comparisons."}
+        description={language === 'bn' ? "কোণ, বেগ ও উচ্চতা পরিবর্তন করে প্রক্ষেপণ গতির রহস্য নিজেই আবিষ্কার করো। গ্রাফ, সূত্র ও তুলনায় পদার্থবিজ্ঞান আরও স্পষ্ট হয়।" : "Discover the secrets of projectile motion by changing angle, velocity, and height. Physics becomes clearer through graphs, formulas, and comparisons."}
         outcomes={language === 'bn' ? [
           'পাল্লা (R), সর্বোচ্চ উচ্চতা (H) ও উড়ানের সময় (T) নির্ণয় করতে পারবে',
           '৩০° ও ৬০° কোণে একই পাল্লা পাওয়ার কারণ ব্যাখ্যা করতে পারবে',
           'বেগের উপাংশ vₓ ও vᵧ এর পরিবর্তন গ্রাফে বিশ্লেষণ করতে পারবে',
-          'দুটি প্রক্ষেপণ পাশাপাশি তুলনা করে পার্থক্য বের করতে পারবে',
+          'দুটি প্রক্ষেপণ তুলনা করে পার্থক্য বের করতে পারবে',
         ] : [
           'Calculate Range (R), Maximum Height (H), and Flight Time (T)',
           'Explain why the same range is achieved at 30° and 60° angles',
           'Analyze the change in velocity components vₓ and vᵧ in graphs',
-          'Compare two projectile motions side-by-side to find differences',
+          'Compare two projectile motions to find differences',
         ]}
         ctaLabel={language === 'bn' ? "সিমুলেশন শুরু করি" : "Start Simulation"}
       />

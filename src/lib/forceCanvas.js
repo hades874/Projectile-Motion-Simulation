@@ -121,14 +121,14 @@ function drawSurface(ctx, w, h) {
 
 // Proportional horizontal force arrow starting at (x, y)
 
-function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0) {
+function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0, scale = 1) {
   if (Math.abs(F) < 0.5) return
   const dir = Math.sign(F)
   const absF = Math.abs(F)
   
   // Length from the start point
-  const maxLen = 140
-  const minLen = 25
+  const maxLen = 140 * scale
+  const minLen = 25 * scale
   const shaftLen = (Math.min(absF, maxF) / maxF) * maxLen + minLen
   
   const startX = x + dir * startOffset
@@ -141,8 +141,8 @@ function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0) {
   ctx.lineJoin = 'round'
   
   // Draw Arrow Path (Shaft + Head)
-  const hs = 18 // Head length
-  const hw = 8  // Head half-width
+  const hs = 18 * scale // Head length
+  const hw = 8 * scale  // Head half-width
   
   const drawArrowPath = () => {
     ctx.beginPath()
@@ -156,19 +156,19 @@ function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0) {
   }
 
   // 1. Shadow/Glow
-  ctx.shadowBlur = 10
+  ctx.shadowBlur = 10 * scale
   ctx.shadowColor = color
   
   // 2. Thick background outline
   ctx.strokeStyle = 'white'
-  ctx.lineWidth = 8
+  ctx.lineWidth = 8 * scale
   drawArrowPath()
   ctx.stroke()
   
   // 3. Main colored arrow
   ctx.shadowBlur = 0
   ctx.strokeStyle = color
-  ctx.lineWidth = 4
+  ctx.lineWidth = 4 * scale
   ctx.stroke()
   
   // 4. Solid head fill
@@ -181,15 +181,15 @@ function drawForceArrow(ctx, x, y, F, maxF, color, label, startOffset = 0) {
   ctx.fill()
   
   // Label
-  ctx.font = 'bold 15px Hind Siliguri, Inter, sans-serif'
+  ctx.font = `bold ${Math.round(15 * scale)}px Hind Siliguri, Inter, sans-serif`
   ctx.textAlign = dir > 0 ? 'left' : 'right'
   ctx.textBaseline = 'bottom'
   
-  const labelX = ex + dir * 10
-  const labelY = y - 8
+  const labelX = ex + dir * 10 * scale
+  const labelY = y - 8 * scale
   
   ctx.strokeStyle = 'white'
-  ctx.lineWidth = 4
+  ctx.lineWidth = 4 * scale
   ctx.strokeText(label, labelX, labelY)
   ctx.fillText(label, labelX, labelY)
   
@@ -445,8 +445,8 @@ function drawRope(ctx, x1, y, x2, markerX, isRunning, tension = 0, scale = 1) {
   ctx.restore()
 }
 
-function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h) {
-  const gx = w - 175, gy = 18, gw = 158, gh = 120
+function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h, scale = 1) {
+  const gx = w - 175 * scale, gy = 18 * scale, gw = 158 * scale, gh = 120 * scale
   const maxF = Math.max(Fs_max * 1.5, 10)
   ctx.save()
   
@@ -454,29 +454,29 @@ function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'
   ctx.lineWidth = 1
-  ctx.beginPath(); ctx.roundRect(gx, gy, gw, gh, 12); ctx.fill(); ctx.stroke()
+  ctx.beginPath(); ctx.roundRect(gx, gy, gw, gh, 12 * scale); ctx.fill(); ctx.stroke()
   
   // Outer border
   ctx.strokeStyle = '#E5E7EB'
   ctx.strokeRect(gx, gy, gw, gh)
 
-  const ax = gx + 25, ay = gy + gh - 22
-  const axw = gw - 38, axh = gh - 35
+  const ax = gx + 25 * scale, ay = gy + gh - 22 * scale
+  const axw = gw - 38 * scale, axh = gh - 35 * scale
   
   // Axes
-  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5
-  ctx.beginPath(); ctx.moveTo(ax, gy + 10); ctx.lineTo(ax, ay + 5); ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(ax - 5, ay); ctx.lineTo(ax + axw, ay); ctx.stroke()
+  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5 * scale
+  ctx.beginPath(); ctx.moveTo(ax, gy + 10 * scale); ctx.lineTo(ax, ay + 5 * scale); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(ax - 5 * scale, ay); ctx.lineTo(ax + axw, ay); ctx.stroke()
 
   const pivotNorm = Fs_max / maxF
   const xPivot = ax + pivotNorm * axw
   
   // Static region (diagonal y=x)
-  ctx.strokeStyle = '#EA580C'; ctx.lineWidth = 2.5
+  ctx.strokeStyle = '#EA580C'; ctx.lineWidth = 2.5 * scale
   ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(xPivot, ay - pivotNorm * axh); ctx.stroke()
   
   // Kinetic region (horizontal dashed)
-  ctx.setLineDash([5, 4])
+  ctx.setLineDash([5 * scale, 4 * scale])
   ctx.beginPath()
   ctx.moveTo(xPivot, ay - (Fk / maxF) * axh)
   ctx.lineTo(ax + axw, ay - (Fk / maxF) * axh)
@@ -485,15 +485,15 @@ function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h) {
   // Current point with glow
   const dX = ax + Math.min(Math.abs(Fapplied) / maxF, 1) * axw
   const dY = ay - Math.min(Math.abs(Ff_actual) / maxF, 1) * axh
-  ctx.shadowBlur = 8
+  ctx.shadowBlur = 8 * scale
   ctx.shadowColor = '#1CAB55'
   ctx.fillStyle = '#1CAB55'
-  ctx.beginPath(); ctx.arc(dX, dY, 6, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.arc(dX, dY, 6 * scale, 0, Math.PI * 2); ctx.fill()
 
   ctx.shadowBlur = 0
-  ctx.fillStyle = '#6B7280'; ctx.font = 'bold 10px Hind Siliguri, Inter, sans-serif'
-  ctx.textAlign = 'center'; ctx.fillText('প্রযুক্ত বল', ax + axw / 2, gy + gh - 5)
-  ctx.save(); ctx.translate(gx + 10, gy + gh / 2); ctx.rotate(-Math.PI / 2)
+  ctx.fillStyle = '#6B7280'; ctx.font = `bold ${Math.round(10 * scale)}px Hind Siliguri, Inter, sans-serif`
+  ctx.textAlign = 'center'; ctx.fillText('প্রযুক্ত বল', ax + axw / 2, gy + gh - 5 * scale)
+  ctx.save(); ctx.translate(gx + 10 * scale, gy + gh / 2); ctx.rotate(-Math.PI / 2)
   ctx.fillText('ঘর্ষণ বল', 0, 0); ctx.restore()
 
   ctx.restore()
@@ -511,46 +511,49 @@ export function drawNetForce(ctx, w, h, state, lang = 'bn', strings) {
   const maxF = 4 * FORCE_PER_PERSON
   const s = strings?.canvasLabels || { force1: 'Force 1', force2: 'Force 2', netForce: 'Net Force', unitM: 'm', unitMs: 'm/s' }
 
+  // Scale factor for responsive proportions
+  const scale = Math.min(1.2, w / 600)
+
   ctx.clearRect(0, 0, w, h)
   drawBackground(ctx, w, h)
   drawSurface(ctx, w, h)
 
   // Dashed track center line
   ctx.save()
-  ctx.strokeStyle = '#D1D5DB'; ctx.lineWidth = 1; ctx.setLineDash([8, 6])
+  ctx.strokeStyle = '#D1D5DB'; ctx.lineWidth = 1; ctx.setLineDash([8 * scale, 6 * scale])
   ctx.beginPath(); ctx.moveTo(w * 0.04, gy - 1); ctx.lineTo(w * 0.96, gy - 1); ctx.stroke()
   ctx.setLineDash([]); ctx.restore()
 
   // Left pushers (Red)
   leftPushers.forEach((active, i) => {
-    const px = cartSX - 110 - i * 32
-    if (px > 0) drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning)
+    const px = cartSX - (110 * scale) - i * (32 * scale)
+    if (px > 0) drawPerson(ctx, px, gy, active, 'right', '#E8001D', state.isRunning, false, scale)
   })
   // Right pushers (Blue)
   rightPushers.forEach((active, i) => {
-    const px = cartSX + 110 + i * 32
-    if (px < w) drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning)
+    const px = cartSX + (110 * scale) + i * (32 * scale)
+    if (px < w) drawPerson(ctx, px, gy, active, 'left', '#274FE3', state.isRunning, false, scale)
   })
 
-  drawCart(ctx, cartSX, gy)
+  drawCart(ctx, cartSX, gy, scale)
 
-  // Force arrows stacked above cart (offset by half-cart width)
-  const baseArrowY = gy - 75
-  const cartOffset = 36
-  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `${s.force1} = ${lCount * 50} N`, cartOffset)
-  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `${s.force2} = ${rCount * 50} N`, cartOffset)
+  // Force arrows stacked above cart
+  const baseArrowY = gy - 75 * scale
+  const cartOffset = 36 * scale
+  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `${s.force1} = ${lCount * 50} N`, cartOffset, scale)
+  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32 * scale, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `${s.force2} = ${rCount * 50} N`, cartOffset, scale)
   if (lCount > 0 || rCount > 0) {
-    drawForceArrow(ctx, cartSX, baseArrowY - 64, Fnet, maxF, '#1CAB55', `${s.netForce} = ${Fnet} N`, cartOffset)
+    drawForceArrow(ctx, cartSX, baseArrowY - 64 * scale, Fnet, maxF, '#1CAB55', `${s.netForce} = ${Fnet} N`, cartOffset, scale)
   }
 
   // Position readout
   ctx.save()
-  ctx.fillStyle = '#4B5563'; ctx.font = 'bold 13px Inter, sans-serif'
+  ctx.fillStyle = '#4B5563'; ctx.font = `bold ${Math.round(13 * scale)}px Inter, sans-serif`
   ctx.textAlign = 'center'
   const px = cartX >= 0 ? '+' : ''
   const posStr = `${px}${cartX.toFixed(1)} ${s.unitM}`
   const velStr = `${cartV.toFixed(1)} ${s.unitMs}`
-  ctx.fillText(`${posStr}  |  ${velStr}`, cartSX, gy - 115)
+  ctx.fillText(`${posStr}  |  ${velStr}`, cartSX, gy - 115 * scale)
   ctx.restore()
 }
 
@@ -559,7 +562,9 @@ export function drawMotion(ctx, w, h, state, lang = 'bn', strings) {
   const obj = OBJECTS[selectedObject]
   const gy = groundY(h)
   const boxSX = wx(boxX, w)
-  const boxSize = 44 + Math.min(Math.log10(obj.mass + 1) * 16, 32)
+  
+  const scale = Math.min(1.2, w / 600)
+  const boxSize = (44 + Math.min(Math.log10(obj.mass + 1) * 16, 32)) * scale
   const maxF = 500
   const s = strings?.canvasLabels || { appliedF: 'Applied Force', frictionF: 'Friction Force', unitMs: 'm/s' }
 
@@ -570,25 +575,19 @@ export function drawMotion(ctx, w, h, state, lang = 'bn', strings) {
   drawBackground(ctx, w, h)
   drawSurface(ctx, w, h)
 
-  // Shake if struggling
-  let shakeX = 0
-  if (isStruggling) {
-    shakeX = (Math.random() - 0.5) * 2
-  }
-
   drawParticles(ctx, boxSX, gy, boxV)
 
-  const arrowY = gy - boxSize - 20
+  const arrowY = gy - boxSize - 20 * scale
   const boxOffset = boxSize / 2
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, boxOffset)
-  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, boxOffset)
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, boxOffset, scale)
+  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, boxOffset, scale)
 
   // Speed readout
   if (Math.abs(boxV) > 0.05) {
     ctx.save()
-    ctx.fillStyle = '#1CAB55'; ctx.font = 'bold 14px Inter, sans-serif'
+    ctx.fillStyle = '#1CAB55'; ctx.font = `bold ${Math.round(14 * scale)}px Inter, sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(`v = ${boxV.toFixed(1)} ${s.unitMs}`, boxSX, gy - boxSize - 65)
+    ctx.fillText(`v = ${boxV.toFixed(1)} ${s.unitMs}`, boxSX, gy - boxSize - 65 * scale)
     ctx.restore()
   }
 }
@@ -598,6 +597,8 @@ export function drawFriction(ctx, w, h, state, lang = 'bn', strings) {
   const surf = SURFACES[surface]
   const gy = groundY(h)
   const boxSX = wx(boxX, w)
+  
+  const scale = Math.min(1.2, w / 600)
   const maxF = 500
   const Ff = frictionForce(Fapplied, mass, surf.mu_s, surf.mu_k, boxV)
   const Fs_max = surf.mu_s * mass * 9.8
@@ -612,31 +613,31 @@ export function drawFriction(ctx, w, h, state, lang = 'bn', strings) {
 
   // Surface label
   ctx.save()
-  ctx.fillStyle = '#6B7280'; ctx.font = 'bold 12px Hind Siliguri, sans-serif'; ctx.textAlign = 'left'
+  ctx.fillStyle = '#6B7280'; ctx.font = `bold ${Math.round(12 * scale)}px Hind Siliguri, sans-serif`; ctx.textAlign = 'left'
   const surfLabel = surfStrings[surface] || surf.label
-  ctx.fillText(`${lang === 'bn' ? 'তল' : 'Surface'}: ${surfLabel}  (μₛ=${surf.mu_s})`, 16, h - 12)
+  ctx.fillText(`${lang === 'bn' ? 'তল' : 'Surface'}: ${surfLabel}  (μₛ=${surf.mu_s})`, 16 * scale, h - 12 * scale)
   ctx.restore()
 
   // Shake if struggling
   let shakeX = 0
-  if (isStruggling) shakeX = (Math.random() - 0.5) * 2
+  if (isStruggling) shakeX = (Math.random() - 0.5) * 2 * scale
 
   // Draw person pushing
   if (Math.abs(Fapplied) > 0.5) {
     const dir = Math.sign(Fapplied)
-    const px = boxSX - dir * 40
-    drawPerson(ctx, px + shakeX, gy, true, dir > 0 ? 'right' : 'left', '#274FE3', isRunning, false)
+    const px = boxSX - dir * (40 * scale)
+    drawPerson(ctx, px + shakeX, gy, true, dir > 0 ? 'right' : 'left', '#274FE3', isRunning, false, scale)
   }
 
   drawParticles(ctx, boxSX, gy, boxV)
-  drawSprite(ctx, surface, boxSX + shakeX, gy, 48)
+  drawSprite(ctx, surface, boxSX + shakeX, gy, 48 * scale)
 
-  const arrowY = gy - 70
-  const objOffset = 24 // Fixed size for friction sprites usually
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, objOffset)
-  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, objOffset)
+  const arrowY = gy - 70 * scale
+  const objOffset = 24 * scale
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, objOffset, scale)
+  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, objOffset, scale)
 
-  drawFrictionGraph(ctx, Fapplied, -Ff, Fs_max, Fk, w, h)
+  drawFrictionGraph(ctx, Fapplied, -Ff, Fs_max, Fk, w, h, scale)
 }
 
 export function drawTug(ctx, w, h, state, lang = 'bn', strings) {

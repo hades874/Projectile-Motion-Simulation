@@ -29,6 +29,7 @@ function reducer(state, action) {
 
   switch (action.type) {
     case 'SET_TAB':
+      if (state.activeTab === action.tab) return state
       return { ...state, activeTab: action.tab }
 
     case 'TOGGLE_PUSHER': {

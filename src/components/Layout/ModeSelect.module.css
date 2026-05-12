@@ -139,10 +139,10 @@
   font-size: 14px;
   color: var(--fg-2);
   margin: 0;
-  max-width: 280px;
   position: relative;
   z-index: 1;
   line-height: 1.5;
+  text-align: center;
 }
 
 /* ── Trajectory Canvas ──────────────────────────────────────────────────────── */
