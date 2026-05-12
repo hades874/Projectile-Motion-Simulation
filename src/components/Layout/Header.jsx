@@ -4,7 +4,14 @@ export function Header({ mode, onModeSwitch }) {
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
-        <span className={styles.logoText}>10MS</span>
+        <div className={styles.logoWrapper}>
+          <img 
+            src="https://cdn.10minuteschool.com/images/svg/Origin%20Labs%20Black.svg" 
+            alt="Origin Labs" 
+            className={styles.logoImg} 
+          />
+          <span className={styles.seriesLabel}>বলবিজ্ঞান সিরিজ / Mechanics Series</span>
+        </div>
         <span className={`${styles.title} bn`}>প্রক্ষেপ গতি</span>
       </div>
       <div className={styles.actions}>

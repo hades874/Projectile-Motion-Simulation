@@ -193,7 +193,11 @@ export function SeniorScreen({ state, setParam, setAnimation, toggleOverlay, set
         </button>
 
         <div className={styles.headerBrand}>
-          <span className={styles.logo}>10MS</span>
+          <img 
+            src="https://cdn.10minuteschool.com/images/svg/Origin%20Labs%20Black.svg" 
+            alt="Origin Labs" 
+            className={styles.logoImg} 
+          />
           <div className={styles.headerDivider} />
           <h1 className={`${styles.title} ${language === 'bn' ? 'bn' : ''}`}>{s.appTitle}</h1>
         </div>

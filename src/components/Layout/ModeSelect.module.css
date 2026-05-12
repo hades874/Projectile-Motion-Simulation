@@ -49,29 +49,40 @@
 }
 
 .brandBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 16px;
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: var(--r-pill);
+  border-radius: 12px;
   box-shadow: var(--sh-card);
 }
 
-.brandLogo {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--ten-red);
-  letter-spacing: 0.05em;
+.brandLogoImg {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
-.brandDot { color: var(--gray-300); }
-
-.brandSeries {
+.brandSeriesText {
   font-size: 11px;
   font-weight: 600;
   color: var(--fg-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .brandBadge {
+    padding: 6px 12px;
+  }
+  .brandLogoImg {
+    height: 22px;
+  }
+  .brandSeriesText {
+    font-size: 9px;
+  }
 }
 
 .heroTourBtn {

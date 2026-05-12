@@ -196,7 +196,12 @@ export function ForceScreen() {
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </button>
-        <span className={styles.logo}>10MS</span>
+        <img 
+          src="https://cdn.10minuteschool.com/images/svg/Origin%20Labs%20Black.svg" 
+          alt="Origin Labs" 
+          className={styles.logoImg} 
+        />
+        <div className={styles.headerDivider} />
         <h1 className={`${styles.title} ${language === 'bn' ? 'bn' : ''}`}>{strings.title}</h1>
         <div className={styles.headerSpacer} />
         <div className={styles.headerActions}>

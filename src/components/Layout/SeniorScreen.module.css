@@ -47,12 +47,16 @@
   min-width: 0;
 }
 
-.logo {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--ten-red);
-  letter-spacing: 0.05em;
-  flex-shrink: 0;
+.logoImg {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .logoImg {
+    height: 16px;
+  }
 }
 
 .headerDivider {

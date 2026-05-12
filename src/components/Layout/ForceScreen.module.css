@@ -117,10 +117,23 @@
 }
 .backBtn:hover { background: var(--gray-100); }
 
-.logo {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--ten-red);
+.logoImg {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+.headerDivider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .logoImg {
+    height: 16px;
+  }
 }
 
 .title {

@@ -18,11 +18,34 @@
   gap: var(--s-2);
 }
 
-.logoText {
-  font-size: var(--fs-body-sm);
-  font-weight: 700;
-  color: var(--ten-red);
-  letter-spacing: 0.05em;
+.logoWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.logoImg {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+.seriesLabel {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--fg-3);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .logoImg {
+    height: 16px;
+  }
+  .seriesLabel {
+    font-size: 7px;
+  }
 }
 
 .title {

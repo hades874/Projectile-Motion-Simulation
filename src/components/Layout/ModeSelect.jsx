@@ -70,9 +70,14 @@ export function ModeSelect() {
 
         <div className={styles.heroBrandRow}>
           <div className={styles.brandBadge}>
-            <span className={styles.brandLogo}>10MS</span>
-            <span className={styles.brandDot}>&middot;</span>
-            <span className={`${styles.brandSeries} ${language === 'bn' ? 'bn' : ''}`}>{t.brandSeries}</span>
+            <img 
+              src="https://cdn.10minuteschool.com/images/svg/Origin%20Labs%20Black.svg" 
+              alt="Origin Labs" 
+              className={styles.brandLogoImg} 
+            />
+            <span className={`${styles.brandSeriesText} ${language === 'bn' ? 'bn' : ''}`}>
+              {t.brandSeries}
+            </span>
           </div>
           <div className={styles.heroActions}>
             <button
