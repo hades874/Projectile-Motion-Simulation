@@ -139,7 +139,7 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
           <ReadoutCard label={s.readouts.frictionF}  value={`${fmt(Math.abs(Ff))} N`} lang={language} />
         </div>
 
-        <GuideCard title={strings.guideTitle} items={s.guides} defaultOpen />
+        <GuideCard title={strings.guideTitle} items={s.guides} />
 
         <div className={styles.actions} data-tour="motion-actions">
           {isRunning ? (
