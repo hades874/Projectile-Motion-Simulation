@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { updateUrlParams } from '../lib/urlParams';
+import { getTranslations } from '../content/translations';
 
 const LanguageContext = createContext();
 
@@ -18,6 +19,13 @@ export const LanguageProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('app_language', language);
     document.documentElement.lang = language;
+    
+    // Update document title
+    const t = getTranslations(language);
+    if (t.home && t.home.metaTitle) {
+      document.title = t.home.metaTitle;
+    }
+
     // Sync to URL
     updateUrlParams({ lang: language });
   }, [language]);
