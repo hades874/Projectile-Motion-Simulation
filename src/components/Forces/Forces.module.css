@@ -322,11 +322,18 @@
 /* Velocity label floated above the CSS object in MotionTab */
 .velocityLabel {
   position: absolute;
-  transform: translateX(-50%) translateY(-100%);
+  transform: translateX(-50%) translateY(-300%);
   color: #1CAB55;
-  font: bold 16px/1 Inter, sans-serif;
+  font: bold 18px/1 Inter, sans-serif;
   white-space: nowrap;
   pointer-events: none;
+
+  /* Creates a solid 1px white outline around the text */
+  text-shadow: 
+    -1px -1px 0 #FFF,  
+     1px -1px 0 #FFF,
+    -1px  1px 0 #FFF,
+     1px  1px 0 #FFF;
 }
 
 @media (max-width: 639px) {
