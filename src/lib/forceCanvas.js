@@ -1,4 +1,9 @@
 import { OBJECTS, SURFACES, FORCE_PER_PERSON, frictionForce, WIN_DISTANCE } from './forcesPhysics.js'
+import { formatNum } from './bangla.js'
+
+function fmt(value, decimals, lang) {
+  return formatNum(value, decimals, lang === 'bn' ? 'bangla' : 'western')
+}
 
 // Preload object sprites
 const IMG = {}
@@ -499,6 +504,15 @@ function drawFrictionGraph(ctx, Fapplied, Ff_actual, Fs_max, Fk, w, h, scale = 1
   ctx.restore()
 }
 
+// Base CSS dimensions for each motion-tab object at objScale = 1.
+// Single source of truth shared by forceCanvas and MotionTab.
+export const OBJ_DIMS = {
+  ice:    { w: 50,  h: 50,  halfW: 25 },
+  box:    { w: 50,  h: 50,  halfW: 25 },
+  fridge: { w: 100, h: 120, halfW: 50 },
+  car:    { w: 160, h: 90,  halfW: 80 },
+}
+
 // ─── Tab drawing functions ───────────────────────────────────────────────────
 
 export function drawNetForce(ctx, w, h, state, lang = 'bn', strings) {
@@ -540,10 +554,10 @@ export function drawNetForce(ctx, w, h, state, lang = 'bn', strings) {
   // Force arrows stacked above cart
   const baseArrowY = gy - 75 * scale
   const cartOffset = 36 * scale
-  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `${s.force1} = ${lCount * 50} N`, cartOffset, scale)
-  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32 * scale, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `${s.force2} = ${rCount * 50} N`, cartOffset, scale)
+  if (lCount > 0) drawForceArrow(ctx, cartSX, baseArrowY, -(lCount * FORCE_PER_PERSON), maxF, '#E8001D', `${s.force1} = ${fmt(lCount * 50, 0, lang)} N`, cartOffset, scale)
+  if (rCount > 0) drawForceArrow(ctx, cartSX, baseArrowY - 32 * scale, rCount * FORCE_PER_PERSON, maxF, '#274FE3', `${s.force2} = ${fmt(rCount * 50, 0, lang)} N`, cartOffset, scale)
   if (lCount > 0 || rCount > 0) {
-    drawForceArrow(ctx, cartSX, baseArrowY - 64 * scale, Fnet, maxF, '#1CAB55', `${s.netForce} = ${Fnet} N`, cartOffset, scale)
+    drawForceArrow(ctx, cartSX, baseArrowY - 64 * scale, Fnet, maxF, '#1CAB55', `${s.netForce} = ${fmt(Fnet, 0, lang)} N`, cartOffset, scale)
   }
 
   // Position readout
@@ -551,8 +565,8 @@ export function drawNetForce(ctx, w, h, state, lang = 'bn', strings) {
   ctx.fillStyle = '#4B5563'; ctx.font = `bold ${Math.round(13 * scale)}px Inter, sans-serif`
   ctx.textAlign = 'center'
   const px = cartX >= 0 ? '+' : ''
-  const posStr = `${px}${cartX.toFixed(1)} ${s.unitM}`
-  const velStr = `${cartV.toFixed(1)} ${s.unitMs}`
+  const posStr = `${px}${fmt(cartX, 1, lang)} ${s.unitM}`
+  const velStr = `${fmt(cartV, 1, lang)} ${s.unitMs}`
   ctx.fillText(`${posStr}  |  ${velStr}`, cartSX, gy - 115 * scale)
   ctx.restore()
 }
@@ -563,13 +577,17 @@ export function drawMotion(ctx, w, h, state, lang = 'bn', strings) {
   const gy = groundY(h)
   const boxSX = wx(boxX, w)
   
-  const scale = Math.min(1.2, w / 600)
-  const boxSize = (44 + Math.min(Math.log10(obj.mass + 1) * 16, 32)) * scale
+  const scale = Math.max(0.4, Math.min(1.2, w / 600))
   const maxF = 500
   const s = strings?.canvasLabels || { appliedF: 'Applied Force', frictionF: 'Friction Force', unitMs: 'm/s' }
 
   const Ff = frictionOn ? frictionForce(Fapplied, obj.mass, obj.mu_s, obj.mu_k, boxV) : 0
-  const isStruggling = Math.abs(Fapplied) > 10 && Math.abs(boxV) < 0.1
+
+  // Arrow origins derived from OBJ_DIMS scaled by the same factor MotionTab uses,
+  // so arrows always start from the correct edge of the CSS object regardless of size.
+  const dims = OBJ_DIMS[selectedObject] || OBJ_DIMS.box
+  const boxOffset = dims.halfW * scale
+  const arrowY    = gy - 2 - (dims.h * scale) / 2
 
   ctx.clearRect(0, 0, w, h)
   drawBackground(ctx, w, h)
@@ -577,19 +595,8 @@ export function drawMotion(ctx, w, h, state, lang = 'bn', strings) {
 
   drawParticles(ctx, boxSX, gy, boxV)
 
-  const arrowY = gy - boxSize - 20 * scale
-  const boxOffset = boxSize / 2
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, boxOffset, scale)
-  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, boxOffset, scale)
-
-  // Speed readout
-  if (Math.abs(boxV) > 0.05) {
-    ctx.save()
-    ctx.fillStyle = '#1CAB55'; ctx.font = `bold ${Math.round(14 * scale)}px Inter, sans-serif`
-    ctx.textAlign = 'center'
-    ctx.fillText(`v = ${boxV.toFixed(1)} ${s.unitMs}`, boxSX, gy - boxSize - 65 * scale)
-    ctx.restore()
-  }
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${fmt(Fapplied, 0, lang)} N`, boxOffset, scale)
+  if (frictionOn && Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${fmt(Math.abs(Ff), 0, lang)} N`, boxOffset, scale)
 }
 
 export function drawFriction(ctx, w, h, state, lang = 'bn', strings) {
@@ -632,10 +639,11 @@ export function drawFriction(ctx, w, h, state, lang = 'bn', strings) {
   drawParticles(ctx, boxSX, gy, boxV)
   drawSprite(ctx, surface, boxSX + shakeX, gy, 48 * scale)
 
-  const arrowY = gy - 70 * scale
-  const objOffset = 24 * scale
-  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${Fapplied.toFixed(0)} N`, objOffset, scale)
-  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${Math.abs(Ff).toFixed(0)} N`, objOffset, scale)
+  const spriteH = 48 * scale
+  const arrowY = gy - spriteH / 2
+  const objOffset = spriteH * 0.5
+  if (Math.abs(Fapplied) > 0.5) drawForceArrow(ctx, boxSX, arrowY, Fapplied, maxF, '#274FE3', `${s.appliedF} = ${fmt(Fapplied, 0, lang)} N`, objOffset, scale)
+  if (Math.abs(Ff) > 0.5) drawForceArrow(ctx, boxSX, arrowY - 32 * scale, Ff, maxF, '#EA580C', `${s.frictionF} = ${fmt(Math.abs(Ff), 0, lang)} N`, objOffset, scale)
 
   drawFrictionGraph(ctx, Fapplied, -Ff, Fs_max, Fk, w, h, scale)
 }

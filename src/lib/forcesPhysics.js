@@ -6,10 +6,10 @@ export const TRACK_HALF = 8          // m
 export const WIN_DISTANCE = 6        // m — tug-of-war win threshold
 
 export const OBJECTS = {
-  ice:    { mass: 5,   mu_s: 0.10, mu_k: 0.05, label: 'বরফ' },   // Fs_max ≈ 5 N
-  box:    { mass: 20,  mu_s: 0.40, mu_k: 0.30, label: 'বাক্স' },  // Fs_max ≈ 78 N
-  fridge: { mass: 60,  mu_s: 0.45, mu_k: 0.35, label: 'ফ্রিজ' }, // Fs_max ≈ 265 N
-  car:    { mass: 120, mu_s: 0.50, mu_k: 0.40, label: 'গাড়ি' },  // Fs_max ≈ 588 N
+  ice:    { mass: 5,   mu_s: 0.102, mu_k: 0.102, label: 'বরফ' },   // Fk ≈ 5 N
+  box:    { mass: 20,  mu_s: 0.408, mu_k: 0.408, label: 'বাক্স' },  // Fk ≈ 80 N
+  fridge: { mass: 60,  mu_s: 0.459, mu_k: 0.459, label: 'ফ্রিজ' }, // Fk ≈ 270 N
+  car:    { mass: 120, mu_s: 0.502, mu_k: 0.502, label: 'গাড়ি' },  // Fk ≈ 590 N
 }
 
 export const SURFACES = {

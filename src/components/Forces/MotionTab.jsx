@@ -1,5 +1,5 @@
 import { ForceCanvas } from './ForceCanvas.jsx'
-import { drawMotion, wx, groundY } from '../../lib/forceCanvas.js'
+import { drawMotion, wx, groundY, OBJ_DIMS } from '../../lib/forceCanvas.js'
 import { OBJECTS, frictionForce, netMotionForce, accel } from '../../lib/forcesPhysics.js'
 import { Button } from '../Common/Button.jsx'
 import { Toggle } from '../Common/Toggle.jsx'
@@ -42,11 +42,6 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
   const Ff  = frictionOn ? frictionForce(Fapplied, obj.mass, obj.mu_s, obj.mu_k, boxV) : 0
   const a   = accel(netMotionForce(Fapplied, obj.mass, obj.mu_s, obj.mu_k, boxV, frictionOn), obj.mass)
 
-  // Object sizes for positioning
-  const sizes = { ice: 60, car: 160, fridge: 50, box: 70 }
-  const size = sizes[selectedObject] || 50
-  const objH = selectedObject === 'car' ? 90 : size
-
   const fmt = (v, d = 0) => formatNum(v, d, language === 'bn' ? 'bangla' : 'western')
 
   return (
@@ -55,25 +50,41 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
         {({ width, height }) => {
           const gy = groundY(height)
           const boxSX = wx(boxX, width)
+          const dims = OBJ_DIMS[selectedObject] || OBJ_DIMS.box
+          // Same scale formula as drawMotion so CSS object and canvas arrows stay in sync.
+          const objScale = Math.max(0.4, Math.min(1.2, width / 600))
+          // Label floats 12px above the visual top of the scaled object.
+          const labelY = gy - 2 - dims.h * objScale - 12
 
           return (
             <>
-              {/* Object */}
+              {/* Object — positioned at base CSS dims, then scaled from bottom-center */}
               <div
                 className={styles.objectContainer}
                 style={{
-                  left: boxSX - (selectedObject === 'car' ? 80 : size / 2),
-                  top: gy - objH - 2,
-                  width: selectedObject === 'car' ? 160 : size,
-                  height: objH
+                  left: boxSX - dims.w / 2,
+                  top: gy - dims.h - 2,
+                  width: dims.w,
+                  height: dims.h,
+                  transform: `scale(${objScale})`,
+                  transformOrigin: 'bottom center',
                 }}
               >
-                <CSSObject 
-                  type={selectedObject} 
+                <CSSObject
+                  type={selectedObject}
                   isMoving={isRunning && Math.abs(boxV) > 0.05}
                   flipped={Fapplied < 0}
                 />
               </div>
+              {/* Velocity label — rendered as DOM so it always floats above the CSS object */}
+              {Math.abs(boxV) > 0.05 && height > 0 && (
+                <div
+                  className={styles.velocityLabel}
+                  style={{ left: boxSX, top: labelY }}
+                >
+                  v = {fmt(boxV, 1)} m/s
+                </div>
+              )}
             </>
           )
         }}
@@ -94,7 +105,7 @@ export function MotionTab({ state, setParam, start, pause, reset, tick }) {
           <input
             type="range"
             className={styles.rangeInput}
-            min={-800} max={800} step={10}
+            min={-1000} max={1000} step={10}
             value={Fapplied}
             onChange={e => setParam('motion', 'Fapplied', Number(e.target.value))}
           />

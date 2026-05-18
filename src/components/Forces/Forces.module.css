@@ -143,10 +143,10 @@
   .instructionText {
     font-size: 14px;
   }
+  
 
-  .carContainer {
-    transform: scale(0.6);
-    transform-origin: bottom left;
+  .velocityLabel {
+    font-size: 12px;
   }
 }
 
@@ -317,6 +317,22 @@
 
 .rangeInput::-webkit-slider-thumb:active {
   transform: scale(1.15);
+}
+
+/* Velocity label floated above the CSS object in MotionTab */
+.velocityLabel {
+  position: absolute;
+  transform: translateX(-50%) translateY(-100%);
+  color: #1CAB55;
+  font: bold 16px/1 Inter, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .velocityLabel {
+    font-size: 12px;
+  }
 }
 
 /* CSS Objects - positioned directly without transitions for sync with stick figure */
@@ -495,8 +511,8 @@
 
 /* Fridge - modern stainless steel appearance */
 .fridge {
-  width: 100px;
-  height: 120px;
+  width: 70px;
+  height: 130px;
   background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
   border: 2px solid #9ca3af;
   border-radius: 4px;

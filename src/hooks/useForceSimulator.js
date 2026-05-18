@@ -56,7 +56,8 @@ function reducer(state, action) {
     case 'RESET': {
       const base = state[tab]
       if (tab === 'tug') return { ...state, tug: { ...base, ropeX: 0, ropeV: 0, isRunning: false, winner: null } }
-      return { ...state, [tab]: { ...base, boxX: 0, boxV: 0, isRunning: false } }
+      if (tab === 'motion') return { ...state, motion: { ...base, Fapplied: 0, boxX: 0, boxV: 0, isRunning: false } }
+      return { ...state, [tab]: { ...base, Fapplied: 0, boxX: 0, boxV: 0, isRunning: false } }
     }
 
     case 'TICK': {
